@@ -11,8 +11,8 @@
   ],
   "orientation": "any",
   "background_color": "#ffe8cf",
-  "theme_color": "#2d251c",
-  "description": "手機優先的貓咪咖啡館經營遊戲",
+  "theme_color": "#5b3828",
+  "description": "V0.53.0 使用單一 Camera 與 Canvas 場景核心的貓咪咖啡館經營遊戲",
   "icons": [
     {
       "src": "icons/icon-192.png",
