@@ -1,0 +1,10 @@
+{
+  "name": "貓咪咖啡館",
+  "short_name": "貓咪咖啡館",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#2d251c",
+  "theme_color": "#2d251c",
+  "description": "橫向遊玩的貓咪咖啡館經營遊戲"
+}
