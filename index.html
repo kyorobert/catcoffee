@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>貓咪咖啡館 V0.47.0｜每日營業循環實作版</title>
+<title>貓咪咖啡館 V0.47.0.1｜格線與操作修正版</title>
 <style>
 :root{--ui:#fff7ed;--ui2:#ffe9d8;--border:#ddb98f;--ink:#6d4a32;--accent:#ef9aa2;--green:#719b77;--shadow:0 5px 0 #e2c4a0;}
 *{box-sizing:border-box} html,body{margin:0;height:100%;font-family:"Microsoft JhengHei",system-ui,sans-serif;color:var(--ink);background:#f5ecdf;overflow:hidden}
@@ -99,7 +99,7 @@ body.dragging-furniture .item{pointer-events:none;}
 <body>
 <div class="app">
   <div class="topbar">
-    <div class="brand"><div class="icon">🐱</div><div><b>貓咪咖啡館 Lv.23</b><small>V0.47.0｜每日營業循環實作版</small></div></div>
+    <div class="brand"><div class="icon">🐱</div><div><b>貓咪咖啡館 Lv.23</b><small>V0.47.0.1｜格線與操作修正版</small></div></div>
     <div class="stats">
       <div class="chip"><span>🗓️</span><div><small>第 32 天</small><b id="statDay">週三 10:30</b></div></div>
       <div class="chip"><span>🪙</span><div><small>資金</small><b id="statCoins">128,750</b></div></div>
@@ -215,7 +215,7 @@ body.dragging-furniture .item{pointer-events:none;}
 
   <div class="modal hidden" id="modal">
     <div class="panel">
-      <h3>V0.47.0｜每日營業循環實作版</h3>
+      <h3>V0.47.0.1｜格線與操作修正版</h3>
       <p>本版加入完整的一日營業循環：早晨準備、上午／下午／晚間營業、基本體力行動、打烊結算與每日營業報告。</p>
       <ol>
         <li>大型家具與椅子已拆為前後兩層：角色可在中間被自然遮擋。</li>
@@ -229,14 +229,14 @@ body.dragging-furniture .item{pointer-events:none;}
   </div>
 </div>
 <script>
-const SAVE_KEY='catCafeDecorV0470';
+const SAVE_KEY='catCafeDecorV04701';
 const W=1448,H=1086,COLS=10,ROWS=8;
-const FLOOR_TL={x:790,y:316}, FLOOR_TR={x:1440,y:590}, FLOOR_BR={x:820,y:1082}, FLOOR_BL={x:6,y:744};
+const FLOOR_TL={x:742,y:214}, FLOOR_TR={x:1442,y:466}, FLOOR_BR={x:822,y:1084}, FLOOR_BL={x:4,y:746};
 const PLAYABLE_MIN_ROW=0, PLAYABLE_MAX_ROW=7;
 const initialItems=[
  ['rugStripe',3,4,0],['rugPink',6,5,0],['counter',7,2,1],['dessert',8,3,0],['console',5,2,0],['pinkTableLong',2,4,0],['chair',2,5,0],['chair',3,4,1],['pinkTable',5,5,0],['cushionChair',5,6,0],['redChair',6,5,1],['sofa',1,2,0],['bookshelf',1,4,0],['glassCabinet',3,2,0],['plant',8,5,0],['vasePlant',7,6,0],['catBed',1,6,0],['fireplace',8,4,0]
 ];
-function defaultState(){return {version:470,coins:128750,reputation:4850,day:32,weekdayIndex:2,dayText:'週三 08:00',phase:'prep',phaseElapsed:0,phaseDuration:45,energy:5,maxEnergy:5,cleanliness:72,foodStock:8,catCare:0,weather:'☀️ 晴朗',traffic:'普通',featured:'🍰 草莓蛋糕',grid:false,category:'全部',shopOpen:true,entranceSide:'center',dailyRevenue:0,dailyRep:0,servedCustomers:0,dailyOrders:0,dailyTips:0,prepActions:{feed:0,groom:0,play:0,clean:0,stock:0,special:0},placing:null,inventory:{},items:initialItems.map((a,i)=>({id:'i'+i,type:a[0],x:a[1],y:a[2],r:a[3]})),history:[]};}
+function defaultState(){return {version:4701,coins:128750,reputation:4850,day:32,weekdayIndex:2,dayText:'週三 08:00',phase:'prep',phaseElapsed:0,phaseDuration:45,energy:5,maxEnergy:5,cleanliness:72,foodStock:8,catCare:0,weather:'☀️ 晴朗',traffic:'普通',featured:'🍰 草莓蛋糕',grid:false,category:'全部',shopOpen:true,entranceSide:'center',dailyRevenue:0,dailyRep:0,servedCustomers:0,dailyOrders:0,dailyTips:0,prepActions:{feed:0,groom:0,play:0,clean:0,stock:0,special:0},placing:null,inventory:{},items:initialItems.map((a,i)=>({id:'i'+i,type:a[0],x:a[1],y:a[2],r:a[3]})),history:[]};}
 const furniture={
     roundTable:{name:'圓形咖啡桌',cat:'座位',price:680,img:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHYAAABSCAYAAACBmiAxAAADW0lEQVR4nO3cv2sUQRjG8UcTSIwgNgabkEY0lVgEYiVY2YiKjWCKayzERgyCqH9AEINioxY2V1gkhUSxsRKsDKQQKwWbkEYighZGDxQt7l50x52b2d3Zm9n3nk8TOO7H5rLfzM7s3gFEREREREREzbEj9gZU9ePD+u+Yrz9+YDbJ93Bn7A2geiS5twHxSwxt0GWzWKVGY72wtiJdrp85nPl9F1ff1lowi1VqYP/3h61Qm+WlBQDAu49fMreHLpjFKlVbsSy0PylXhC6YxSoVrFgWWo5ZrpCCy5bLYpWqXCxLDSN0uSxWqdLFstR6hCqXxSpVuFhZ85zZvxcAcO7qnbBbRAD+L3dudg4A0H7+AoC7XBarlPfZHbNUIXsWy00Li1XKWayU2jp5AgCwtr6Wez+WG5a8j7ajZBcWq1TwP+zy0kLpvYzCYbFK1XbNE8fcMM7ffAAAGB2b6N7Qm8e6sFilol2lSP2NjO0C8LfUb582AXCteOjVXizH2mJspW5vbRZ6HharlPfZHd8VKBeWm8+31Mnj8xxjh5n3GPvP0ViQcrUquuom51kPnboEoPyYamKxSpW+5skcc4VvwU0da6uug0uhom2sJF25fK3v4znGDrnS81hzzBVlC46trjNSrkLNlaTF1XkAwNbLx5n31bdUwWKVqrzylLN22bdg0fn6GQCwZ+ogAOBnZxsA8KvzveomZdR9btgs0uQqtC4sVqnga8WugkWr93NkvLvisnvfVHeD5Lxjj6vkQY2NNmaRpqqFFh1bBYtVKtr3PMk82DZvm5jsFiwlv392f0Bb1uUqUQxqzCyKxSoVfW8z52vi7r1bg96UjFRL9MVilUr2mqe6ijE/g1T0U2xNwWKVSq7YsvM2m/bFY5kx3Pw+Jdv9Ww9fNbpcFqtUMsWGKtUs1GR+vtd2u+15mlIyi1Uq+t4n89iqxZ49Op1b2Okj01We1rpmPHPhdvT3rh8Wq1TSe10VUrCtWCnxxqMV+Nwv9UJNLFapZI6KQ3MVaHr6ZiP3cU25ZsvEYpVq1Ljhwzb/tJUqY6zJVjznsRRVI/Y+H0VLNY9yi86DUy+XxSqV9F7nwyw11EqRb8GplstilVIzjzVLrbpS9OT1Ru4YbJvvpobFEhEREREREVF0fwAC9jO40HhUdgAAAABJRU5ErkJggg==',size:92,foot:[1,1]},
     pinkTable:{name:'粉紅圓桌',cat:'座位',price:760,img:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHYAAABSCAYAAACBmiAxAAAD0ElEQVR4nO3du2sUURjG4VcNJK5sEpMQgxCCFzClxUrEImBlIwQUbFLYCFoFLGz8F1IIqRRsLNIEVAJWWghbiGiKNBZKgsRYmGjuGBNQ1mL5CPM5x3PmtjN79n2aOLNn3Encn2dmd3YDEBERERERETWPQ3nvQFJ7C3O1PO+/42ylkD/Dw3nvAGWjkI82IP8S09boslmsp3Ir1rcio8q6YBbrqYYV2+qF2qRdMIv1VGbFstBkkhbMYj2VWrFFK3RvZxMA0FHuznU/kopbLov1VOJii1aqr6KWy2I9FbtYlppM3GMA13JZrKciF8tS6/I+6raVy2I91eY6kKUGFf38mMV6ylqsqdS855hWdaT9qNM4Fusp5zlWy7pU/o8QJKW2tZecxrNYT8UuNmsstU6XuvHlk9N2LNZT1mJ317YAAKXersx3hg7oUr9/eFNfLvc5bc9iPWUtdrE6AwA4M3oDAMvNmqnUqFisp6zFrix/q/+B5WbKVGrn4DkAwPbyx0h/H4v1lLXYE4MDAFhuVtIuVbBYTznPsbrclekpAMCl8YnAeBb8f/rVmT/7vwJfdamcYynAes3T+8nbNcBcrlaUgvWrQ3m9WqQL3ViYB3BQomYqVZ5x6qlc4VWKrcz6r/9iYqwG2EvVZLwcPWu+zMW2KxqkUGGaQzV9++7mGgAW2/KcrytOWq6eo3XJRSvY9dqir+9ehq4/1tMfWLaVKkX+3vkROr7/8jjfu0Mx3gkg5dqYSt3d3gAA7GztB9ab5uK0lE8ORBovJeryxM/11dD1pvHCVK4UW+ruDdwuWCwBiFGsPq+1MZUrpOBS5/HQ9ZqMG6qMAgCW5qqpLPedHg7cj608TQo2bedaqrwnZ/X1dA2IXqpgsZ6K/f5YW7m2UmV9uasdgL1YfbuJa6kmtvKSbmd6Rkm4nqfasFhPpfapMaaj5bhzrO32tOdYWc66WJFVqYLFeir1T2azlStsc6ywFa01eo7V423bZ12qYLGeyuyzFHW5V6dmA/clR9VCl2k7Ks56jhW2Z550qeLU9buB71fOS0Xc81NXLNZThfmdAFKwqVTbXKvnzqRzbPXVcwDAzYfVwM/o89MHoccQutC8sVhPFepRBvw792oX7j0K3WeZw6RMTUpdX5wPrL//eCawPHZ+KHR7XW7RsVhPNdWj0MWTO6OhxY9URkLH62JFs5fLYj3VFI8+F1FLHb41Gfjer10cCt2+WctlsZ4q9KPOhS7VtVAb14KLWi6L9VRhP+cpKl1q1EK1Z2+XQufg2fklAOa5tyhYLBERERERERHl7i8eHdBR0/0f/wAAAABJRU5ErkJggg==',size:92,foot:[1,1]},
@@ -422,7 +422,33 @@ function renderSplitFurniture(item,s,cfg){
   bindItemEvents(front,item.id);
   els.items.appendChild(front);
 }
-function drawGrid(){const ctx=els.grid.getContext('2d'); ctx.clearRect(0,0,W,H); if(!state.grid) return; ctx.strokeStyle='rgba(151,96,68,.22)'; ctx.lineWidth=1.5; for(let gx=0;gx<=COLS;gx++){const a=iso(gx,PLAYABLE_MIN_ROW),b=iso(gx,PLAYABLE_MAX_ROW+1); ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();} for(let gy=PLAYABLE_MIN_ROW;gy<=PLAYABLE_MAX_ROW+1;gy++){const a=iso(0,gy),b=iso(COLS,gy); ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();} ctx.strokeStyle='rgba(128,77,51,.36)'; ctx.lineWidth=2.2; const tl=iso(0,PLAYABLE_MIN_ROW), tr=iso(COLS,PLAYABLE_MIN_ROW), br=iso(COLS,PLAYABLE_MAX_ROW+1), bl=iso(0,PLAYABLE_MAX_ROW+1); ctx.beginPath(); ctx.moveTo(tl.x,tl.y); ctx.lineTo(tr.x,tr.y); ctx.lineTo(br.x,br.y); ctx.lineTo(bl.x,bl.y); ctx.closePath(); ctx.stroke(); }
+function drawGrid(){
+  const ctx=els.grid.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  if(!state.grid) return;
+  ctx.save();
+  ctx.lineJoin='round';
+  ctx.lineCap='round';
+  for(let gy=PLAYABLE_MIN_ROW;gy<PLAYABLE_MAX_ROW+1;gy++){
+    for(let gx=0;gx<COLS;gx++){
+      const p1=iso(gx,gy),p2=iso(gx+1,gy),p3=iso(gx+1,gy+1),p4=iso(gx,gy+1);
+      ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.lineTo(p3.x,p3.y);ctx.lineTo(p4.x,p4.y);ctx.closePath();
+      ctx.fillStyle=(gx+gy)%2===0?'rgba(255,244,208,.055)':'rgba(255,255,255,.018)';ctx.fill();
+    }
+  }
+  ctx.strokeStyle='rgba(111,75,51,.30)';ctx.lineWidth=1.35;
+  for(let gx=0;gx<=COLS;gx++){
+    const a=iso(gx,PLAYABLE_MIN_ROW),b=iso(gx,PLAYABLE_MAX_ROW+1);
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  }
+  for(let gy=PLAYABLE_MIN_ROW;gy<=PLAYABLE_MAX_ROW+1;gy++){
+    const a=iso(0,gy),b=iso(COLS,gy);
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  }
+  const tl=iso(0,PLAYABLE_MIN_ROW),tr=iso(COLS,PLAYABLE_MIN_ROW),br=iso(COLS,PLAYABLE_MAX_ROW+1),bl=iso(0,PLAYABLE_MAX_ROW+1);
+  ctx.strokeStyle='rgba(98,62,41,.48)';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(tl.x,tl.y);ctx.lineTo(tr.x,tr.y);ctx.lineTo(br.x,br.y);ctx.lineTo(bl.x,bl.y);ctx.closePath();ctx.stroke();
+  ctx.restore();
+}
 
 const PHASES={
   prep:{name:'早晨準備',icon:'🌅',hint:'整理店面與照顧貓咪',progress:0,spawn:0,time:'08:00'},
@@ -515,25 +541,18 @@ function finishDrag(){
 function rotateSelected(){const item=state.items.find(i=>i.id===selectedId); if(!item) return; const trial={...item,r:(item.r+1)%4}; const issue=layoutIssue(trial,item.id); if(issue) return toast(issue); snapshot(); item.r=trial.r; save(); render();}
 function storeSelected(){const idx=state.items.findIndex(i=>i.id===selectedId); if(idx<0) return; const item=state.items[idx]; snapshot(); state.inventory[item.type]=(state.inventory[item.type]||0)+1; state.items.splice(idx,1); selectedId=null; save(); render(); toast('家具已收回倉庫');}
 function sellSelected(){const idx=state.items.findIndex(i=>i.id===selectedId); if(idx<0) return; const item=state.items[idx]; snapshot(); state.coins += Math.round(furniture[item.type].price*0.6); state.items.splice(idx,1); selectedId=null; save(); render(); toast('家具已出售');}
-function resetAll(){if(!confirm('要重置店面嗎？目前擺設會清除。')) return; localStorage.removeItem(SAVE_KEY); state=defaultState(); selectedId=null; drag=null; 
-function bindExtraControls(){
-  const map={openPrepBtn:'開店準備功能將於下一版加入',feedBtn:'已為店貓準備餐點',playBtn:'店貓玩耍中',groomBtn:'完成梳毛，親密度提升',taskRewardBtn:'還有任務尚未完成'};
-  Object.entries(map).forEach(([id,msg])=>{const el=document.getElementById(id); if(el) el.addEventListener('click',()=>toast(msg));});
-  const rotate=document.getElementById('rotateModeBtn'); if(rotate) rotate.addEventListener('click',()=>{if(selectedId) rotateSelected(); else toast('請先選擇一件家具');});
-  const grid=document.getElementById('gridModeBtn'); if(grid) grid.addEventListener('click',()=>{state.grid=!state.grid; render(); toast(state.grid?'格線已開啟':'格線已關閉');});
-  document.addEventListener('click',ev=>{if(ev.target&&ev.target.id==='catDetailBtn') toast('貓咪詳細資料將於養成版本開放');});
+function resetAll(){
+  if(!confirm('要重置店面與今日進度嗎？目前擺設會恢復預設值。')) return;
+  localStorage.removeItem(SAVE_KEY);
+  state=defaultState();
+  selectedId=null;
+  drag=null;
+  resetCustomers();
+  initCats(true);
+  render();
+  openPrepPanel();
+  toast('已重置店面與今日營業進度');
 }
-
-bindExtraControls(); const entranceBtn=$('#entranceSideBtn'); if(entranceBtn) entranceBtn.onclick=toggleEntranceSide;
-$('#openPrepBtn').onclick=advancePhase;
-$('#closePrepPanel').onclick=closePrepPanel;
-$('#confirmOpenBtn').onclick=()=>{if(state.phase==='prep')startMorning();else closePrepPanel();};
-$('#nextDayBtn').onclick=beginNextDay;
-document.querySelectorAll('[data-prep]').forEach(btn=>btn.onclick=()=>{const kind=btn.dataset.prep;const cfg={feed:[1,'餵食'],groom:[1,'梳毛'],play:[1,'陪玩'],clean:[1,'清潔'],stock:[1,'備料'],special:[2,'設定今日推薦']}[kind];spendEnergy(cfg[0],kind,cfg[1]);});
-$('#feedBtn').onclick=()=>spendEnergy(1,'feed','餵食');
-$('#playBtn').onclick=()=>spendEnergy(1,'play','陪玩');
-$('#groomBtn').onclick=()=>spendEnergy(1,'groom','梳毛');
-initCats(true); initCustomers(true); startDayClock(); render();if(state.phase==='prep')setTimeout(openPrepPanel,350); toast('已重置店面');}
 
 // cats
 function key(c){return c.x+','+c.y;}
@@ -750,10 +769,24 @@ els.stage.addEventListener('pointermove',ev=>{ if(!state.placing && !drag) retur
 els.stage.addEventListener('pointerup',()=>{if(drag) finishDrag();}); els.stage.addEventListener('pointercancel',()=>{if(drag) finishDrag();});
 els.stage.addEventListener('click',ev=>{ if(drag) return; if(state.placing) return commitPlace(); selectedId=null; renderSelection(); renderItems(); });
 $('#rotateBtn').onclick=rotateSelected; $('#storeBtn').onclick=storeSelected; $('#sellBtn').onclick=sellSelected;
-$('#toggleGridBtn').onclick=()=>{state.grid=!state.grid; render();}; $('#cancelPlaceBtn').onclick=()=>{cancelPlace(); render();}; $('#toggleShopBtn').onclick=()=>{state.shopOpen=!state.shopOpen; render();}; $('#closeShop').onclick=()=>{state.shopOpen=false; render();}; $('#resetBtn').onclick=resetAll; $('#undoBtn').onclick=undo; $('#saveBtn').onclick=()=>{save(); toast('已儲存目前佈置');}; $('#helpBtn').onclick=()=>els.modal.classList.remove('hidden'); $('#helpBtn2').onclick=()=>els.modal.classList.remove('hidden'); $('#closeModal').onclick=()=>els.modal.classList.add('hidden');
+$('#toggleGridBtn').onclick=()=>{state.grid=!state.grid; render(); toast(state.grid?'已開啟對齊地板透視的佈置格線':'已關閉佈置格線');}; $('#cancelPlaceBtn').onclick=()=>{cancelPlace(); render();}; $('#toggleShopBtn').onclick=()=>{state.shopOpen=!state.shopOpen; render();}; $('#closeShop').onclick=()=>{state.shopOpen=false; render();}; $('#resetBtn').onclick=resetAll; $('#undoBtn').onclick=undo; $('#saveBtn').onclick=()=>{save(); toast('已儲存目前佈置');}; $('#helpBtn').onclick=()=>els.modal.classList.remove('hidden'); $('#helpBtn2').onclick=()=>els.modal.classList.remove('hidden'); $('#closeModal').onclick=()=>els.modal.classList.add('hidden');
+
+function bindDailyControls(){
+  const byId=id=>document.getElementById(id);
+  const open=byId('openPrepBtn'); if(open) open.onclick=advancePhase;
+  const closePrep=byId('closePrepPanel'); if(closePrep) closePrep.onclick=closePrepPanel;
+  const confirmOpen=byId('confirmOpenBtn'); if(confirmOpen) confirmOpen.onclick=()=>{if(state.phase==='prep')startMorning();else closePrepPanel();};
+  const nextDay=byId('nextDayBtn'); if(nextDay) nextDay.onclick=beginNextDay;
+  document.querySelectorAll('[data-prep]').forEach(btn=>{btn.onclick=()=>{const kind=btn.dataset.prep;const cfg={feed:[1,'餵食'],groom:[1,'梳毛'],play:[1,'陪玩'],clean:[1,'清潔'],stock:[1,'備料'],special:[2,'設定今日推薦']}[kind];if(cfg)spendEnergy(cfg[0],kind,cfg[1]);};});
+  const feed=byId('feedBtn'); if(feed) feed.onclick=()=>spendEnergy(1,'feed','餵食');
+  const play=byId('playBtn'); if(play) play.onclick=()=>spendEnergy(1,'play','陪玩');
+  const groom=byId('groomBtn'); if(groom) groom.onclick=()=>spendEnergy(1,'groom','梳毛');
+}
 
 const entranceBtn=$('#entranceSideBtn'); if(entranceBtn) entranceBtn.onclick=toggleEntranceSide;
-initCats(true); initCustomers(true); render();
+bindDailyControls();
+initCats(true); initCustomers(true); startDayClock(); render();
+if(state.phase==='prep')setTimeout(openPrepPanel,280);
 </script>
 </body>
 </html>
