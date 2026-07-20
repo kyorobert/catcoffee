@@ -1,16 +1,5 @@
-# 貓咪咖啡館 V0.50.3
+# 貓咪咖啡館 V0.50.4
 
-手機優先 PWA 部署版。
+手機直立主介面重製版。手機瀏覽器可直接直立遊玩；場景支援單指拖曳與雙指縮放。家具商店使用底部抽屜，平板與桌機維持橫向完整介面。
 
-## GitHub Pages
-將本目錄所有內容放在儲存庫根目錄，Pages 選擇 main / root。
-
-## iPhone 滿版
-使用 Safari 或 Chrome 開啟網站，點分享 → 加入主畫面，再從主畫面圖示啟動。iOS 一般瀏覽器分頁無法由網頁強制移除網址列。
-
-## 檔案
-- index.html
-- manifest.webmanifest
-- icons/
-- splash/
-- .nojekyll
+GitHub Pages：將本目錄全部檔案上傳至 Repository 根目錄。

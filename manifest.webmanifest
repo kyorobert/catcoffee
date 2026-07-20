@@ -9,7 +9,7 @@
     "fullscreen",
     "standalone"
   ],
-  "orientation": "landscape",
+  "orientation": "any",
   "background_color": "#ffe8cf",
   "theme_color": "#2d251c",
   "description": "手機優先的貓咪咖啡館經營遊戲",
