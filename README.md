@@ -1,3 +1,3 @@
-# 貓咪咖啡館 V0.47.0.1
+# 貓咪咖啡館 V0.47.0.2
 
-格線與底部操作按鈕修正版。將本目錄內容放在 GitHub Repository 根目錄，並於 Settings → Pages 選擇 main / (root)。
+手機直立、桌機橫向的響應式版本。將本目錄檔案上傳至 GitHub Repository 根目錄，並在 Settings → Pages 選擇 main / root。

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>貓咪咖啡館 V0.47.0.1｜格線與操作修正版</title>
+<title>貓咪咖啡館 V0.47.0.2｜手機直立與桌機橫向版</title>
 <style>
 :root{--ui:#fff7ed;--ui2:#ffe9d8;--border:#ddb98f;--ink:#6d4a32;--accent:#ef9aa2;--green:#719b77;--shadow:0 5px 0 #e2c4a0;}
 *{box-sizing:border-box} html,body{margin:0;height:100%;font-family:"Microsoft JhengHei",system-ui,sans-serif;color:var(--ink);background:#f5ecdf;overflow:hidden}
@@ -94,12 +94,37 @@ body.dragging-furniture .item{pointer-events:none;}
 .daily-panel{position:absolute;z-index:110;inset:0;background:rgba(47,29,18,.58);display:grid;place-items:center;padding:16px}.daily-panel.hidden{display:none}.daily-card{width:min(640px,96vw);max-height:90vh;overflow:auto;border:4px solid #895934;border-radius:24px;background:linear-gradient(#fffaf0,#f4d9af);box-shadow:0 18px 50px rgba(34,18,10,.4);padding:18px}.daily-card h2{margin:0;font-size:22px;color:#4f311e}.daily-card .subtitle{margin:4px 0 14px;color:#916849;font-size:12px}.prep-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:13px}.prep-summary>div{padding:10px;border:2px solid #d4a06a;border-radius:14px;background:#fff8e9;text-align:center}.prep-summary small{display:block;color:#956d4e;font-size:10px}.prep-summary b{display:block;margin-top:3px;font-size:16px}.prep-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.prep-actions button{min-height:66px;border:2px solid #ce9860;border-radius:14px;background:#fff4de;font-weight:900}.prep-actions button span{display:block;font-size:23px}.prep-actions button:disabled{opacity:.45;filter:grayscale(.5)}.check-list{margin:12px 0;display:grid;gap:6px}.check-item{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:11px;background:#fff7e7;border:1px solid #dfbd91;font-size:12px}.check-item.ok strong{color:#54825f}.check-item.warn strong{color:#b46c48}.daily-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.daily-actions button{padding:10px 15px;border-radius:12px;border:2px solid #bd8551;background:#f4d4a8;font-weight:900}.daily-actions button.primary{background:#e78e96;color:#fff;border-color:#bb6871}.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.report-grid>div{padding:10px;border-radius:13px;background:#fff8e9;border:2px solid #d7aa77}.report-grid small{display:block;color:#916849}.report-grid b{display:block;font-size:18px;margin-top:3px}.grade{display:flex;align-items:center;gap:14px;padding:12px;border-radius:16px;background:#fff4dc;border:2px solid #d4a06a}.grade-mark{width:66px;height:66px;border-radius:18px;display:grid;place-items:center;background:#e78e96;color:#fff;font-size:38px;font-weight:900}.phase-toast{position:absolute;left:50%;top:156px;transform:translateX(-50%);z-index:80;padding:9px 16px;border-radius:999px;background:rgba(87,54,33,.9);color:#fff;font-weight:900;font-size:12px;pointer-events:none;opacity:0;transition:.25s}.phase-toast.show{opacity:1}
 .bottom #openPrepBtn.active-phase{background:linear-gradient(#f7b5b9,#e8878e);color:#fff}
 @media(max-width:1100px){.day-flow{left:90px;right:250px;grid-template-columns:135px 1fr 105px}.day-phase small,.phase-labels{display:none}.prep-actions{grid-template-columns:repeat(2,1fr)}}
+
+/* V0.47.0.2 responsive portrait layout */
+@media (max-width:700px) and (orientation:portrait){
+  html,body{width:100%;height:100%;overscroll-behavior:none;background:#2d251c}
+  .app{height:100dvh;min-height:100dvh;overflow:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+  .topbar{left:6px;right:6px;top:6px;height:62px;padding:6px 8px;border-radius:15px;gap:6px;display:grid;grid-template-columns:minmax(136px,1fr) auto}
+  .brand{min-width:0;gap:7px;overflow:hidden}.brand .icon{width:40px;height:40px;min-width:40px;border-width:2px;border-radius:12px;font-size:22px}.brand b{font-size:15px;white-space:nowrap}.brand small{display:none}
+  .stats{display:flex;justify-content:flex-end;gap:5px;min-width:0}.stats .chip{min-width:70px;width:70px;height:44px;padding:3px 6px;border-width:2px;border-radius:11px}.stats .chip span{font-size:17px}.stats .chip small{font-size:8px}.stats .chip b{font-size:11px;white-space:nowrap}.stats .chip:nth-child(1),.stats .energy-chip{display:none}.actions{display:none}
+  .day-flow{left:6px;right:6px;top:74px;height:56px;padding:6px 9px;border-radius:14px;grid-template-columns:1fr 112px;gap:8px}.day-flow>div:nth-child(2){display:none}.day-phase span{font-size:23px}.day-phase b{font-size:13px}.day-phase small{font-size:9px}.energy-box small{font-size:9px}.energy-box b{font-size:13px}.energy-pips{gap:3px}.energy-pips i{width:12px;height:8px}
+  .ops-hud{left:6px;right:6px;top:136px;width:auto;padding:6px 8px;border-radius:13px}.ops-hud-title{margin-bottom:5px}.ops-hud-title b{font-size:11px}.ops-hud-title small{font-size:8px}.ops-hud-grid{grid-template-columns:repeat(4,1fr);gap:4px}.ops-hud-grid div{padding:3px 2px}.ops-hud-grid span{font-size:8px}.ops-hud-grid b{font-size:10px}
+  .stage{left:0;right:0;top:202px;bottom:92px;overflow:hidden;touch-action:none;background:#2d251c}
+  .world{top:50%;left:50%}
+  .cat-rail,.task-panel{display:none!important}
+  .shop{left:6px;right:6px;top:auto;bottom:90px;width:auto;height:min(58dvh,520px);border-radius:20px;transform:translateY(0);transition:transform .24s ease,opacity .2s ease}.shop.closed{transform:translateY(calc(100% + 110px));opacity:0;pointer-events:none}.shop-head{padding:9px 10px 6px}.tabs{grid-template-columns:repeat(4,1fr);padding:0 8px 7px}.catalog{grid-template-columns:repeat(2,minmax(0,1fr));padding:4px 8px 8px}.card{min-height:104px}.card img{width:76px;height:60px}.shop-tools{padding:6px 8px}.shop-tools button{height:36px;font-size:10px}
+  .bottom{left:0;right:0;bottom:0;transform:none;width:100%;height:82px;border-radius:18px 18px 0 0;padding:7px 6px calc(7px + env(safe-area-inset-bottom));gap:5px;overflow-x:auto;overflow-y:hidden;justify-content:flex-start;scrollbar-width:none}.bottom::-webkit-scrollbar{display:none}.bottom button{flex:0 0 70px;width:70px;height:58px;border-radius:12px}.bottom button span{font-size:21px}.bottom button b{font-size:10px}
+  .selection{top:202px;max-width:calc(100vw - 12px);padding:5px 7px;gap:4px}.selection b{font-size:10px}.selection button{padding:6px 7px;font-size:9px}
+  .tip{left:8px;right:8px;bottom:88px;transform:none;text-align:center;font-size:10px;padding:7px 10px;white-space:normal}.toast{bottom:92px;max-width:calc(100vw - 20px);text-align:center;font-size:11px}
+  .checkout-hud{left:8px;right:8px;top:204px;min-width:0;transform:none;padding:8px 10px}.checkout-hud strong{font-size:11px}.checkout-hud .icon{font-size:21px}
+  .daily-panel{padding:8px}.daily-card{width:100%;max-height:calc(100dvh - 20px);padding:13px;border-radius:18px}.daily-card h2{font-size:18px}.prep-summary{grid-template-columns:1fr 1fr}.prep-summary>div:last-child{grid-column:1/-1}.prep-actions{grid-template-columns:1fr 1fr}.report-grid{grid-template-columns:1fr 1fr}
+  .modal{padding:8px}.modal .panel{width:100%;max-height:90dvh;overflow:auto}
+}
+@media (min-width:701px){
+  .stage{inset:0}
+}
+
 </style>
 </head>
 <body>
 <div class="app">
   <div class="topbar">
-    <div class="brand"><div class="icon">🐱</div><div><b>貓咪咖啡館 Lv.23</b><small>V0.47.0.1｜格線與操作修正版</small></div></div>
+    <div class="brand"><div class="icon">🐱</div><div><b>貓咪咖啡館 Lv.23</b><small>V0.47.0.2｜手機直立與桌機橫向版</small></div></div>
     <div class="stats">
       <div class="chip"><span>🗓️</span><div><small>第 32 天</small><b id="statDay">週三 10:30</b></div></div>
       <div class="chip"><span>🪙</span><div><small>資金</small><b id="statCoins">128,750</b></div></div>
@@ -215,7 +240,7 @@ body.dragging-furniture .item{pointer-events:none;}
 
   <div class="modal hidden" id="modal">
     <div class="panel">
-      <h3>V0.47.0.1｜格線與操作修正版</h3>
+      <h3>V0.47.0.2｜手機直立與桌機橫向版</h3>
       <p>本版加入完整的一日營業循環：早晨準備、上午／下午／晚間營業、基本體力行動、打烊結算與每日營業報告。</p>
       <ol>
         <li>大型家具與椅子已拆為前後兩層：角色可在中間被自然遮擋。</li>
@@ -229,7 +254,7 @@ body.dragging-furniture .item{pointer-events:none;}
   </div>
 </div>
 <script>
-const SAVE_KEY='catCafeDecorV04701';
+const SAVE_KEY='catCafeDecorV04702';
 const W=1448,H=1086,COLS=10,ROWS=8;
 const FLOOR_TL={x:742,y:214}, FLOOR_TR={x:1442,y:466}, FLOOR_BR={x:822,y:1084}, FLOOR_BL={x:4,y:746};
 const PLAYABLE_MIN_ROW=0, PLAYABLE_MAX_ROW=7;
@@ -280,6 +305,7 @@ const CAT_PROFILES=[
 const $=s=>document.querySelector(s);
 const els={world:$('#world'),stage:$('#stage'),grid:$('#gridLayer'),entrance:$('#entranceLayer'),items:$('#items'),cats:$('#cats'),customers:$('#customers'),ghost:$('#ghost'),toast:$('#toast'),sceneTip:$('#sceneTip'),roster:$('#roster'),catalog:$('#catalog'),tabs:$('#tabs'),shop:$('#shopPanel'),selection:$('#selectionBar'),selName:$('#selName'),statCoins:$('#statCoins'),statRep:$('#statRep'),statDay:$('#statDay'),modal:$('#modal'),opsHud:$('#opsHud'),hudGuests:$('#hudGuests'),hudOrders:$('#hudOrders'),hudRevenue:$('#hudRevenue'),hudServed:$('#hudServed'),hudStatus:$('#hudStatus'),dayFlow:$('#dayFlow'),phaseIcon:$('#phaseIcon'),phaseName:$('#phaseName'),phaseHint:$('#phaseHint'),phaseProgress:$('#phaseProgress'),energyNow:$('#energyNow'),energyMax:$('#energyMax'),energyPips:$('#energyPips'),prepPanel:$('#prepPanel'),reportPanel:$('#reportPanel'),phaseToast:$('#phaseToast')};
 let state=load();
+if(matchMedia('(max-width:700px) and (orientation:portrait)').matches){state.shopOpen=false;}
 let selectedId=null; let drag=null; let toastTimer=null;
 let catActors=[]; let catTimer=null;
 let customerActors=[]; let customerTimer=null; let customerSeed=1;
@@ -510,8 +536,29 @@ function renderItems(){
 function renderGhost(){els.ghost.innerHTML=''; if(!state.placing && !drag) return; const item=drag?drag.current:state.placing; const issue=layoutIssue(item,drag?drag.id:''); const ok=!issue; const s=itemStyle(item); const el=document.createElement('div'); el.className='ghost-item '+(ok?'valid':'invalid'); el.style.left=s.left+'px'; el.style.top=s.top+'px'; el.style.width=s.width+'px'; el.style.zIndex=99999; el.innerHTML=`<img src="${furniture[item.type].img}" alt="">`; if(s.flip) el.style.transform='translate(-50%,-100%) scaleX(-1)'; els.ghost.appendChild(el);}
 function renderSelection(){const item=state.items.find(i=>i.id===selectedId); els.selection.classList.toggle('hidden',!item); if(item) els.selName.textContent=furniture[item.type].name;}
 function toast(msg){clearTimeout(toastTimer); els.toast.textContent=msg; els.toast.classList.add('show'); toastTimer=setTimeout(()=>els.toast.classList.remove('show'),1800);}
-function resizeWorld(){const rect=els.stage.getBoundingClientRect(); const compact=innerWidth<980; const usableW=rect.width-(state.shopOpen?(compact?86:330):18); const usableH=rect.height-14; let s=Math.min(usableW/W, usableH/H)*1.02; s=Math.max(.28, Math.min(.82, s)); els.world.style.setProperty('--world-scale',s); els.world.style.left=(state.shopOpen&&innerWidth>980?'44%':'50%');}
-function startPlace(type){state.placing={type,x:4,y:Math.max(PLAYABLE_MIN_ROW,4),r:0}; selectedId=null; renderSelection(); renderGhost(); els.sceneTip.textContent=`點擊中央地板放置「${furniture[type].name}」`; toast('請點擊店內空位放置家具');}
+function resizeWorld(){
+  const rect=els.stage.getBoundingClientRect();
+  const portrait=matchMedia('(max-width:700px) and (orientation:portrait)').matches;
+  if(portrait){
+    const fitW=rect.width/W;
+    const fitH=rect.height/H;
+    let s=Math.max(fitW*1.18,fitH*.76,.32);
+    s=Math.min(.48,s);
+    els.world.style.setProperty('--world-scale',s);
+    els.world.style.left='50%';
+    els.world.style.top='50%';
+    return;
+  }
+  const compact=innerWidth<980;
+  const usableW=rect.width-(state.shopOpen?(compact?86:330):18);
+  const usableH=rect.height-14;
+  let s=Math.min(usableW/W,usableH/H)*1.02;
+  s=Math.max(.28,Math.min(.82,s));
+  els.world.style.setProperty('--world-scale',s);
+  els.world.style.left=(state.shopOpen&&innerWidth>980?'44%':'50%');
+  els.world.style.top='53%';
+}
+function startPlace(type){state.placing={type,x:4,y:Math.max(PLAYABLE_MIN_ROW,4),r:0}; if(matchMedia('(max-width:700px) and (orientation:portrait)').matches)state.shopOpen=false; selectedId=null; renderSelection(); renderGhost(); els.sceneTip.textContent=`點擊中央地板放置「${furniture[type].name}」`; toast('請點擊店內空位放置家具');}
 function cancelPlace(){state.placing=null; drag=null; renderGhost(); els.sceneTip.textContent='V0.46.2.1：顧客會先走到椅外候位點，再自然入座';}
 function commitPlace(){if(!state.placing) return; const it={id:'n'+Date.now(),...state.placing}; const issue=layoutIssue(it); if(issue) return toast(issue); const owned=state.inventory[it.type]||0; const cost=owned?0:furniture[it.type].price; if(state.coins<cost) return toast('資金不足'); snapshot(); if(owned) state.inventory[it.type]--; else state.coins-=cost; state.items.push(it); selectedId=it.id; save(); render(); toast('家具已放置');}
 function startDrag(ev,id){
@@ -764,7 +811,7 @@ function renderRoster(){els.roster.innerHTML=catActors.map((cat,i)=>`<button cla
 function render(){renderDayFlow();renderStats(); renderTabs(); renderCatalog(); drawGrid(); renderEntrance(); renderSelection(); renderItems(); renderGhost(); resizeWorld(); renderCats(); renderCustomers(); save();}
 
 // events
-window.addEventListener('resize',resizeWorld); document.addEventListener('dragstart',ev=>ev.preventDefault());
+window.addEventListener('resize',()=>{if(matchMedia('(max-width:700px) and (orientation:portrait)').matches&&state.shopOpen&&innerWidth<701){/* keep current explicit state */}resizeWorld();}); document.addEventListener('dragstart',ev=>ev.preventDefault());
 els.stage.addEventListener('pointermove',ev=>{ if(!state.placing && !drag) return; ev.preventDefault(); const p=worldPoint(ev); if(state.placing){const g=nearestCell(p.x,p.y,state.placing); state.placing.x=g.x; state.placing.y=g.y;} if(drag){const g=nearestCell(p.x,p.y,drag.current,drag.current.id); drag.current={...drag.origin,x:g.x,y:g.y}; drag.moved=drag.moved||g.x!==drag.origin.x||g.y!==drag.origin.y;} renderGhost(); },{passive:false});
 els.stage.addEventListener('pointerup',()=>{if(drag) finishDrag();}); els.stage.addEventListener('pointercancel',()=>{if(drag) finishDrag();});
 els.stage.addEventListener('click',ev=>{ if(drag) return; if(state.placing) return commitPlace(); selectedId=null; renderSelection(); renderItems(); });
