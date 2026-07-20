@@ -12,7 +12,7 @@
   "orientation": "any",
   "background_color": "#ffe8cf",
   "theme_color": "#5b3828",
-  "description": "V0.53.1 使用控制點地板映射、Canvas 透視地毯與單一 Camera 的貓咪咖啡館經營遊戲",
+  "description": "V0.53.2 使用局部家具放置提示並保留單一 Camera 的貓咪咖啡館經營遊戲",
   "icons": [
     {
       "src": "icons/icon-192.png",

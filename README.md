@@ -1,22 +1,25 @@
-# 貓咪咖啡館 V0.53.1｜背景透視對齊與地板映射重建
+# 貓咪咖啡館 V0.53.2｜地板視覺與放置系統止血修正版
 
-純前端 HTML5 遊戲，可直接部署至 GitHub Pages，不需要後端或建置工具。
+純前端 HTML5 遊戲，可直接部署至 GitHub Pages。
 
-## V0.53.1 重點
+## V0.53.2 重點
 
-- 保留 V0.53.0 的單一 Camera、Canvas 背景、Pointer Events 與 Safari resize 架構。
-- 以 9 × 11、共 99 個明確世界座標控制點，取代四角平均與逐列端點映射。
-- `floorGridToWorld()` 與 `worldToFloorGrid()` 統一家具、角色、Ghost 與觸控放置座標。
-- 直立家具以占地底邊中心作為腳底錨點。
-- 地毯由場景 Canvas 以兩個仿射三角形映射到占地四邊形，並預先分析素材 Alpha 邊界。
-- `?floorDebug=1` 顯示控制點、格子編號、家具錨點與點擊座標。
-- 舊存檔沿用原本的 `x / y / r / type` 格座標；一次性標記為 `floorMappingVersion: 5310`。
+- 正式模式完全不顯示全場邏輯格、地板外框或控制點。
+- 家具放置與拖曳時，只顯示候選家具的綠色／紅色占地提示。
+- 「放置輔助」開啟時，最多顯示候選位置附近 5×5 格。
+- 完整控制網格只能透過 `?floorDebug=1` 顯示。
+- 地毯恢復使用原始點陣素材與腳底錨點，不再進行 Canvas 四邊形拉伸或 Polygon 裁切。
+- 邏輯格仍負責吸附、碰撞、尋路與存檔，但與背景美術地磚正式分離。
+- V0.53.0 的單一 Camera、Canvas 背景、Pointer Events 與 Safari resize 架構保持不變。
+- 載入舊存檔時不批次正規化、搬動或重排家具座標。
 
-## 部署
+## Debug
 
-將本目錄內容直接放到 GitHub Pages 根目錄。`index.html`、`manifest.webmanifest`、`.nojekyll`、`assets/`、`icons/` 與 `splash/` 必須位於同一層。
+正式模式：`index.html`
 
-## 本機靜態檢查
+地板校正模式：`index.html?floorDebug=1`
+
+## 靜態檢查
 
 ```powershell
 node check.js
