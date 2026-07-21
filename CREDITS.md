@@ -1,16 +1,29 @@
-# 素材與製作名錄
+# 素材與授權紀錄
 
-## 專案原有素材
+## 貓咪角色 Sprite Sheet
 
-- 家具像素圖與後續簡化 SVG 家具：來自本專案 V0.53.2 既有內容，於 V0.54.0 拆分為 assets/furniture 本地素材。
-- App icons 與 splash 圖：來自本專案既有內容，保留於 icons 與 splash。
+- 名稱：豆豆、煤球、雪球、拿鐵、花花全身點陣角色與 fallback 貓咪
+- 作者：本專案原創製作
+- 來源：依專案既有合法角色大頭貼、名字與毛色設定重新設計
+- 授權：隨本專案使用
+- 修改內容：建立 64×64 Frame、透明背景的 Phaser Sprite Sheet，包含 idle、walk、sit、sleep、happy、serve 與上下方向幀
+- 專案路徑：`assets/cats/*/*-spritesheet.png`
 
-## V0.54.0 原創場景
+## 貓咪名冊大頭貼
 
-- 等角地板、左牆、右牆、窗戶、黑板、入口標示、貓咪與顧客簡化圖形：由專案程式透過 Phaser Graphics 即時產生。
-- 未使用其他商業遊戲截圖、開羅官方素材或授權不明的外部素材。
+- 名稱：豆豆、煤球、雪球、拿鐵、花花大頭貼
+- 來源：V0.53.2 既有專案素材
+- 用途：名冊與照顧面板；未縮小作為場景全身角色
+- 專案路徑：`assets/cats/*/*-portrait.png`
 
-## 第三方程式
+## 房間、家具、圖示與 Splash
 
-- Phaser 3.90.0：Phaser Studio Inc.，MIT License。完整資訊見 THIRD_PARTY_NOTICES.md。
-- Playwright Core 1.55.0：僅作為開發 Smoke Test 工具，不載入正式遊戲。Apache License 2.0。
+- 來源：專案既有素材與 V0.54.0 原創 Phaser Graphics 房間
+- 用途：咖啡廳場景、家具、PWA 圖示與啟動畫面
+
+## 第三方程式庫
+
+- Phaser 3.90.0：Phaser Studio Inc.，MIT License；完整記錄見 `THIRD_PARTY_NOTICES.md`。
+- Playwright Core 1.55.0：僅供本機 Smoke Test，Apache License 2.0，不包含於瀏覽器執行路徑。
+
+本版本未加入未授權商業遊戲素材，亦未使用開羅遊戲官方角色素材。

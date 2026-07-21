@@ -1,24 +1,32 @@
-# 貓咪咖啡館 V0.54.0-alpha.1
+# 貓咪咖啡廳 V0.54.1-alpha
 
-本版集中修正 Phaser 啟動、家具 Loader、Canvas Renderer、載入錯誤畫面、家具 Anchor，以及新舊存檔隔離。Phaser 管理房間、等角地板、家具、角色、Camera、拖曳及放置提示；固定 HUD、商店與操作面板由 DOM 管理。
+本版重建 Phaser 場景貓咪的全身點陣角色與動畫。豆豆、煤球、雪球、拿鐵與花花均有獨立 64×64 Frame Sprite Sheet；名冊仍使用原有大頭貼，兩種素材由同一個 cat ID 綁定。
 
-## 架構重點
+## 貓咪角色
 
-- 單一 GridSystem 提供所有等角座標、footprint 與 anchor。
-- 單一 OccupancySystem 分離地毯、地板家具、牆面家具與入口保留格。
-- 單一 PlacementSystem 處理硬性阻擋；椅子未配桌只產生 warning。
-- 單一 Phaser Main Camera 支援拖曳、雙指縮放、wheel、動態 cover zoom 與 resize 中心保留。
-- 新版只寫入 catCafePhaserV0540；舊存檔首次遷移前備份到 catCafeLegacySaveBackupV0532。
-- 啟動超過 20 秒或發生例外時顯示可操作錯誤畫面，不再永久停留於 Spinner。
-- Alpha.1 固定使用 Phaser Canvas Renderer。
-- 正式遊戲不載入 legacy，也不依賴 CDN。
+- 動畫：`idle`、`walk`、`sit`、`sleep`、`happy`、`serve`。
+- 方向：向下與向上各四幀，左右移動使用 `flipX`。
+- 腳底：所有 Phaser Sprite 使用 `setOrigin(0.5, 1)`。
+- 深度：沿用現有 `DepthSystem`，以角色腳底 worldY 排序。
+- 錯誤處理：個別 Sprite Sheet 無法載入時改用本地 fallback，不會阻止 CafeScene 啟動。
+- 貓咪名冊：保留原大頭貼、名字、個性與照顧數值。
 
-## 本機執行
+## 啟動與測試
 
-ES Modules 需要由靜態 HTTP Server 載入，不能使用 file://。可執行 `python -m http.server 8765`，核心檢查使用 `npm.cmd test`、`npm.cmd run test:http` 與 `npm.cmd run test:browser`。
+ES Modules 必須透過 HTTP Server 載入，不可直接使用 `file://`。
+
+```powershell
+py -m http.server 8765
+npm.cmd test
+npm.cmd run test:http
+npm.cmd run test:browser
+npm.cmd run check
+```
+
+正式入口、CSS、ES Modules 與貓咪 Sprite Sheet 使用固定 `v=0541a` 快取版本。Safari 部署更新後可先正常重新整理；清除網站資料只應作為裝置仍保留非常舊快取時的排除步驟，不是遊戲啟動的必要條件。
 
 ## 部署
 
-GitHub Pages 部署 ZIP 不包含 node_modules、legacy、測試截圖或本機暫存檔。Phaser 正式檔位於 assets/vendor/phaser-3.90.0.min.js。
+GitHub Pages 部署檔使用本地 `assets/vendor/phaser-3.90.0.min.js`，不依賴 CDN。部署 ZIP 不包含 `node_modules/`、`legacy/`、`tools/`、備份或測試截圖。
 
-部署後 Safari 應先正常重新整理；若裝置仍保留非常舊的網站資料，可由 Safari 設定清除該站資料再測試。正式入口、CSS 與 ES Modules 均使用 `v=0540a1` 版本識別，清除網站資料不是正常啟動的必要條件。
+新版存檔仍使用 `catCafePhaserV0540`；本版本不變更存檔 key、房間、Grid、Placement、Occupancy 或 Camera 核心。

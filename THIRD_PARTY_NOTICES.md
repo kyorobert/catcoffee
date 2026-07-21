@@ -4,8 +4,8 @@
 
 - Project: Phaser
 - Version: 3.90.0
-- Source: https://www.npmjs.com/package/phaser/v/3.90.0
-- Local runtime: assets/vendor/phaser-3.90.0.min.js
+- Source: npm package `phaser@3.90.0`
+- Local runtime: `assets/vendor/phaser-3.90.0.min.js`
 - License: MIT License
 - Copyright: Copyright (c) 2024 Richard Davey, Phaser Studio Inc.
 
@@ -29,10 +29,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-## Playwright Core（開發測試工具，不載入正式遊戲）
+## Playwright Core（僅開發測試）
 
 - Package: `playwright-core`
 - Version: `1.55.0`
 - License: Apache License 2.0
-- Source: https://www.npmjs.com/package/playwright-core
-- Usage: `tests/browser-smoke.test.js` 連接本機已安裝的 Chrome 或 Edge；部署執行時不依賴此套件。
+- Usage: `tests/browser-smoke.test.js` 啟動本機 Chrome 或 Edge 進行 Smoke Test。

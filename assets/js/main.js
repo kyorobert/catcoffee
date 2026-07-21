@@ -1,8 +1,8 @@
-import {createGameConfig} from './config/game-config.js?v=0540a1';
-import {FURNITURE_CONFIG} from './config/furniture-config.js?v=0540a1';
-import {SaveAdapter} from './systems/SaveAdapter.js?v=0540a1';
-import {StartupController} from './systems/StartupController.js?v=0540a1';
-import {UiBridge} from './ui/UiBridge.js?v=0540a1';
+import {createGameConfig} from './config/game-config.js?v=0541a';
+import {FURNITURE_CONFIG} from './config/furniture-config.js?v=0541a';
+import {SaveAdapter} from './systems/SaveAdapter.js?v=0541a';
+import {StartupController} from './systems/StartupController.js?v=0541a';
+import {UiBridge} from './ui/UiBridge.js?v=0541a';
 
 if(!window.Phaser)throw new Error('Local Phaser 3.90.0 failed to load');
 

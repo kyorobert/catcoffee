@@ -1,6 +1,6 @@
 {
-  "name": "貓咪咖啡館",
-  "short_name": "貓咪咖啡館",
+  "name": "貓咪咖啡廳",
+  "short_name": "貓咪咖啡廳",
   "id": "./",
   "start_url": "./?source=pwa",
   "scope": "./",
@@ -9,7 +9,7 @@
   "orientation": "any",
   "background_color": "#3b291f",
   "theme_color": "#8f5a43",
-  "description": "V0.54.0-alpha.1｜啟動、載入與存檔安全修正版",
+  "description": "V0.54.1-alpha｜貓咪角色視覺與動畫重建版",
   "icons": [
     {"src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
     {"src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},

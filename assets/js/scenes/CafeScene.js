@@ -1,15 +1,15 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0540a1';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0540a1';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0540a1';
-import {GridSystem} from '../systems/GridSystem.js?v=0540a1';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0540a1';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0540a1';
-import {CameraController} from '../systems/CameraController.js?v=0540a1';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0540a1';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0540a1';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0540a1';
-import {CatEntity} from '../entities/CatEntity.js?v=0540a1';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0540a1';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0541a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0541a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0541a';
+import {GridSystem} from '../systems/GridSystem.js?v=0541a';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0541a';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0541a';
+import {CameraController} from '../systems/CameraController.js?v=0541a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0541a';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0541a';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0541a';
+import {CatEntity} from '../entities/CatEntity.js?v=0541a';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0541a';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -49,8 +49,10 @@ export class CafeScene extends Phaser.Scene{
     this.state=this.saveAdapter.state;
     this.entities=new Map();
     this.customers=new Map();
+    this.catEntities=new Map();
     this.dragState=null;
     this.selectedId=null;
+    this.selectedCatId=null;
   }
   initializeGrid(){
     this.grid=new GridSystem(ROOM_CONFIG,FURNITURE_CONFIG);
@@ -120,11 +122,27 @@ export class CafeScene extends Phaser.Scene{
   }
   createCats(){
     const duty=new Set(this.state.dutyCats||[]);
+    this.catEntities.forEach(entity=>entity.destroy());
+    this.catEntities.clear();
     CAT_PROFILES.forEach((profile,index)=>{
       if(!duty.has(profile.id)&&index>2)return;
-      const cell=[{x:1,y:6},{x:5,y:6},{x:7,y:5},{x:3,y:7},{x:8,y:4}][index];
-      new CatEntity(this,profile,this.grid.getCellCenter(cell.x,cell.y));
+      const cell=profile.initialCell||[{x:1,y:6},{x:5,y:6},{x:7,y:5},{x:3,y:7},{x:8,y:4}][index];
+      const entity=new CatEntity(this,profile,this.grid.getCellCenter(cell.x,cell.y),{
+        duty:duty.has(profile.id),
+        onSelect:(catId)=>this.selectCat(catId)
+      });
+      this.catEntities.set(profile.id,entity);
     });
+  }
+  selectCat(catId){
+    this.selectedCatId=catId;
+    this.catEntities.forEach((entity,id)=>entity.setSelected(id===catId));
+    const profile=CAT_PROFILES.find(cat=>cat.id===catId)||null;
+    this.game.events.emit('cat-selection-changed',profile?{
+      cat:profile,
+      stats:this.state.catStats?.[catId]||null,
+      duty:(this.state.dutyCats||[]).includes(catId)
+    }:null);
   }
   bindPlacementInput(){
     this.input.on('pointerdown',pointer=>{
@@ -323,7 +341,7 @@ export class CafeScene extends Phaser.Scene{
   }
   careCat(mode='play'){
     if(this.state.energy<=0){this.game.events.emit('toast',{message:'體力不足，下一天會恢復',key:'energy-empty',priority:2});return}
-    const id=(this.state.dutyCats||[])[0]||'bean';
+    const id=this.selectedCatId||(this.state.dutyCats||[])[0]||'bean';
     const stats=this.state.catStats[id]||{satiety:60,mood:60,bond:0,clean:60};
     this.state.energy--;
     if(mode==='feed')stats.satiety=Math.min(100,stats.satiety+14);
@@ -332,6 +350,7 @@ export class CafeScene extends Phaser.Scene{
     stats.bond=(stats.bond||0)+2;
     this.state.catStats[id]=stats;this.state.tasks.care=(this.state.tasks.care||0)+1;
     this.saveAdapter.save();this.emitState();
+    this.catEntities.get(id)?.playHappy();
     this.game.events.emit('toast',{message:`已和 ${CAT_PROFILES.find(cat=>cat.id===id)?.name||'貓咪'} 完成互動`,key:`care-${mode}`});
   }
   openStoreForDay(){
@@ -371,5 +390,8 @@ export class CafeScene extends Phaser.Scene{
   }
   emitState(){
     this.game.events.emit('state-changed',{...this.state,phaseLabel:PHASE_LABELS[this.state.phase]||this.state.phase});
+  }
+  update(time,delta){
+    this.catEntities?.forEach(entity=>entity.update(time,delta));
   }
 }

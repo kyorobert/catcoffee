@@ -1,4 +1,4 @@
-import {DepthSystem} from '../systems/DepthSystem.js?v=0540a1';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0541a';
 
 export class FurnitureEntity extends Phaser.GameObjects.Image{
   constructor(scene,item,definition,grid){
