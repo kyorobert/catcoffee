@@ -1,26 +1,24 @@
-# 貓咪咖啡館 V0.53.2｜地板視覺與放置系統止血修正版
+# 貓咪咖啡館 V0.54.0-alpha.1
 
-純前端 HTML5 遊戲，可直接部署至 GitHub Pages。
+本版集中修正 Phaser 啟動、家具 Loader、Canvas Renderer、載入錯誤畫面、家具 Anchor，以及新舊存檔隔離。Phaser 管理房間、等角地板、家具、角色、Camera、拖曳及放置提示；固定 HUD、商店與操作面板由 DOM 管理。
 
-## V0.53.2 重點
+## 架構重點
 
-- 正式模式完全不顯示全場邏輯格、地板外框或控制點。
-- 家具放置與拖曳時，只顯示候選家具的綠色／紅色占地提示。
-- 「放置輔助」開啟時，最多顯示候選位置附近 5×5 格。
-- 完整控制網格只能透過 `?floorDebug=1` 顯示。
-- 地毯恢復使用原始點陣素材與腳底錨點，不再進行 Canvas 四邊形拉伸或 Polygon 裁切。
-- 邏輯格仍負責吸附、碰撞、尋路與存檔，但與背景美術地磚正式分離。
-- V0.53.0 的單一 Camera、Canvas 背景、Pointer Events 與 Safari resize 架構保持不變。
-- 載入舊存檔時不批次正規化、搬動或重排家具座標。
+- 單一 GridSystem 提供所有等角座標、footprint 與 anchor。
+- 單一 OccupancySystem 分離地毯、地板家具、牆面家具與入口保留格。
+- 單一 PlacementSystem 處理硬性阻擋；椅子未配桌只產生 warning。
+- 單一 Phaser Main Camera 支援拖曳、雙指縮放、wheel、動態 cover zoom 與 resize 中心保留。
+- 新版只寫入 catCafePhaserV0540；舊存檔首次遷移前備份到 catCafeLegacySaveBackupV0532。
+- 啟動超過 20 秒或發生例外時顯示可操作錯誤畫面，不再永久停留於 Spinner。
+- Alpha.1 固定使用 Phaser Canvas Renderer。
+- 正式遊戲不載入 legacy，也不依賴 CDN。
 
-## Debug
+## 本機執行
 
-正式模式：`index.html`
+ES Modules 需要由靜態 HTTP Server 載入，不能使用 file://。可執行 `python -m http.server 8765`，核心檢查使用 `npm.cmd test`、`npm.cmd run test:http` 與 `npm.cmd run test:browser`。
 
-地板校正模式：`index.html?floorDebug=1`
+## 部署
 
-## 靜態檢查
+GitHub Pages 部署 ZIP 不包含 node_modules、legacy、測試截圖或本機暫存檔。Phaser 正式檔位於 assets/vendor/phaser-3.90.0.min.js。
 
-```powershell
-node check.js
-```
+部署後 Safari 應先正常重新整理；若裝置仍保留非常舊的網站資料，可由 Safari 設定清除該站資料再測試。正式入口、CSS 與 ES Modules 均使用 `v=0540a1` 版本識別，清除網站資料不是正常啟動的必要條件。
