@@ -1,0 +1,10 @@
+@media(max-width:760px){
+  #gameHud{grid-template-columns:1fr auto;padding:max(5px,env(safe-area-inset-top)) 7px 5px;gap:5px}.brand-cat{width:31px;height:31px;font-size:19px}.brand b{font-size:12px}.brand em{font-size:8px}.hud-metrics{justify-content:flex-end;gap:3px}.hud-metrics span{padding:4px 6px;font-size:10px}.hud-metrics span:nth-child(4){display:none}.operation-card{grid-column:1/-1;justify-self:stretch;grid-template-columns:auto auto 1fr auto;padding:4px 7px}.operation-card small{grid-column:auto}.operation-card div{grid-column:auto}.operation-card button{font-size:10px;padding:4px 6px}
+  #gameBottomBar{gap:3px;padding:5px 5px calc(5px + env(safe-area-inset-bottom))}#gameBottomBar button{min-height:45px;flex-direction:column;gap:0;font-size:9px;border-radius:10px}#gameBottomBar button b{font-size:18px}
+  .selection-bar{bottom:7px;max-width:96%;overflow:auto;padding:6px}.selection-bar button{font-size:10px;padding:6px}.selection-bar b{font-size:10px}
+  .store-catalog{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:8px}.panel-dialog{max-height:91dvh}
+}
+@media(max-height:500px) and (orientation:landscape){
+  #gameHud{grid-template-columns:1fr auto auto;padding:3px 8px}.operation-card{grid-column:auto}.brand em,.operation-card small{display:none}#gameBottomBar{position:absolute;right:6px;bottom:6px;width:auto;grid-template-columns:repeat(5,54px);padding:4px;border:1px solid #c98c66;border-radius:13px;background:#fff5e4dd}#gameBottomBar button{min-height:42px}
+}
+

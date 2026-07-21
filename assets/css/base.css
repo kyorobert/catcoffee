@@ -1,0 +1,26 @@
+:root{font-family:Inter,"Noto Sans TC",system-ui,sans-serif;color:#4a3025;background:#3b291f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
+body{position:fixed;inset:0;background:#3b291f}
+button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulation}
+#gameApp{position:fixed;inset:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
+#gameViewport{position:relative;min-width:0;min-height:0;overflow:hidden;touch-action:none;overscroll-behavior:none;background:#3b291f}
+#phaserGame,#phaserGame canvas{width:100%;height:100%;display:block;touch-action:none}
+#domOverlay{position:absolute;inset:0;pointer-events:none}
+#bootOverlay{position:absolute;inset:0;display:grid;place-content:center;gap:12px;padding:24px;text-align:center;color:#fff4df;background:#3b291f;z-index:20;transition:opacity .25s;pointer-events:auto}
+#bootOverlay.hidden{opacity:0;visibility:hidden}
+.boot-loading,.boot-error{width:min(420px,88vw);display:grid;gap:12px;justify-items:center}
+.boot-loading progress{width:min(320px,75vw);height:10px;accent-color:#f4ba79}
+.boot-error{display:none;padding:22px;border:1px solid #ffbd9d66;border-radius:18px;background:#6a342bdd;box-shadow:0 18px 48px #1e100dbb}
+.boot-error>b{font-size:1.3rem;color:#ffd3bd}
+.boot-error p{margin:0;overflow-wrap:anywhere}
+.boot-error small{display:block;color:#ffe9d8cc}
+.boot-error div{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.boot-error button{padding:10px 14px;border-radius:999px;background:#fff0db;color:#5a3025;font-weight:800}
+#bootOverlay[data-state="error"] .boot-loading{display:none}
+#bootOverlay[data-state="error"] .boot-error{display:grid}
+.spinner{width:36px;height:36px;margin:auto;border:4px solid #fff4df55;border-top-color:#f4ba79;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#gameToast{position:absolute;left:50%;top:18px;max-width:min(88%,420px);padding:10px 16px;transform:translate(-50%,-15px);opacity:0;border-radius:999px;color:white;background:#4f332bcc;box-shadow:0 8px 30px #24140f66;transition:.2s;z-index:30}
+#gameToast.show{transform:translate(-50%,0);opacity:1}
+.hidden{display:none!important}
