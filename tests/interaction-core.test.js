@@ -39,5 +39,7 @@ assert.equal(state.state,CAT_STATE.WALKING);
 assert.equal(canTransitionInputMode(INPUT_MODE.IDLE,INPUT_MODE.CAMERA_PAN),true);
 assert.equal(canTransitionInputMode(INPUT_MODE.FURNITURE_DRAG,INPUT_MODE.PINCH_ZOOM),true);
 assert.equal(canTransitionInputMode(INPUT_MODE.PINCH_ZOOM,INPUT_MODE.FURNITURE_DRAG),false);
+assert.equal(canTransitionInputMode(INPUT_MODE.CAT_INTERACTION,INPUT_MODE.CARE_INTERACTION),true);
+assert.equal(canTransitionInputMode(INPUT_MODE.CARE_INTERACTION,INPUT_MODE.PINCH_ZOOM),false,'care session blocks pinch input');
 
 console.log('Portable interaction core passed: input transitions, BFS avoidance and cat behavior state rules.');

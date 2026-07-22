@@ -1,6 +1,6 @@
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0542a';
-import {CAT_PROFILES, FALLBACK_CAT} from '../config/cat-config.js?v=0542a';
-import {hasCompleteCatSheet, registerCatAnimations} from '../systems/CatAnimationSystem.js?v=0542a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0550a';
+import {CAT_PROFILES, FALLBACK_CAT} from '../config/cat-config.js?v=0550a';
+import {hasCompleteCatSheet, registerCatAnimations} from '../systems/CatAnimationSystem.js?v=0550a';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -51,6 +51,8 @@ export class BootScene extends Phaser.Scene {
         frameHeight: profile.frameHeight
       });
     }
+    this.load.image('environment:wall-window', './assets/environment/wall-window.png?v=0550a');
+    this.load.image('environment:menu-board', './assets/environment/menu-board.png?v=0550a');
   }
 
   create() {

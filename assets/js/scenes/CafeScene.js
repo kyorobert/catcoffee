@@ -1,20 +1,23 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0542a';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0542a';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0542a';
-import {GridSystem} from '../systems/GridSystem.js?v=0542a';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0542a';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0542a';
-import {CameraController} from '../systems/CameraController.js?v=0542a';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0542a';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0542a';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0542a';
-import {CatEntity} from '../entities/CatEntity.js?v=0542a';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0542a';
-import {INPUT_MODE} from '../core/input-state.js?v=0542a';
-import {InputModeController} from '../phaser/InputModeController.js?v=0542a';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0542a';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0542a';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0542a';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0550a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0550a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0550a';
+import {GridSystem} from '../systems/GridSystem.js?v=0550a';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0550a';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0550a';
+import {CameraController} from '../systems/CameraController.js?v=0550a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0550a';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0550a';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0550a';
+import {CatEntity} from '../entities/CatEntity.js?v=0550a';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0550a';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0550a';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0550a';
+import {INPUT_MODE} from '../core/input-state.js?v=0550a';
+import {InputModeController} from '../phaser/InputModeController.js?v=0550a';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0550a';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0550a';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0550a';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0550a';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -85,14 +88,22 @@ export class CafeScene extends Phaser.Scene{
       inputMode:this.inputMode,cameraController:this.cameraController,
       catBehaviorController:this.catBehaviorController
     });
+    this.careInteractionController=new CareInteractionController(this,{
+      inputMode:this.inputMode,cameraController:this.cameraController,
+      catBehaviorController:this.catBehaviorController,furnitureDragController:this.furnitureDragController,
+      saveAdapter:this.saveAdapter,profiles:CAT_PROFILES
+    });
     this.interactionDebug=new InteractionDebugView(this,{
       inputMode:this.inputMode,furnitureDragController:this.furnitureDragController,
       catBehaviorController:this.catBehaviorController,cameraController:this.cameraController
     });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{
+      this.careInteractionController?.destroy();
       this.cameraController?.destroy();
       this.catBehaviorController?.destroy();
       this.interactionDebug?.destroy();
+      this.wallDecorations?.forEach(decoration=>decoration.destroy());
+      this.ambientEffects?.destroy();
     });
     this.time.addEvent({delay:6500,loop:true,callback:()=>this.maybeSpawnCustomer()});
   }
@@ -113,11 +124,6 @@ export class CafeScene extends Phaser.Scene{
     graphics.fillStyle(walls.right.fill,1).fillPoints([top,right,{x:right.x,y:right.y-walls.height},{x:top.x,y:top.y-walls.height}],true);
     graphics.lineStyle(8,walls.left.accent,1).strokePoints([top,left],false);
     graphics.lineStyle(8,walls.right.accent,1).strokePoints([top,right],false);
-    // Original wall decorations generated from the same room geometry.
-    graphics.fillStyle(0x8bd0dc,.85).fillRect(top.x-210,top.y-walls.height+55,125,92);
-    graphics.lineStyle(9,0xf5e4ca,1).strokeRect(top.x-210,top.y-walls.height+55,125,92);
-    graphics.fillStyle(0x4b3b32,.9).fillRoundedRect(top.x+82,top.y-walls.height+64,145,88,8);
-    graphics.lineStyle(6,0xd8b384,1).strokeRoundedRect(top.x+82,top.y-walls.height+64,145,88,8);
     for(let y=0;y<floor.rows;y++)for(let x=0;x<floor.cols;x++){
       const diamond=this.grid.getCellDiamond(x,y);
       const color=floor.colors[(x+y*3)%floor.colors.length];
@@ -129,6 +135,11 @@ export class CafeScene extends Phaser.Scene{
       graphics.fillStyle(0x9f765a,.48).fillPoints(diamond,true);
     });
     graphics.setDepth(-1000);
+    this.wallDecorations=[
+      new WallDecorationEntity(this,{texture:'environment:wall-window',x:top.x-165,y:top.y-walls.height+122,scale:.92}),
+      new WallDecorationEntity(this,{texture:'environment:menu-board',x:top.x+155,y:top.y-walls.height+124,scale:.9})
+    ];
+    this.ambientEffects=new AmbientEffects(this,{top,floor});
   }
   createFurniture(){
     this.entities.forEach(entity=>entity.destroy());
@@ -251,19 +262,15 @@ export class CafeScene extends Phaser.Scene{
     this.saveAdapter.save();this.furnitureDragController?.renderPlacementVisuals();this.emitState();
     return this.state.placementHelper;
   }
+  startCareInteraction(catId,mode){
+    this.selectCat(catId);
+    return this.careInteractionController?.start(catId,mode)||{started:false,reason:'controller-missing'};
+  }
+  cancelCareInteraction(reason='cancelled'){return this.careInteractionController?.cancel(reason)||false}
+  finishCareInteraction(){return this.careInteractionController?.finish()||false}
   careCat(mode='play'){
-    if(this.state.energy<=0){this.game.events.emit('toast',{message:'體力不足，下一天會恢復',key:'energy-empty',priority:2});return}
     const id=this.selectedCatId||(this.state.dutyCats||[])[0]||'bean';
-    const stats=this.state.catStats[id]||{satiety:60,mood:60,bond:0,clean:60};
-    this.state.energy--;
-    if(mode==='feed')stats.satiety=Math.min(100,stats.satiety+14);
-    if(mode==='groom')stats.clean=Math.min(100,stats.clean+14);
-    if(mode==='play')stats.mood=Math.min(100,stats.mood+14);
-    stats.bond=(stats.bond||0)+2;
-    this.state.catStats[id]=stats;this.state.tasks.care=(this.state.tasks.care||0)+1;
-    this.saveAdapter.save();this.emitState();
-    this.catEntities.get(id)?.playHappy();
-    this.game.events.emit('toast',{message:`已和 ${CAT_PROFILES.find(cat=>cat.id===id)?.name||'貓咪'} 完成互動`,key:`care-${mode}`});
+    return this.startCareInteraction(id,mode);
   }
   openStoreForDay(){
     const layout=validateStoreLayoutBeforeOpen(this.state.items,this.placement);
@@ -306,6 +313,7 @@ export class CafeScene extends Phaser.Scene{
   update(time,delta){
     this.furnitureDragController?.update(time,delta);
     this.catBehaviorController?.update(time,delta);
+    this.careInteractionController?.update(time,delta);
     this.interactionDebug?.update(time,delta);
   }
 }

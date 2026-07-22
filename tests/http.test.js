@@ -104,6 +104,13 @@ try{
     if(!signature.every((byte,index)=>body[index]===byte))failures.push(`invalid cat PNG signature ${path}`);
     if(body.length<100)failures.push(`empty cat PNG ${path}`);
   }
+  for(const asset of ['./assets/environment/wall-window.png?v=0550a','./assets/environment/menu-board.png?v=0550a']){
+    const path=new URL(asset,origin+'/').pathname;
+    const response=await fetch(origin+path);
+    const body=new Uint8Array(await response.arrayBuffer());
+    const signature=[0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a];
+    if(!response.ok||!response.headers.get('content-type')?.includes('image/png')||!signature.every((byte,index)=>body[index]===byte))failures.push(`invalid environment PNG ${path}`);
+  }
 } finally {
   await new Promise(resolveClose=>server.close(resolveClose));
 }
@@ -112,4 +119,4 @@ if(failures.length){
   console.error('HTTP resource failures:\n- '+failures.join('\n- '));
   process.exit(1);
 }
-console.log(`HTTP resource test passed: ${visited.size} linked resources, ${Object.keys(FURNITURE_CONFIG).length} furniture textures and 11 cat PNG assets.`);
+console.log(`HTTP resource test passed: ${visited.size} linked resources, ${Object.keys(FURNITURE_CONFIG).length} furniture textures, 11 cat PNG assets and 2 wall decorations.`);

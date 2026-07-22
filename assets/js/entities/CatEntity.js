@@ -1,5 +1,5 @@
-import {DepthSystem} from '../systems/DepthSystem.js?v=0542a';
-import {catAnimationKey, resolveCatTextureKey} from '../systems/CatAnimationSystem.js?v=0542a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0550a';
+import {catAnimationKey, resolveCatTextureKey} from '../systems/CatAnimationSystem.js?v=0550a';
 
 const LOOPING_STATES = new Set(['idle', 'walk', 'sit', 'sleep']);
 
@@ -16,13 +16,15 @@ export class CatEntity {
     this.selected = false;
     this.duty = Boolean(options.duty);
     this.destroyed = false;
+    this.worldX = position.x;
+    this.worldY = position.y;
+    this.visualOffsetY = 0;
+    this.motionClock = Math.random() * 1000;
 
     const textureKey = resolveCatTextureKey(scene, catData);
-    this.shadow = scene.add.ellipse(position.x, position.y - 1, 30, 10, 0x392820, 0.24)
-      .setOrigin(0.5, 0.5);
+    this.shadow = scene.add.ellipse(position.x, position.y - 1, 30, 10, 0x392820, 0.24).setOrigin(0.5);
     this.selectionRing = scene.add.ellipse(position.x, position.y - 2, 38, 15, 0xf8d978, 0.12)
-      .setStrokeStyle(2, 0xffdc74, 0.95)
-      .setVisible(false);
+      .setStrokeStyle(2, 0xffdc74, 0.95).setVisible(false);
     this.sprite = scene.add.sprite(position.x, position.y, textureKey, 0)
       .setOrigin(0.5, 1)
       .setScale(catData.scale || 1)
@@ -31,12 +33,12 @@ export class CatEntity {
       fontFamily: 'system-ui, sans-serif', fontSize: '11px', fontStyle: '700',
       color: '#4b3025', backgroundColor: '#fff4dfd9', padding: {x: 4, y: 2}
     }).setOrigin(0.5, 1).setVisible(false);
-    this.statusLabel = scene.add.text(position.x + 20, position.y - 49, '●', {
-      fontFamily: 'system-ui, sans-serif', fontSize: '11px', color: '#72b66d',
+    this.statusLabel = scene.add.text(position.x + 20, position.y - 49, '值班', {
+      fontFamily: 'system-ui, sans-serif', fontSize: '10px', fontStyle: '700', color: '#72b66d',
       stroke: '#fff4df', strokeThickness: 2
     }).setOrigin(0.5).setVisible(this.duty);
 
-    this.handlePointerDown = (pointer) => {
+    this.handlePointerDown = pointer => {
       pointer.event?.stopPropagation?.();
       this.onSelect?.(this.catData.id, this);
     };
@@ -47,8 +49,7 @@ export class CatEntity {
 
   setState(nextState, direction = this.direction) {
     if (this.destroyed) return;
-    const normalizedState = ['idle', 'walk', 'sit', 'sleep', 'happy', 'serve'].includes(nextState)
-      ? nextState : 'idle';
+    const normalizedState = ['idle', 'walk', 'sit', 'sleep', 'happy', 'serve'].includes(nextState) ? nextState : 'idle';
     const normalizedDirection = direction === 'up' ? 'up' : 'down';
     const key = catAnimationKey(this.catData.id, normalizedState, normalizedDirection);
     const fallbackKey = catAnimationKey(this.catData.id, 'idle', normalizedDirection);
@@ -72,56 +73,77 @@ export class CatEntity {
   playHappy(direction = this.direction) { this.setState('happy', direction); }
   playServe(direction = this.direction) { this.setState('serve', direction); }
 
-  moveTo(worldX, worldY, onComplete = null) {
+  // Legacy scripted moves can opt into continuation so intermediate nodes do
+  // not flash idle.  Autonomous BFS motion uses setPosition directly.
+  moveTo(worldX, worldY, onComplete = null, {continuation = false} = {}) {
     if (this.destroyed) return;
     this.moveTween?.stop();
-    const dx = worldX - this.sprite.x;
-    const dy = worldY - this.sprite.y;
-    const facingUp = dy < 0;
+    const start = this.getWorldPosition();
+    const dx = worldX - start.x;
+    const dy = worldY - start.y;
     this.sprite.setFlipX(dx < 0);
-    this.playWalk(facingUp ? 'up' : 'down');
+    this.playWalk(dy < 0 ? 'up' : 'down');
     const distance = Math.hypot(dx, dy);
     const duration = Math.max(160, distance / Math.max(1, this.profile.moveSpeed || 52) * 1000);
-    const targets = [this.sprite, this.shadow, this.selectionRing, this.nameLabel, this.statusLabel];
-    const startX = this.sprite.x;
-    const startY = this.sprite.y;
-    const offsets = targets.map(object => ({object, x: object.x - startX, y: object.y - startY}));
     this.moveTween = this.scene.tweens.addCounter({
       from: 0, to: 1, duration, ease: 'Linear',
-      onUpdate: (tween) => {
+      onUpdate: tween => {
         const progress = tween.getValue();
-        for (const entry of offsets) {
-          entry.object.setPosition(
-            startX + entry.x + dx * progress,
-            startY + entry.y + dy * progress
-          );
-        }
-        this.updateDepth();
+        this.setPosition(start.x + dx * progress, start.y + dy * progress);
       },
       onComplete: () => {
         this.moveTween = null;
         this.setPosition(worldX, worldY);
-        this.playIdle();
+        if (!continuation) this.playIdle();
         onComplete?.();
       }
     });
   }
 
+  getWorldPosition() { return {x: this.worldX, y: this.worldY}; }
+
   setPosition(worldX, worldY) {
-    this.sprite.setPosition(worldX, worldY);
-    this.shadow.setPosition(worldX, worldY - 1);
-    this.selectionRing.setPosition(worldX, worldY - 2);
-    this.nameLabel.setPosition(worldX, worldY - 61);
-    this.statusLabel.setPosition(worldX + 20, worldY - 49);
+    this.worldX = worldX;
+    this.worldY = worldY;
+    this.applyVisualPositions();
     this.updateDepth();
   }
 
-  update() {
-    if (!this.destroyed) this.updateDepth();
+  updateVisual(time, delta = 0) {
+    if (this.destroyed) return;
+    this.motionClock += Math.max(0, delta);
+    if (this.state === 'walk') {
+      const stepPhase = this.motionClock / 105;
+      this.visualOffsetY = Math.sin(stepPhase * Math.PI) * 1.35 - 0.35;
+      const shadowPulse = 1 - Math.abs(Math.sin(stepPhase * Math.PI)) * 0.055;
+      this.shadow.setScale(shadowPulse, 1 - (1 - shadowPulse) * 0.5);
+    } else if (this.state === 'idle') {
+      this.visualOffsetY = Math.sin((time + this.motionClock * 0.08) / 720) * 0.28;
+      this.shadow.setScale(1, 1);
+    } else {
+      this.visualOffsetY = 0;
+      this.shadow.setScale(1, 1);
+    }
+    this.applyVisualPositions();
+  }
+
+  applyVisualPositions() {
+    this.sprite.setPosition(this.worldX, this.worldY + this.visualOffsetY);
+    this.shadow.setPosition(this.worldX, this.worldY - 1);
+    this.selectionRing.setPosition(this.worldX, this.worldY - 2);
+    this.nameLabel.setPosition(this.worldX, this.worldY - 61);
+    this.statusLabel.setPosition(this.worldX + 20, this.worldY - 49);
+  }
+
+  update(time = this.scene.time.now, delta = 0) {
+    if (!this.destroyed) {
+      this.updateVisual(time, delta);
+      this.updateDepth();
+    }
   }
 
   updateDepth() {
-    const depth = DepthSystem.for('character', this.sprite.y);
+    const depth = DepthSystem.for('character', this.worldY);
     this.shadow.setDepth(depth - 2);
     this.selectionRing.setDepth(depth - 1);
     this.sprite.setDepth(depth);

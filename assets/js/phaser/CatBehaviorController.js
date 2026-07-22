@@ -1,8 +1,8 @@
-import {findPath} from '../core/grid-pathfinder.js?v=0542a';
+import {findPath} from '../core/grid-pathfinder.js?v=0550a';
 import {
   CAT_STATE, createCatBehaviorState, shouldLeaveIdle, chooseCatTarget,
   beginWalking, finishPath, pauseBehavior, resumeBehavior, markLayoutChanged, randomDelay
-} from '../core/cat-behavior-core.js?v=0542a';
+} from '../core/cat-behavior-core.js?v=0550a';
 
 const key = (x, y) => `${x},${y}`;
 
@@ -17,6 +17,7 @@ export class CatBehaviorController {
     this.random = random;
     this.behaviors = new Map();
     this.pausedReasons = new Set();
+    this.pausedCats = new Map();
     this.lastPositionSaveAt = -Infinity;
     this.allCells = [];
     for (let y = 0; y < this.grid.room.floor.rows; y++) {
@@ -62,6 +63,8 @@ export class CatBehaviorController {
     for (const [id, entity] of this.entities) {
       let behavior = this.behaviors.get(id);
       if (!behavior) continue;
+      entity.updateVisual?.(time, delta);
+      if (this.pausedCats.get(id)?.size) continue;
       if (behavior.needsRepath) behavior = this.repathBehavior(behavior, blocked, time);
       if (behavior.state === CAT_STATE.WALKING) behavior = this.advanceWalking(entity, behavior, blocked, time, delta);
       else if (shouldLeaveIdle(behavior, time)) behavior = this.chooseNextAction(entity, behavior, blocked, time);
@@ -112,8 +115,9 @@ export class CatBehaviorController {
     const nextCell = behavior.path[behavior.pathIndex];
     if (!nextCell || !this.isWalkableCell(nextCell.x, nextCell.y, blocked)) return this.repathBehavior({...behavior, needsRepath: true}, blocked, time);
     const target = this.grid.getCellCenter(nextCell.x, nextCell.y);
-    const dx = target.x - entity.sprite.x;
-    const dy = target.y - entity.sprite.y;
+    const position = entity.getWorldPosition?.() || {x: entity.sprite.x, y: entity.sprite.y};
+    const dx = target.x - position.x;
+    const dy = target.y - position.y;
     const distance = Math.hypot(dx, dy);
     const speed = Math.max(35, Math.min(55, this.profiles.get(behavior.id)?.moveSpeed || 48));
     const step = speed * Math.max(0, delta) / 1000;
@@ -131,7 +135,7 @@ export class CatBehaviorController {
     }
     entity.sprite.setFlipX(dx < 0);
     entity.playWalk(dy < 0 ? 'up' : 'down');
-    entity.setPosition(entity.sprite.x + dx / distance * step, entity.sprite.y + dy / distance * step);
+    entity.setPosition(position.x + dx / distance * step, position.y + dy / distance * step);
     return behavior;
   }
 
@@ -139,8 +143,9 @@ export class CatBehaviorController {
     const nextCell = behavior.path[behavior.pathIndex];
     if (!nextCell) return;
     const target = this.grid.getCellCenter(nextCell.x, nextCell.y);
-    entity.sprite.setFlipX(target.x < entity.sprite.x);
-    entity.playWalk(target.y < entity.sprite.y ? 'up' : 'down');
+    const position = entity.getWorldPosition?.() || {x: entity.sprite.x, y: entity.sprite.y};
+    entity.sprite.setFlipX(target.x < position.x);
+    entity.playWalk(target.y < position.y ? 'up' : 'down');
   }
 
   applyRestAnimation(entity, state) {
@@ -162,7 +167,8 @@ export class CatBehaviorController {
   getCharacterCells() {
     const cells = new Set();
     for (const entity of this.entities.values()) {
-      const cell = this.grid.snapWorldToGrid(entity.sprite.x, entity.sprite.y);
+      const position = entity.getWorldPosition?.() || {x: entity.sprite.x, y: entity.sprite.y};
+      const cell = this.grid.snapWorldToGrid(position.x, position.y);
       cells.add(key(cell.x, cell.y));
     }
     return cells;
@@ -192,6 +198,31 @@ export class CatBehaviorController {
     }
   }
 
+  pauseCat(catId, reason = 'manual') {
+    if (!this.behaviors.has(catId)) return false;
+    const reasons = this.pausedCats.get(catId) || new Set();
+    reasons.add(reason);
+    this.pausedCats.set(catId, reasons);
+    this.behaviors.set(catId, pauseBehavior(this.behaviors.get(catId)));
+    return true;
+  }
+
+  resumeCat(catId, reason = 'manual') {
+    const reasons = this.pausedCats.get(catId);
+    if (!reasons) return false;
+    reasons.delete(reason);
+    if (reasons.size) return true;
+    this.pausedCats.delete(catId);
+    const behavior = resumeBehavior(this.behaviors.get(catId), this.scene.time.now, this.random);
+    this.behaviors.set(catId, behavior);
+    const entity = this.entities.get(catId);
+    if (behavior.state === CAT_STATE.WALKING) this.applyWalkDirection(entity, behavior);
+    else entity?.playIdle();
+    return true;
+  }
+
+  isCatPaused(catId) { return Boolean(this.pausedCats.get(catId)?.size); }
+
   onFurnitureLayoutChanged() {
     for (const [id, behavior] of this.behaviors) this.behaviors.set(id, markLayoutChanged(behavior));
   }
@@ -208,6 +239,7 @@ export class CatBehaviorController {
     return {
       paused: this.pausedReasons.size > 0,
       pauseReasons: [...this.pausedReasons],
+      pausedCats: Object.fromEntries([...this.pausedCats].map(([id, reasons]) => [id, [...reasons]])),
       reservedCatCells: [...this.getReservedCatCells()],
       cats: [...this.behaviors.values()].map(state => ({...state, pathLength: state.path.length}))
     };
@@ -215,6 +247,7 @@ export class CatBehaviorController {
 
   destroy() {
     this.pausedReasons.clear();
+    this.pausedCats.clear();
     this.behaviors.clear();
   }
 }

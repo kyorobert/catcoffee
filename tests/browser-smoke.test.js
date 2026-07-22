@@ -166,6 +166,34 @@ try{
       await page.waitForTimeout(7000);
       const catsAfter=await page.evaluate(()=>[...window.__CAT_CAFE_GAME__.scene.getScene('CafeScene').catEntities].map(([id,entity])=>[id,entity.sprite.x,entity.sprite.y]));
       if(!catsAfter.some((entry,index)=>Math.hypot(entry[1]-catsBefore[index][1],entry[2]-catsBefore[index][2])>1))problems.push('no cat moved during the 7-second browser observation');
+
+      const careBefore=await page.evaluate(()=>{
+        const state=window.gameController.getState();
+        return {energy:state.energy,satiety:state.catStats.bean.satiety,care:state.tasks.care||0};
+      });
+      await page.click('#careBtn');
+      await page.click('[data-care-cat="bean"]');
+      await page.click('[data-care-action="feed"]');
+      await page.waitForSelector('#carePanel[data-phase="perform"]');
+      await page.waitForSelector('#carePanel[data-phase="result"]',{timeout:5000});
+      const careAfter=await page.evaluate(()=>{
+        const state=window.gameController.getState();
+        const panel=document.getElementById('carePanel');
+        const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+        return {
+          energy:state.energy,satiety:state.catStats.bean.satiety,care:state.tasks.care||0,
+          phase:panel.dataset.phase,committed:scene.careInteractionController.session?.committed,
+          cameraEnabled:scene.cameraController.isEnabled(),catPaused:scene.catBehaviorController.isCatPaused('bean')
+        };
+      });
+      if(careAfter.energy!==careBefore.energy-1||careAfter.satiety!==Math.min(100,careBefore.satiety+14)||careAfter.care!==careBefore.care+1)problems.push(`care result mismatch: ${JSON.stringify({careBefore,careAfter})}`);
+      if(careAfter.phase!=='result'||!careAfter.committed||careAfter.cameraEnabled||!careAfter.catPaused)problems.push('care perform/result input lock is invalid');
+      await page.click('[data-care-finish]');
+      const careCleanup=await page.evaluate(()=>{
+        const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+        return {hidden:document.getElementById('carePanel').classList.contains('hidden'),cameraEnabled:scene.cameraController.isEnabled(),catPaused:scene.catBehaviorController.isCatPaused('bean')};
+      });
+      if(!careCleanup.hidden||!careCleanup.cameraEnabled||careCleanup.catPaused)problems.push(`care cleanup failed: ${JSON.stringify(careCleanup)}`);
     }
     results.push({scenario:scenario.name,viewport:`${viewport.width}x${viewport.height}`,...state,pageErrors,failedRequests,httpErrors,consoleFatal,problems});
     await context.close();
@@ -177,4 +205,4 @@ try{
 }
 
 console.log(JSON.stringify({browser:executablePath,results},null,2));
-console.log('Browser smoke passed: 3 viewports × fresh and legacy localStorage.');
+console.log('Browser smoke passed: seven viewports, fresh/legacy saves, furniture drag, cat motion and one complete care interaction.');

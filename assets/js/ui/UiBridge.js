@@ -1,6 +1,7 @@
-import {ToastManager} from '../systems/ToastManager.js?v=0542a';
-import {StorePanel} from './StorePanel.js?v=0542a';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0542a';
+import {ToastManager} from '../systems/ToastManager.js?v=0550a';
+import {StorePanel} from './StorePanel.js?v=0550a';
+import {CarePanel} from './CarePanel.js?v=0550a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0550a';
 
 export class UiBridge {
   constructor(game, saveAdapter, furnitureConfig, {startup = null} = {}) {
@@ -14,6 +15,12 @@ export class UiBridge {
       document.getElementById('storePanel'), furnitureConfig, saveAdapter,
       type => this.scene()?.startPlacement(type)
     );
+    this.care = new CarePanel(document.getElementById('carePanel'), CAT_PROFILES, {
+      select: catId => this.scene()?.selectCat(catId),
+      start: (catId, mode) => this.scene()?.startCareInteraction(catId, mode),
+      cancel: reason => this.scene()?.cancelCareInteraction(reason),
+      finish: () => this.scene()?.finishCareInteraction()
+    });
     this.bindEvents();
     this.bindButtons();
     this.renderState(saveAdapter.state);
@@ -31,6 +38,11 @@ export class UiBridge {
     this.game.events.on('cat-selection-changed', selection => this.renderCatSelection(selection));
     this.game.events.on('toast', payload => this.toast.show(payload.message, payload));
     this.game.events.on('daily-report', report => this.showReport(report));
+    this.game.events.on('care-session-started', payload => this.care.begin(payload));
+    this.game.events.on('care-session-completed', payload => this.care.complete(payload));
+    this.game.events.on('care-session-cancelled', () => this.care.hide());
+    this.game.events.on('care-session-finished', () => this.care.hide());
+    this.game.events.on('care-session-failed', () => this.care.fail());
     this.game.events.on('boot-progress', value => this.startup?.setProgress(value));
     this.game.events.on('boot-file', file => this.startup?.setStatus(`載入素材：${file.key}`));
     this.game.events.on('boot-load-error', failure => {
@@ -63,18 +75,10 @@ export class UiBridge {
   bindButtons() {
     document.getElementById('openStoreBtn').addEventListener('click', () => this.store.open());
     document.getElementById('helperBtn').addEventListener('click', () => this.scene()?.togglePlacementHelper());
-    document.getElementById('careBtn').addEventListener('click', () => this.openPanel('carePanel'));
+    document.getElementById('careBtn').addEventListener('click', () => this.care.open(this.saveAdapter.state, this.selectedCatId));
     document.getElementById('reportBtn').addEventListener('click', () => this.showReport());
     document.getElementById('settingsBtn').addEventListener('click', () => this.openPanel('settingsPanel'));
-    document.querySelectorAll('[data-close-panel]').forEach(button => button.addEventListener('click', () => button.closest('.panel').classList.add('hidden')));
-    document.querySelectorAll('[data-care]').forEach(button => button.addEventListener('click', () => {
-      this.scene()?.careCat(button.dataset.care);
-      this.closePanel('carePanel');
-    }));
-    document.getElementById('careCatList').addEventListener('click', event => {
-      const card = event.target.closest('[data-cat-id]');
-      if (card) this.scene()?.selectCat(card.dataset.catId);
-    });
+    document.querySelectorAll('[data-close-panel]').forEach(button => button.addEventListener('click', () => this.closePanel(button.closest('.panel').id)));
     document.getElementById('openDayBtn').addEventListener('click', () => this.scene()?.openStoreForDay());
     document.getElementById('nextPhaseBtn').addEventListener('click', () => this.scene()?.nextPhase());
     document.getElementById('rotateBtn').addEventListener('click', () => this.scene()?.rotateSelection());
@@ -83,8 +87,8 @@ export class UiBridge {
     document.getElementById('cancelPlacementBtn').addEventListener('click', () => this.scene()?.cancelDrag());
   }
 
-  openPanel(id) { document.getElementById(id).classList.remove('hidden'); }
-  closePanel(id) { document.getElementById(id).classList.add('hidden'); }
+  openPanel(id) { document.getElementById(id)?.classList.remove('hidden'); }
+  closePanel(id) { document.getElementById(id)?.classList.add('hidden'); }
 
   renderState(state) {
     document.getElementById('hudCoins').textContent = Number(state.coins || 0).toLocaleString('zh-TW');
@@ -100,32 +104,18 @@ export class UiBridge {
     document.getElementById('helperBtn').querySelector('span').textContent = `放置輔助：${state.placementHelper ? '開' : '關'}`;
     document.getElementById('openDayBtn').disabled = state.phase !== 'prep';
     document.getElementById('nextPhaseBtn').disabled = state.phase === 'prep';
-    this.renderCats(state);
+    this.care.updateState(state);
     document.body.dataset.hudState = 'received';
-  }
-
-  renderCats(state) {
-    const list = document.getElementById('careCatList');
-    list.innerHTML = CAT_PROFILES.map(cat => {
-      const stats = state.catStats?.[cat.id] || {};
-      const selected = this.selectedCatId === cat.id ? ' selected' : '';
-      const duty = (state.dutyCats || []).includes(cat.id) ? '<i>值班</i>' : '';
-      return `<button type="button" class="cat-card${selected}" data-cat-id="${cat.id}">
-        <img src="${cat.portrait}" alt="${cat.name}大頭貼" width="54" height="54">
-        <span><b>${cat.name} ${duty}</b><em>${cat.personality}</em>
-        <small>飽足 ${stats.satiety || 0} · 心情 ${stats.mood || 0} · 羈絆 ${stats.bond || 0}</small></span>
-      </button>`;
-    }).join('');
   }
 
   renderCatSelection(selection) {
     this.selectedCatId = selection?.cat?.id || null;
-    this.renderCats(this.saveAdapter.state);
   }
 
   renderSelection(selection) {
     const bar = document.getElementById('selectionBar');
     bar.classList.toggle('hidden', !selection);
+    bar.classList.toggle('placing', Boolean(selection?.placing));
     if (!selection) return;
     document.getElementById('selectionName').textContent = selection.definition.name + (selection.placing ? '（放置中）' : '');
     document.getElementById('storeBtn').disabled = selection.placing;
@@ -135,7 +125,7 @@ export class UiBridge {
   showReport(report = null) {
     const state = this.saveAdapter.state;
     const data = report || {day: state.day, revenue: state.dailyRevenue, served: state.servedCustomers, reputation: state.dailyRep};
-    document.getElementById('reportContent').innerHTML = `<div class="report-grid"><b>日期</b><span>Day ${data.day}</span><b>營收</b><span>☕ ${Number(data.revenue || 0).toLocaleString('zh-TW')}</span><b>顧客</b><span>${data.served || 0}</span><b>人氣</b><span>+${data.reputation || 0}</span></div>`;
+    document.getElementById('reportContent').innerHTML = `<div class="report-grid"><b>日期</b><span>Day ${data.day}</span><b>營收</b><span>NT$ ${Number(data.revenue || 0).toLocaleString('zh-TW')}</span><b>顧客</b><span>${data.served || 0}</span><b>人氣</b><span>+${data.reputation || 0}</span></div>`;
     this.openPanel('reportPanel');
   }
 }

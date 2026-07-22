@@ -25,7 +25,13 @@ export class SaveAdapter{
       phase:'prep',phaseElapsed:0,energy:5,maxEnergy:5,cleanliness:72,foodStock:8,
       dailyRevenue:0,dailyRep:0,servedCustomers:0,dailyOrders:0,dailyTips:0,
       category:'全部',placementHelper:false,inventory:{},dutyCats:['bean','coal','snow'],
-      catStats:{bean:{satiety:62,mood:76,bond:12,clean:70},coal:{satiety:58,mood:68,bond:8,clean:64},snow:{satiety:66,mood:74,bond:10,clean:82},latte:{satiety:61,mood:82,bond:11,clean:68},hana:{satiety:55,mood:78,bond:9,clean:72}},
+      catStats:{
+        bean:{satiety:62,mood:76,bond:12,clean:70,lastCareAt:0,careCount:0,lastCareMode:null},
+        coal:{satiety:58,mood:68,bond:8,clean:64,lastCareAt:0,careCount:0,lastCareMode:null},
+        snow:{satiety:66,mood:74,bond:10,clean:82,lastCareAt:0,careCount:0,lastCareMode:null},
+        latte:{satiety:61,mood:82,bond:11,clean:68,lastCareAt:0,careCount:0,lastCareMode:null},
+        hana:{satiety:55,mood:78,bond:9,clean:72,lastCareAt:0,careCount:0,lastCareMode:null}
+      },
       tasks:{serve:0,care:0,revenue:0},taskRewardClaimed:false,
       migrationWarnings:[],migrationArchive:[],unmappedLegacyItems:[],
       items:initialItems.filter(([type])=>this.furniture[type]).map((entry,index)=>({id:`i${index}`,type:entry[0],x:entry[1],y:entry[2],r:entry[3]}))
@@ -68,7 +74,13 @@ export class SaveAdapter{
       return {...item,x:Number.isFinite(x)?x:item.x,y:Number.isFinite(y)?y:item.y,r:Number.isFinite(rotation)?rotation:0};
     });
     state.inventory={...defaults.inventory,...(parsed.inventory||{})};
-    state.catStats={...defaults.catStats,...(parsed.catStats||{})};
+    state.catStats=Object.fromEntries(Object.keys(defaults.catStats).map(catId=>[
+      catId,
+      {...defaults.catStats[catId],...(parsed.catStats?.[catId]||{})}
+    ]));
+    for(const [catId,stats] of Object.entries(parsed.catStats||{})){
+      if(!state.catStats[catId])state.catStats[catId]={...stats,lastCareAt:Number(stats.lastCareAt)||0,careCount:Number(stats.careCount)||0,lastCareMode:stats.lastCareMode||null};
+    }
     state.migrationWarnings=Array.isArray(parsed.migrationWarnings)?[...parsed.migrationWarnings]:[];
     state.migrationArchive=Array.isArray(parsed.migrationArchive)?[...parsed.migrationArchive]:[];
     for(const item of unknownItems){

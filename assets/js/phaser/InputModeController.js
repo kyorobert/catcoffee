@@ -1,4 +1,4 @@
-import {INPUT_MODE, canTransitionInputMode, stableInputMode} from '../core/input-state.js?v=0542a';
+import {INPUT_MODE, canTransitionInputMode, stableInputMode} from '../core/input-state.js?v=0550a';
 
 export class InputModeController {
   constructor({getSelectedItemId = () => null, onChange = null} = {}) {
@@ -33,7 +33,7 @@ export class InputModeController {
   }
 
   canStartPinch() {
-    return this.activePointers.size >= 2 && this.mode !== INPUT_MODE.UI_BLOCKED;
+    return this.activePointers.size >= 2 && ![INPUT_MODE.UI_BLOCKED, INPUT_MODE.CARE_INTERACTION].includes(this.mode);
   }
 
   releaseToStable() {
