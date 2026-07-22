@@ -1,4 +1,4 @@
-import {INPUT_MODE} from '../core/input-state.js?v=0550a';
+import {INPUT_MODE} from '../core/input-state.js?v=0550a1';
 
 export class CameraController {
   constructor(scene, roomConfig, {inputMode = null, isFurnitureDragging = () => false, onPinchStart = null} = {}) {

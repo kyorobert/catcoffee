@@ -1,10 +1,15 @@
-import {CARE_ACTIONS} from '../core/care-interaction-core.js?v=0550a';
+import {CARE_ACTIONS} from '../core/care-interaction-core.js?v=0550a1';
 
 const STAT_LABELS = Object.freeze({satiety: '飽足', mood: '心情', clean: '清潔', bond: '羈絆'});
 const clamp = value => Math.max(0, Math.min(100, Number(value) || 0));
 
 export class CarePanel {
   constructor(element, profiles, callbacks = {}) {
+    if (!(element instanceof Element)) throw new TypeError('CarePanel 需要有效的 #carePanel Element');
+    const content = element.querySelector('[data-care-content]');
+    const closeButton = element.querySelector('[data-care-close]');
+    if (!(content instanceof Element)) throw new TypeError('CarePanel 缺少 [data-care-content]');
+    if (!(closeButton instanceof Element)) throw new TypeError('CarePanel 缺少 [data-care-close]');
     this.element = element;
     this.profiles = profiles;
     this.profileMap = new Map(profiles.map(profile => [profile.id, profile]));
@@ -13,7 +18,8 @@ export class CarePanel {
     this.selectedCatId = null;
     this.session = null;
     this.pending = false;
-    this.content = element.querySelector('[data-care-content]');
+    this.content = content;
+    this.closeButton = closeButton;
     this.onClick = event => this.handleClick(event);
     this.onKeyDown = event => { if (event.key === 'Escape' && this.isOpen()) this.close('escape'); };
     element.addEventListener('click', this.onClick);

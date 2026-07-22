@@ -1,41 +1,83 @@
 import {chromium} from 'playwright-core';
+import {spawnSync} from 'node:child_process';
 import {createServer} from 'node:http';
 import {existsSync,readFileSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
 import {CAT_PROFILES,CAT_ANIMATION_LAYOUT,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const root=process.cwd();
 const candidates=[
-  'C:/Program Files/Google/Chrome/Application/chrome.exe',
-  'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
-  'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
-  'C:/Program Files/Microsoft/Edge/Application/msedge.exe'
+  {name:'chrome',path:'C:/Program Files/Google/Chrome/Application/chrome.exe'},
+  {name:'chrome',path:'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe'},
+  {name:'edge',path:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'},
+  {name:'edge',path:'C:/Program Files/Microsoft/Edge/Application/msedge.exe'}
 ];
-const executablePath=candidates.find(existsSync);
-if(!executablePath)throw new Error('No installed Chrome or Edge executable was found');
+const available=[...new Map(candidates.filter(item=>existsSync(item.path)).map(item=>[item.name,item])).values()];
+if(!available.length)throw new Error('No installed Chrome or Edge executable was found');
+if(!process.env.CAT_CAFE_BROWSER_TARGET&&available.length>1){
+  for(const target of available){
+    const run=spawnSync(process.execPath,[fileURLToPath(import.meta.url)],{
+      cwd:root,encoding:'utf8',timeout:360000,env:{...process.env,CAT_CAFE_BROWSER_TARGET:target.name}
+    });
+    if(run.status!==0)throw new Error(`${target.name} browser smoke failed:\n${run.stderr||run.stdout}`);
+    console.log(run.stdout.trim());
+  }
+  process.exit(0);
+}
+const selected=available.find(item=>item.name===process.env.CAT_CAFE_BROWSER_TARGET)||available[0];
+const executablePath=selected.path;
 
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json; charset=utf-8','.png':'image/png','.svg':'image/svg+xml','.jpg':'image/jpeg','.webp':'image/webp'};
 const server=createServer((request,response)=>{
-  const pathname=decodeURIComponent(new URL(request.url,'http://127.0.0.1').pathname);
+  const requestUrl=new URL(request.url,'http://127.0.0.1');
+  const pathname=decodeURIComponent(requestUrl.pathname);
   const relativePath=pathname==='/'?'index.html':pathname.split('/').filter(Boolean).join('/');
   const file=resolve(root,normalize(relativePath));
   if(!file.startsWith(resolve(root))||!existsSync(file)||!statSync(file).isFile()){
     response.writeHead(404);response.end('Not found');return;
   }
   response.writeHead(200,{'content-type':types[extname(file)]||'application/octet-stream','cache-control':'no-store'});
+  if(relativePath==='index.html'&&requestUrl.searchParams.get('fixture')==='missing-care'){
+    response.end(readFileSync(file,'utf8').replace('id="careBtn"','id="careBtn-missing"'));return;
+  }
+  if(relativePath==='index.html'&&requestUrl.searchParams.get('fixture')==='build-mismatch'){
+    response.end(readFileSync(file,'utf8').replace('data-build-id="0550a1"','data-build-id="0550-old"'));return;
+  }
   response.end(readFileSync(file));
 });
 await new Promise(resolveListen=>server.listen(0,'127.0.0.1',resolveListen));
 const origin=`http://127.0.0.1:${server.address().port}`;
 
 const legacySave={coins:73421,reputation:912,xp:456,items:[{id:'legacy-chair',type:'chair',x:3,y:3,r:1}]};
-const viewports=[{width:390,height:844},{width:393,height:852},{width:430,height:932},{width:844,height:390},{width:1024,height:768},{width:1366,height:768},{width:1440,height:900}];
+const viewports=[{width:390,height:844},{width:393,height:852},{width:430,height:932},{width:844,height:390},{width:1024,height:768},{width:1366,height:768},{width:1440,height:900},{width:1650,height:930}];
 const scenarios=[{name:'fresh',legacy:null},{name:'legacy',legacy:legacySave}];
 const results=[];
 let browser;
 try{
   browser=await chromium.launch({executablePath,headless:true});
+  for(const fixture of [
+    {name:'missing-care',expected:'#careBtn'},
+    {name:'build-mismatch',expected:'介面版本不一致'}
+  ]){
+    const context=await browser.newContext({viewport:{width:1366,height:768}});
+    const preserved='{"coins":98765,"sentinel":"keep-me"}';
+    await context.addInitScript(value=>localStorage.setItem('catCafePhaserV0540',value),preserved);
+    const page=await context.newPage();
+    await page.goto(`${origin}/?fixture=${fixture.name}`,{waitUntil:'domcontentloaded',timeout:20000});
+    await page.waitForFunction(()=>document.getElementById('bootOverlay')?.dataset.state==='error',null,{timeout:20000});
+    const failure=await page.evaluate(()=>({
+      error:document.querySelector('[data-boot-error]')?.textContent||'',
+      diagnostics:document.querySelector('[data-boot-diagnostics]')?.textContent||'',
+      gameCreated:Boolean(window.__CAT_CAFE_GAME__),
+      save:localStorage.getItem('catCafePhaserV0540')
+    }));
+    if(failure.gameCreated)throw new Error(`${fixture.name}: Phaser.Game was created before startup validation`);
+    if(!(failure.error+failure.diagnostics).includes(fixture.expected))throw new Error(`${fixture.name}: expected ${fixture.expected}, got ${failure.error}`);
+    if(failure.save!==preserved)throw new Error(`${fixture.name}: current save was modified`);
+    await context.close();
+  }
   for(const scenario of scenarios)for(const viewport of viewports){
     const context=await browser.newContext({viewport});
     await context.addInitScript(({legacy})=>{
@@ -45,7 +87,8 @@ try{
       window.addEventListener('unhandledrejection',event=>window.__SMOKE_UNHANDLED__.push(String(event.reason?.message||event.reason)));
     },{legacy:scenario.legacy});
     const page=await context.newPage();
-    const pageErrors=[],failedRequests=[],httpErrors=[],consoleFatal=[];
+    const pageErrors=[],failedRequests=[],httpErrors=[],consoleFatal=[],loadedUrls=[];
+    page.on('request',request=>loadedUrls.push(request.url()));
     page.on('pageerror',error=>pageErrors.push(error.message));
     page.on('requestfailed',request=>failedRequests.push(`${request.method()} ${request.url()} ${request.failure()?.errorText||''}`));
     page.on('response',response=>{if(response.status()>=400)httpErrors.push(`${response.status()} ${response.url()}`)});
@@ -71,6 +114,8 @@ try{
       }
       scene.selectCat('bean');
       return {
+        htmlBuildId:document.documentElement.dataset.buildId,jsBuildId:window.__CAT_CAFE_JS_BUILD_ID__,
+        gameReady:document.body.dataset.gameReady,
         phaser:Boolean(window.Phaser),canvasCount:document.querySelectorAll('#phaserGame canvas').length,
         canvasWidth:canvas?.width||0,canvasHeight:canvas?.height||0,
         game:Boolean(game),sceneActive:scene?.sys?.isActive()||false,
@@ -95,6 +140,9 @@ try{
     });
     const problems=[];
     if(!state.phaser||!state.game)problems.push('Phaser global or game missing');
+    if(state.htmlBuildId!=='0550a1'||state.jsBuildId!=='0550a1')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
+    if(state.gameReady!=='1')problems.push(`gameReady is ${state.gameReady}`);
+    if(loadedUrls.some(url=>/\?v=0550a(?:$|[&#])/.test(url)||url.includes('?v=0542a')))problems.push('obsolete runtime cache query loaded');
     if(state.canvasCount!==1||state.canvasWidth<=0||state.canvasHeight<=0)problems.push(`invalid canvas ${state.canvasCount} ${state.canvasWidth}x${state.canvasHeight}`);
     if(!state.sceneActive||!state.overlayHidden)problems.push('CafeScene inactive or overlay visible');
     if(!state.canvasRenderer)problems.push(`renderer is not Canvas (${state.rendererType})`);

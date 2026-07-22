@@ -1,6 +1,6 @@
 {
   "name": "cat-cafe-phaser",
-  "version": "0.55.0-alpha",
+  "version": "0.55.0-alpha.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,7 +10,11 @@
     "test:drag": "node ./tests/furniture-drag.test.js",
     "test:care": "node ./tests/care-interaction-core.test.js",
     "test:animation": "node ./tests/cat-animation.test.js",
-    "check": "node ./check.js",
+    "check": "node ./check.js --deploy",
+    "check:deploy": "node ./check.js --deploy",
+    "check:dev": "node ./check.js --dev",
+    "test:dom": "node ./tests/dom-contract.test.js",
+    "test:build": "node ./tests/build-consistency.test.js",
     "test:http": "node ./tests/http.test.js",
     "test:browser": "node ./tests/browser-smoke.test.js"
   },

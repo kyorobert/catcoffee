@@ -1,5 +1,5 @@
-import {INPUT_MODE} from '../core/input-state.js?v=0550a';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0550a';
+import {INPUT_MODE} from '../core/input-state.js?v=0550a1';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0550a1';
 
 const DRAG_THRESHOLD_PX = 8;
 
