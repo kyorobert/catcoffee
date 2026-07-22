@@ -35,6 +35,13 @@ export class OccupancySystem{
     const occupant=this.layers.get(layer)?.get(key(x,y));
     return Boolean(occupant&&occupant!==movingItemId);
   }
+  getOccupant(x,y,layer='floorObject'){return this.layers.get(layer)?.get(key(x,y))||null}
+  getWalkabilitySnapshot(){
+    return new Set([
+      ...this.layers.get('floorObject').keys(),
+      ...this.layers.get('reserved').keys()
+    ]);
+  }
   canOccupy(cells,{layer='floorObject',movingItemId=null}={}){
     for(const cell of cells){
       if(layer!=='wallObject'&&this.isOccupied(cell.x,cell.y,'reserved',movingItemId))return {valid:false,reason:'reserved-entrance'};
@@ -46,4 +53,3 @@ export class OccupancySystem{
     return {valid:true,reason:null};
   }
 }
-

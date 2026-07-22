@@ -1,15 +1,20 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0541a';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0541a';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0541a';
-import {GridSystem} from '../systems/GridSystem.js?v=0541a';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0541a';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0541a';
-import {CameraController} from '../systems/CameraController.js?v=0541a';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0541a';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0541a';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0541a';
-import {CatEntity} from '../entities/CatEntity.js?v=0541a';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0541a';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0542a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0542a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0542a';
+import {GridSystem} from '../systems/GridSystem.js?v=0542a';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0542a';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0542a';
+import {CameraController} from '../systems/CameraController.js?v=0542a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0542a';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0542a';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0542a';
+import {CatEntity} from '../entities/CatEntity.js?v=0542a';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0542a';
+import {INPUT_MODE} from '../core/input-state.js?v=0542a';
+import {InputModeController} from '../phaser/InputModeController.js?v=0542a';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0542a';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0542a';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0542a';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -50,12 +55,12 @@ export class CafeScene extends Phaser.Scene{
     this.entities=new Map();
     this.customers=new Map();
     this.catEntities=new Map();
-    this.dragState=null;
     this.selectedId=null;
     this.selectedCatId=null;
   }
   initializeGrid(){
     this.grid=new GridSystem(ROOM_CONFIG,FURNITURE_CONFIG);
+    this.inputMode=new InputModeController({getSelectedItemId:()=>this.selectedId});
   }
   migrateSaveIfNeeded(){
     this.saveAdapter.migrateIfNeeded(this.grid);
@@ -67,9 +72,28 @@ export class CafeScene extends Phaser.Scene{
     this.placementGraphics=this.add.graphics().setDepth(DepthSystem.for('placement',0));
     this.createFurniture();
   }
-  bindInput(){this.bindPlacementInput()}
+  bindInput(){}
   createCamera(){
-    this.cameraController=new CameraController(this,ROOM_CONFIG,{isFurnitureDragging:()=>Boolean(this.dragState)});
+    this.cameraController=new CameraController(this,ROOM_CONFIG,{
+      inputMode:this.inputMode,
+      isFurnitureDragging:()=>this.furnitureDragController?.isDragging()||false,
+      onPinchStart:()=>this.furnitureDragController?.cancelForPinch()
+    });
+    this.furnitureDragController=new FurnitureDragController(this,{
+      grid:this.grid,occupancy:this.occupancy,placement:this.placement,
+      saveAdapter:this.saveAdapter,furnitureConfig:FURNITURE_CONFIG,
+      inputMode:this.inputMode,cameraController:this.cameraController,
+      catBehaviorController:this.catBehaviorController
+    });
+    this.interactionDebug=new InteractionDebugView(this,{
+      inputMode:this.inputMode,furnitureDragController:this.furnitureDragController,
+      catBehaviorController:this.catBehaviorController,cameraController:this.cameraController
+    });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{
+      this.cameraController?.destroy();
+      this.catBehaviorController?.destroy();
+      this.interactionDebug?.destroy();
+    });
     this.time.addEvent({delay:6500,loop:true,callback:()=>this.maybeSpawnCustomer()});
   }
   finishBoot(){
@@ -115,8 +139,7 @@ export class CafeScene extends Phaser.Scene{
     const definition=FURNITURE_CONFIG[item.type];
     if(!definition)return null;
     const entity=new FurnitureEntity(this,item,definition,this.grid);
-    entity.on('pointerdown',pointer=>this.beginFurnitureDrag(pointer,item.id));
-    entity.on('pointerup',pointer=>pointer.event?.stopPropagation?.());
+    entity.on('pointerdown',pointer=>this.furnitureDragController?.onEntityPointerDown(pointer,item.id));
     this.entities.set(item.id,entity);
     return entity;
   }
@@ -133,8 +156,13 @@ export class CafeScene extends Phaser.Scene{
       });
       this.catEntities.set(profile.id,entity);
     });
+    this.catBehaviorController=new CatBehaviorController(this,{
+      grid:this.grid,occupancy:this.occupancy,entities:this.catEntities,
+      profiles:CAT_PROFILES,saveAdapter:this.saveAdapter
+    });
   }
   selectCat(catId){
+    this.inputMode?.setMode(INPUT_MODE.CAT_INTERACTION,{catId});
     this.selectedCatId=catId;
     this.catEntities.forEach((entity,id)=>entity.setSelected(id===catId));
     const profile=CAT_PROFILES.find(cat=>cat.id===catId)||null;
@@ -143,157 +171,44 @@ export class CafeScene extends Phaser.Scene{
       stats:this.state.catStats?.[catId]||null,
       duty:(this.state.dutyCats||[]).includes(catId)
     }:null);
+    this.inputMode?.releaseToStable();
   }
   bindPlacementInput(){
-    this.input.on('pointerdown',pointer=>{
-      if(this.dragState?.isNew&&this.dragState.pointerId===null){
-        this.dragState.pointerId=pointer.id;
-        const world=pointer.positionToCamera(this.cameras.main);
-        this.updateDragCandidate(world.x,world.y);
-      }
-    });
-    this.input.on('pointermove',pointer=>{
-      if(!this.dragState||pointer.id!==this.dragState.pointerId)return;
-      const world=pointer.positionToCamera(this.cameras.main);
-      this.updateDragCandidate(world.x,world.y);
-    });
-    const finish=pointer=>{
-      if(this.dragState&&pointer.id===this.dragState.pointerId)this.finishFurnitureDrag();
-    };
-    this.input.on('pointerup',finish);
-    this.input.on('pointerupoutside',finish);
+    // Formal pointer bindings live in FurnitureDragController.
   }
   beginFurnitureDrag(pointer,itemId){
-    if(this.dragState)return;
-    const item=this.state.items.find(entry=>entry.id===itemId);
-    if(!item)return;
-    this.selectItem(itemId);
-    this.occupancy.removeItem(itemId);
-    const entity=this.entities.get(itemId);
-    entity.setAlpha(.35);
-    this.dragState={
-      pointerId:pointer.id,isNew:false,movingItemId:itemId,
-      original:{...item},candidate:{...item},entity
-    };
-    this.createGhost(item);
-    pointer.event?.stopPropagation?.();
+    return this.furnitureDragController?.onEntityPointerDown(pointer,itemId);
   }
   startPlacement(type){
-    if(!FURNITURE_CONFIG[type])return false;
-    this.cancelDrag();
-    const candidate=this.findAvailablePlacement(type);
-    const item={id:`new-${Date.now().toString(36)}`,type,x:candidate.x,y:candidate.y,r:0};
-    this.dragState={pointerId:null,isNew:true,movingItemId:null,original:null,candidate:item,entity:null};
-    this.createGhost(item);
-    this.updatePlacementVisuals();
-    this.game.events.emit('selection-changed',{item,definition:FURNITURE_CONFIG[type],placing:true});
-    return true;
+    return this.furnitureDragController?.startPlacement(type)||false;
   }
   findAvailablePlacement(type){
-    for(let y=0;y<ROOM_CONFIG.floor.rows;y++)for(let x=0;x<ROOM_CONFIG.floor.cols;x++){
-      if(this.placement.validatePlacement({type,x,y,rotation:0}).valid)return {x,y};
-    }
-    return {x:4,y:4};
+    return this.furnitureDragController?.findAvailablePlacement(type)||{x:4,y:4};
   }
   createGhost(item){
-    this.ghost?.destroy();
-    const definition=FURNITURE_CONFIG[item.type];
-    const anchor=this.grid.getAnchor(item.type,item.x,item.y,item.r||0);
-    this.ghost=this.add.image(anchor.x,anchor.y,`furniture:${item.type}`)
-      .setOrigin(.5,definition.layer==='floorDecoration'?.5:1)
-      .setAlpha(.72).setDepth(DepthSystem.for('ghost',anchor.y));
-    const targetWidth=Math.max(44,Math.min(180,definition.size||96));
-    if(this.ghost.width)this.ghost.setScale(targetWidth/this.ghost.width);
+    return this.furnitureDragController?.createGhost(item,null);
   }
   updateDragCandidate(worldX,worldY){
-    const snapped=this.grid.snapWorldToGrid(worldX,worldY);
-    const drag=this.dragState;
-    drag.candidate.x=snapped.x;
-    drag.candidate.y=snapped.y;
-    this.syncGhost();
-    this.updatePlacementVisuals();
+    const pointer={id:this.furnitureDragController?.drag?.pointerId,x:worldX,y:worldY,positionToCamera:()=>({x:worldX,y:worldY})};
+    return this.furnitureDragController?.updateCandidateFromPointer(pointer);
   }
   syncGhost(){
-    const item=this.dragState?.candidate;
-    if(!item||!this.ghost)return;
-    const anchor=this.grid.getAnchor(item.type,item.x,item.y,item.r||0);
-    this.ghost.setPosition(anchor.x,anchor.y).setFlipX(Boolean((item.r||0)%2)).setDepth(DepthSystem.for('ghost',anchor.y));
+    return this.furnitureDragController?.syncGhost();
   }
   validation(){
-    const item=this.dragState.candidate;
-    return this.placement.validatePlacement({type:item.type,x:item.x,y:item.y,rotation:item.r||0,movingItemId:this.dragState.movingItemId});
+    return this.furnitureDragController?.validate()||{valid:false,blockingReason:'unplaceable-cell'};
   }
   updatePlacementVisuals(){
-    this.placementGraphics.clear();
-    if(!this.dragState)return;
-    const item=this.dragState.candidate;
-    if(this.state.placementHelper){
-      for(let y=item.y-2;y<=item.y+2;y++)for(let x=item.x-2;x<=item.x+2;x++){
-        if(!this.grid.isPlaceableCell(x,y))continue;
-        const diamond=this.grid.getCellDiamond(x,y);
-        this.placementGraphics.fillStyle(0xfff2c8,.10).fillPoints(diamond,true);
-        this.placementGraphics.lineStyle(1,0xfff2c8,.28).strokePoints([...diamond,diamond[0]],false);
-      }
-    }
-    const result=this.validation();
-    const polygon=this.grid.getFootprintPolygon(item.type,item.x,item.y,item.r||0);
-    const color=result.valid?0x60be73:0xda5252;
-    this.placementGraphics.fillStyle(color,.25).fillPoints(polygon,true);
-    this.placementGraphics.lineStyle(2,color,.9).strokePoints([...polygon,polygon[0]],false);
-    this.ghost?.setTint(result.valid?0xc9ffd1:0xffb3b3);
+    return this.furnitureDragController?.renderPlacementVisuals();
   }
   finishFurnitureDrag(){
-    if(!this.dragState)return;
-    const result=this.validation();
-    const drag=this.dragState;
-    if(result.valid){
-      if(drag.isNew){
-        const type=drag.candidate.type;
-        const inventory=this.state.inventory[type]||0;
-        if(inventory>0)this.state.inventory[type]=inventory-1;
-        else{
-          const price=FURNITURE_CONFIG[type].price||0;
-          if(this.state.coins<price){
-            this.game.events.emit('toast',{message:'金幣不足，尚未購買這件家具',key:'not-enough-coins',priority:2});
-            this.endDrag();
-            return;
-          }
-          this.state.coins-=price;
-        }
-        const item={...drag.candidate,id:`i-${Date.now().toString(36)}`};
-        this.state.items.push(item);
-        this.occupancy.addItem(item);
-        this.addFurnitureEntity(item);
-        this.selectItem(item.id);
-      }else{
-        Object.assign(drag.original,drag.candidate);
-        this.occupancy.addItem(drag.original);
-        drag.entity.setAlpha(1).sync();
-      }
-      this.saveAdapter.save();
-      this.emitState();
-      this.endDrag();
-    }else{
-      if(!drag.isNew){
-        this.occupancy.addItem(drag.original);
-        drag.entity.setAlpha(1).sync();
-        this.endDrag();
-      }
-      this.game.events.emit('toast',{message:result.message||'這裡不能放置',key:`placement-${result.blockingReason}`,priority:2,cooldown:1200});
-    }
+    return this.furnitureDragController?.finish();
   }
   endDrag(){
-    this.dragState=null;
-    this.ghost?.destroy();this.ghost=null;
-    this.placementGraphics.clear();
+    return this.furnitureDragController?.cleanup({layoutChanged:false});
   }
   cancelDrag(){
-    if(!this.dragState)return;
-    if(!this.dragState.isNew){
-      this.occupancy.addItem(this.dragState.original);
-      this.dragState.entity?.setAlpha(1).sync();
-    }
-    this.endDrag();
+    return this.furnitureDragController?.cancel('ui-cancel');
   }
   selectItem(itemId){
     this.selectedId=itemId;
@@ -302,10 +217,7 @@ export class CafeScene extends Phaser.Scene{
     this.game.events.emit('selection-changed',item?{item,definition:FURNITURE_CONFIG[item.type],placing:false}:null);
   }
   rotateSelection(){
-    if(this.dragState){
-      this.dragState.candidate.r=((this.dragState.candidate.r||0)+1)%4;
-      this.syncGhost();this.updatePlacementVisuals();return;
-    }
+    if(this.furnitureDragController?.isDragging()){this.furnitureDragController.rotateCandidate();return}
     const item=this.state.items.find(entry=>entry.id===this.selectedId);
     if(!item)return;
     this.occupancy.removeItem(item.id);
@@ -336,7 +248,7 @@ export class CafeScene extends Phaser.Scene{
   }
   togglePlacementHelper(){
     this.state.placementHelper=!this.state.placementHelper;
-    this.saveAdapter.save();this.updatePlacementVisuals();this.emitState();
+    this.saveAdapter.save();this.furnitureDragController?.renderPlacementVisuals();this.emitState();
     return this.state.placementHelper;
   }
   careCat(mode='play'){
@@ -392,6 +304,8 @@ export class CafeScene extends Phaser.Scene{
     this.game.events.emit('state-changed',{...this.state,phaseLabel:PHASE_LABELS[this.state.phase]||this.state.phase});
   }
   update(time,delta){
-    this.catEntities?.forEach(entity=>entity.update(time,delta));
+    this.furnitureDragController?.update(time,delta);
+    this.catBehaviorController?.update(time,delta);
+    this.interactionDebug?.update(time,delta);
   }
 }

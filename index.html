@@ -7,20 +7,20 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="貓咪咖啡廳">
-  <title>V0.54.1-alpha｜貓咪角色視覺與動畫重建版</title>
+  <title>V0.54.2-alpha｜手機家具拖曳與貓咪行為恢復版</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icons/icon-180.png">
-  <link rel="stylesheet" href="./assets/css/base.css?v=0541a">
-  <link rel="stylesheet" href="./assets/css/hud.css?v=0541a">
-  <link rel="stylesheet" href="./assets/css/panels.css?v=0541a">
-  <link rel="stylesheet" href="./assets/css/mobile.css?v=0541a">
+  <link rel="stylesheet" href="./assets/css/base.css?v=0542a">
+  <link rel="stylesheet" href="./assets/css/hud.css?v=0542a">
+  <link rel="stylesheet" href="./assets/css/panels.css?v=0542a">
+  <link rel="stylesheet" href="./assets/css/mobile.css?v=0542a">
 </head>
 <body>
   <div id="gameApp">
     <header id="gameHud">
       <div class="brand">
         <span class="brand-cat">🐈</span>
-        <div><b>貓咪咖啡廳 <small>Lv.<span id="hudLevel">1</span></small></b><em>V0.54.1-alpha｜貓咪角色視覺與動畫重建版</em></div>
+        <div><b>貓咪咖啡廳 <small>Lv.<span id="hudLevel">1</span></small></b><em>V0.54.2-alpha｜手機家具拖曳與貓咪行為恢復版</em></div>
       </div>
       <div class="hud-metrics">
         <span>🪙 <b id="hudCoins">0</b></span>
@@ -51,7 +51,7 @@
             <p data-boot-error>啟動時發生錯誤。</p>
             <small data-boot-stage>發生階段：未知</small>
             <small data-boot-failures>進度 0% · 失敗素材 0</small>
-            <small data-boot-version>V0.54.1-alpha</small>
+            <small data-boot-version>V0.54.2-alpha</small>
             <div><button data-boot-reload>重新載入</button><button data-boot-clear>清除新版暫存並重試</button></div>
           </div>
         </div>
@@ -101,7 +101,7 @@
   <section id="settingsPanel" class="panel hidden">
     <div class="panel-dialog">
       <header><h2>⚙️ 設定與版本</h2><button data-close-panel aria-label="關閉">×</button></header>
-      <p><b>V0.54.1-alpha｜貓咪角色視覺與動畫重建版</b></p>
+      <p><b>V0.54.2-alpha｜手機家具拖曳與貓咪行為恢復版</b></p>
       <p>Phaser 3.90.0 · Canvas Renderer · 本地離線引擎</p>
       <p>場景貓咪使用原創 64×64 點陣 Sprite Sheet。</p>
       <p>Renderer: Canvas</p>
@@ -110,7 +110,7 @@
 
   <script>
     (() => {
-      const version = 'V0.54.1-alpha';
+      const version = 'V0.54.2-alpha';
       const showError = (error, context = '啟動') => {
         const message = error?.message || String(error || '未知啟動錯誤');
         if (document.body?.dataset.gameReady === '1') {
@@ -139,7 +139,7 @@
       });
     })();
   </script>
-  <script src="./assets/vendor/phaser-3.90.0.min.js?v=0541a" onerror="window.__CAT_CAFE_BOOT_ERROR__?.('Phaser 引擎檔載入失敗','Phaser script')"></script>
-  <script type="module" src="./assets/js/main.js?v=0541a"></script>
+  <script src="./assets/vendor/phaser-3.90.0.min.js?v=0542a" onerror="window.__CAT_CAFE_BOOT_ERROR__?.('Phaser 引擎檔載入失敗','Phaser script')"></script>
+  <script type="module" src="./assets/js/main.js?v=0542a"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0541a';
-import {CAT_PROFILES, FALLBACK_CAT} from '../config/cat-config.js?v=0541a';
-import {hasCompleteCatSheet, registerCatAnimations} from '../systems/CatAnimationSystem.js?v=0541a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0542a';
+import {CAT_PROFILES, FALLBACK_CAT} from '../config/cat-config.js?v=0542a';
+import {hasCompleteCatSheet, registerCatAnimations} from '../systems/CatAnimationSystem.js?v=0542a';
 
 export class BootScene extends Phaser.Scene {
   constructor() {

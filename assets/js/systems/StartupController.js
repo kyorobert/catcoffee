@@ -1,4 +1,4 @@
-export const APP_VERSION = 'V0.54.1-alpha';
+export const APP_VERSION = 'V0.54.2-alpha';
 export const PHASER_SAVE_KEY = 'catCafePhaserV0540';
 
 export class StartupController {
