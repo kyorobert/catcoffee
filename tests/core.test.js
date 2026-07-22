@@ -6,6 +6,7 @@ import {GridSystem} from '../assets/js/systems/GridSystem.js';
 import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js';
 import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js';
 import {SaveAdapter,CURRENT_KEY,LEGACY_BACKUP_KEY,MIGRATION_COMPLETED_VERSION} from '../assets/js/systems/SaveAdapter.js';
+import {CAT_CONFIG,CAT_PROFILES,CAT_ANIMATION_LAYOUT,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const grid=new GridSystem(ROOM_CONFIG,FURNITURE_CONFIG);
 for(let y=0;y<ROOM_CONFIG.floor.rows;y++)for(let x=0;x<ROOM_CONFIG.floor.cols;x++){
@@ -26,8 +27,21 @@ for(const [type,x,y,rotation] of [['plant',4,3,0],['woodTable',2,2,0],['woodTabl
 }
 const furnitureEntitySource=readFileSync(new URL('../assets/js/entities/FurnitureEntity.js',import.meta.url),'utf8');
 const cafeSceneSource=readFileSync(new URL('../assets/js/scenes/CafeScene.js',import.meta.url),'utf8');
+const furnitureDragSource=readFileSync(new URL('../assets/js/phaser/FurnitureDragController.js',import.meta.url),'utf8');
+const catEntitySource=readFileSync(new URL('../assets/js/entities/CatEntity.js',import.meta.url),'utf8');
+const catAnimationSource=readFileSync(new URL('../assets/js/systems/CatAnimationSystem.js',import.meta.url),'utf8');
 assert.match(furnitureEntitySource,/grid\.getAnchor\(/,'formal furniture uses GridSystem.getAnchor');
-assert.match(cafeSceneSource,/this\.grid\.getAnchor\(/,'ghost uses GridSystem.getAnchor');
+assert.match(furnitureDragSource,/this\.grid\.getAnchor\(/,'ghost uses GridSystem.getAnchor');
+assert.equal(CAT_PROFILES.length,5,'all existing cat IDs remain configured');
+assert.deepEqual(Object.keys(CAT_CONFIG),['bean','coal','snow','latte','hana']);
+assert.deepEqual(Object.keys(CAT_ANIMATION_LAYOUT),['idle','walk','sit','sleep','happy','serve']);
+assert.equal(FALLBACK_CAT.frameWidth,64);
+assert.match(catEntitySource,/scene\.add\.sprite\(/,'CatEntity uses a Phaser Sprite');
+assert.match(catEntitySource,/\.setOrigin\(0\.5, 1\)/,'CatEntity uses the shared foot anchor');
+assert.doesNotMatch(catEntitySource,/localStorage|GridSystem|CameraController/,'CatEntity does not write saves or modify core systems');
+assert.match(catEntitySource,/catAnimationKey\(this\.catData\.id/,'CatEntity uses ID-specific animation keys');
+assert.match(catAnimationSource,/scene\.anims\.exists\(key\)/,'animations are registered once');
+assert.match(catAnimationSource,/`cat:\$\{catId\}:\$\{state\}-\$\{direction\}`/,'animation keys include cat ID, state and direction');
 
 const rug={id:'rug',type:'rugPink',x:2,y:2,r:0};
 const table={id:'table',type:'woodTable',x:2,y:2,r:0};
@@ -91,4 +105,4 @@ assert.notEqual(storage.getItem('catCafeDecorV049'),null,'clearing new cache pre
 const remigrated=new SaveAdapter(FURNITURE_CONFIG,storage);
 assert.equal(remigrated.state.coins,12,'clearing new key permits a fresh legacy migration');
 
-console.log('Core tests passed: Grid anchors, Occupancy, Placement and safe SaveAdapter migration.');
+console.log('Core tests passed: cat config/entity animations, Grid anchors, Occupancy, Placement and safe SaveAdapter migration.');
