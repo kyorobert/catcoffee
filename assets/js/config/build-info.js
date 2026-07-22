@@ -1,7 +1,7 @@
 export const APP_VERSION =
-  'V0.55.0-alpha.1｜桌面啟動與版本一致性修正版';
+  'V0.55.1-alpha｜美術規格與素材清理版';
 
-export const BUILD_ID = '0550a1';
+export const BUILD_ID = '0551a';
 
 // This key is part of the public save contract. Never change it for cache recovery.
 export const SAVE_KEY = 'catCafePhaserV0540';

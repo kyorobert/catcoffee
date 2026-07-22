@@ -5,6 +5,7 @@ import {existsSync,readFileSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
+import {PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0551a';
 import {CAT_PROFILES,CAT_ANIMATION_LAYOUT,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const root=process.cwd();
@@ -43,7 +44,7 @@ const server=createServer((request,response)=>{
     response.end(readFileSync(file,'utf8').replace('id="careBtn"','id="careBtn-missing"'));return;
   }
   if(relativePath==='index.html'&&requestUrl.searchParams.get('fixture')==='build-mismatch'){
-    response.end(readFileSync(file,'utf8').replace('data-build-id="0550a1"','data-build-id="0550-old"'));return;
+    response.end(readFileSync(file,'utf8').replace('data-build-id="0551a"','data-build-id="0550-old"'));return;
   }
   response.end(readFileSync(file));
 });
@@ -127,6 +128,7 @@ try{
         catCount:scene.catEntities.size,
         interactionReady:Boolean(scene.inputMode&&scene.furnitureDragController&&scene.catBehaviorController),
         inputMode:scene.inputMode?.getMode(),cameraEnabled:scene.cameraController?.isEnabled(),
+        artDebugEnabled:scene.artDebug?.enabled||false,
         catOrigins:[...scene.catEntities.values()].map(entity=>({id:entity.catData.id,x:entity.sprite.originX,y:entity.sprite.originY,depthBias:entity.sprite.depth-entity.sprite.y,selected:entity.selected})),
         animationStates,
         loadReport:report,catReport,hudState:document.body.dataset.hudState,
@@ -140,7 +142,7 @@ try{
     });
     const problems=[];
     if(!state.phaser||!state.game)problems.push('Phaser global or game missing');
-    if(state.htmlBuildId!=='0550a1'||state.jsBuildId!=='0550a1')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
+    if(state.htmlBuildId!=='0551a'||state.jsBuildId!=='0551a')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
     if(state.gameReady!=='1')problems.push(`gameReady is ${state.gameReady}`);
     if(loadedUrls.some(url=>/\?v=0550a(?:$|[&#])/.test(url)||url.includes('?v=0542a')))problems.push('obsolete runtime cache query loaded');
     if(state.canvasCount!==1||state.canvasWidth<=0||state.canvasHeight<=0)problems.push(`invalid canvas ${state.canvasCount} ${state.canvasWidth}x${state.canvasHeight}`);
@@ -152,6 +154,7 @@ try{
     if(state.catCount<3)problems.push(`only ${state.catCount} cats are active`);
     if(!state.interactionReady)problems.push('interaction controllers are missing');
     if(!state.cameraEnabled)problems.push('camera starts disabled');
+    if(state.artDebugEnabled)problems.push('Art Debug is active on the normal URL');
     if(state.catOrigins.some(cat=>cat.x!==0.5||cat.y!==1))problems.push(`invalid cat origins: ${JSON.stringify(state.catOrigins)}`);
     if(!state.catOrigins.find(cat=>cat.id==='bean')?.selected)problems.push('cat selection did not update');
     if(Object.values(state.animationStates).some(value=>Object.values(value).some(key=>!key)))problems.push('a cat state has no playable animation');
@@ -164,6 +167,11 @@ try{
       if(!state.newRaw)problems.push('new Phaser save was not created');
     }
     if(scenario.name==='fresh'&&viewport.width===390){
+      await page.click('#storeBtn');
+      const storeIds=await page.locator('.store-card[data-id]').evaluateAll(cards=>cards.map(card=>card.dataset.id));
+      if(storeIds.length!==22)problems.push(`normal store contains ${storeIds.length} items instead of 22`);
+      if(storeIds.some(id=>PROTOTYPE_FURNITURE_IDS.includes(id)))problems.push('normal store exposes a Prototype');
+      await page.click('#storePanel [data-close]');
       const dragPlan=await page.evaluate(()=>{
         const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
         const canvas=document.querySelector('#phaserGame canvas');
@@ -247,10 +255,21 @@ try{
     await context.close();
     if(problems.length)throw new Error(`${scenario.name} ${viewport.width}x${viewport.height}: ${problems.join('; ')}`);
   }
+  const artContext=await browser.newContext({viewport:{width:1366,height:768}});
+  const artPage=await artContext.newPage();
+  await artPage.goto(origin+'/?artDebug=1',{waitUntil:'domcontentloaded',timeout:20000});
+  await artPage.waitForFunction(()=>document.body.dataset.gameReady==='1',null,{timeout:20000});
+  const artState=await artPage.evaluate(()=>{
+    const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+    return {enabled:scene.artDebug?.enabled,labels:scene.artDebug?.labels?.size||0,graphics:Boolean(scene.artDebug?.graphics),canvasCount:document.querySelectorAll('#phaserGame canvas').length};
+  });
+  if(!artState.enabled||!artState.graphics||artState.labels<1||artState.canvasCount!==1)throw new Error(`Art Debug failed: ${JSON.stringify(artState)}`);
+  results.push({scenario:'art-debug',viewport:'1366x768',...artState,problems:[]});
+  await artContext.close();
 }finally{
   await browser?.close();
   await new Promise(resolveClose=>server.close(resolveClose));
 }
 
 console.log(JSON.stringify({browser:executablePath,results},null,2));
-console.log('Browser smoke passed: seven viewports, fresh/legacy saves, furniture drag, cat motion and one complete care interaction.');
+console.log('Browser smoke passed: eight viewports, fresh/legacy saves, store filtering, Art Debug, furniture drag, cat motion and one complete care interaction.');

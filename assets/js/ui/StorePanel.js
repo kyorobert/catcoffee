@@ -1,3 +1,6 @@
+import {FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0551a';
+import {getPurchasableFurniture} from '../core/furniture-catalog-selector.js?v=0551a';
+
 function requireElement(element, label) {
   if (!(element instanceof Element)) throw new TypeError(`${label} 必須是有效的 Element`);
   return element;
@@ -38,11 +41,13 @@ export class StorePanel {
   close() { this.element.classList.add('hidden'); }
 
   render() {
-    const categories = ['全部', ...new Set(Object.values(this.furniture).map(item => item.cat))];
+    const visibleCatalog = getPurchasableFurniture({definitions:this.furniture,visualConfig:FURNITURE_VISUAL_CONFIG});
+    const categories = ['全部', ...new Set(visibleCatalog.map(entry => entry.definition.cat))];
+    if (!categories.includes(this.category)) this.category = '全部';
     this.tabs.innerHTML = categories.map(category => `<button class="${category === this.category ? 'active' : ''}" data-category="${category}">${category}</button>`).join('');
     const state = this.saveAdapter.state;
-    const entries = Object.entries(this.furniture).filter(([, item]) => this.category === '全部' || item.cat === this.category);
-    this.catalog.innerHTML = entries.map(([id, item]) => `
+    const entries = getPurchasableFurniture({definitions:this.furniture,visualConfig:FURNITURE_VISUAL_CONFIG,category:this.category});
+    this.catalog.innerHTML = entries.map(({id,definition:item}) => `
       <button class="store-card" data-id="${id}">
         <span class="owned">持有 ${state.inventory[id] || 0}</span>
         <img src="${item.texture}" alt="${item.name}">

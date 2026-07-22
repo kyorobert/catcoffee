@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hant" data-build-id="0550a1">
+<html lang="zh-Hant" data-build-id="0551a">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
@@ -7,20 +7,20 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="貓咪咖啡廳">
-  <title>V0.55.0-alpha.1｜桌面啟動與版本一致性修正版</title>
-  <link rel="manifest" href="./manifest.webmanifest?v=0550a1">
-  <link rel="apple-touch-icon" href="./icons/icon-180.png?v=0550a1">
-  <link rel="stylesheet" href="./assets/css/base.css?v=0550a1">
-  <link rel="stylesheet" href="./assets/css/hud.css?v=0550a1">
-  <link rel="stylesheet" href="./assets/css/panels.css?v=0550a1">
-  <link rel="stylesheet" href="./assets/css/mobile.css?v=0550a1">
+  <title>V0.55.1-alpha｜美術規格與素材清理版</title>
+  <link rel="manifest" href="./manifest.webmanifest?v=0551a">
+  <link rel="apple-touch-icon" href="./icons/icon-180.png?v=0551a">
+  <link rel="stylesheet" href="./assets/css/base.css?v=0551a">
+  <link rel="stylesheet" href="./assets/css/hud.css?v=0551a">
+  <link rel="stylesheet" href="./assets/css/panels.css?v=0551a">
+  <link rel="stylesheet" href="./assets/css/mobile.css?v=0551a">
 </head>
 <body>
   <div id="gameApp">
     <header id="gameHud">
       <div class="brand">
         <span class="brand-cat" aria-hidden="true">🐾</span>
-        <div><b>貓咪咖啡廳 <small>Lv.<span id="hudLevel">1</span></small></b><em>V0.55.0-alpha.1｜桌面啟動與版本一致性修正版</em></div>
+        <div><b>貓咪咖啡廳 <small>Lv.<span id="hudLevel">1</span></small></b><em>V0.55.1-alpha｜美術規格與素材清理版</em></div>
       </div>
       <div class="hud-metrics" aria-label="店鋪狀態">
         <span><i>金幣</i><b id="hudCoins">0</b></span>
@@ -51,7 +51,7 @@
             <p data-boot-error>發生未預期的啟動錯誤。</p>
             <small data-boot-stage>發生階段：未知</small>
             <small data-boot-failures>進度 0%｜失敗素材 0</small>
-            <small data-boot-version>V0.55.0-alpha.1｜Build 0550a1</small>
+            <small data-boot-version>V0.55.1-alpha｜Build 0551a</small>
             <details class="boot-diagnostics"><summary>檢視錯誤診斷</summary><pre data-boot-diagnostics></pre></details>
             <div class="boot-error-actions">
               <button type="button" data-boot-reload>重新載入</button>
@@ -106,7 +106,7 @@
   <section id="settingsPanel" class="panel hidden">
     <div class="panel-dialog">
       <header><h2>設定與版本資訊</h2><button type="button" data-close-panel aria-label="關閉">×</button></header>
-      <p><b>V0.55.0-alpha.1｜桌面啟動與版本一致性修正版</b></p>
+      <p><b>V0.55.1-alpha｜美術規格與素材清理版</b></p>
       <p>Phaser 3.90.0・Canvas Renderer・本地靜態資源</p>
       <p>重新載入最新版不會刪除遊戲存檔。</p>
       <p>Renderer: Canvas</p>
@@ -116,10 +116,10 @@
   <script>
     (() => {
       'use strict';
-      window.__CAT_CAFE_HTML_BUILD_ID__ = '0550a1';
+      window.__CAT_CAFE_HTML_BUILD_ID__ = '0551a';
       window.__CAT_CAFE_EARLY_ERRORS__ = window.__CAT_CAFE_EARLY_ERRORS__ || [];
       window.__CAT_CAFE_ERROR_FINGERPRINTS__ = window.__CAT_CAFE_ERROR_FINGERPRINTS__ || new Set();
-      const version = 'V0.55.0-alpha.1｜桌面啟動與版本一致性修正版';
+      const version = 'V0.55.1-alpha｜美術規格與素材清理版';
       const toMessage = value => value && value.message ? value.message : String(value || '未知的載入錯誤');
       const describe = (error, context, extra = {}) => ({
         name: error && error.name ? error.name : typeof error,
@@ -149,7 +149,7 @@
         };
         setText('[data-boot-error]', diagnostic.message);
         setText('[data-boot-stage]', `發生階段：${diagnostic.context}`);
-        setText('[data-boot-version]', `${version}｜Build 0550a1`);
+        setText('[data-boot-version]', `${version}｜Build 0551a`);
         setText('[data-boot-diagnostics]', JSON.stringify(diagnostic, null, 2));
       };
       const report = (error, context = 'early-boot', extra = {}) => {
@@ -187,7 +187,7 @@
       }
     })();
   </script>
-  <script src="./assets/vendor/phaser-3.90.0.min.js?v=0550a1" onerror="window.__CAT_CAFE_BOOT_ERROR__?.(new Error('Phaser 引擎檔載入失敗'),'Phaser script')"></script>
-  <script type="module" src="./assets/js/main.js?v=0550a1"></script>
+  <script src="./assets/vendor/phaser-3.90.0.min.js?v=0551a" onerror="window.__CAT_CAFE_BOOT_ERROR__?.(new Error('Phaser 引擎檔載入失敗'),'Phaser script')"></script>
+  <script type="module" src="./assets/js/main.js?v=0551a"></script>
 </body>
 </html>

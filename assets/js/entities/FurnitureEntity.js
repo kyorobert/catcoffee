@@ -1,17 +1,26 @@
-import {DepthSystem} from '../systems/DepthSystem.js?v=0550a1';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0551a';
+import {getFurnitureDisplayState} from '../core/furniture-display-state.js?v=0551a';
 
 export class FurnitureEntity extends Phaser.GameObjects.Image{
   constructor(scene,item,definition,grid){
     const anchor=grid.getAnchor(item.type,item.x,item.y,item.r||0);
-    super(scene,anchor.x,anchor.y,`furniture:${item.type}`);
+    const display=getFurnitureDisplayState(item.type,item.r||0,definition);
+    super(scene,anchor.x,anchor.y,display.texture);
     this.item=item;
     this.definition=definition;
     this.grid=grid;
+    this.visual=display.visual;
+    this.usesSizeFallback=display.sizeFallback;
+    this.direction=display.direction;
+    this.missingDirection=Boolean(display.missingDirection);
     this.setName(`furniture:${item.id}`);
-    this.setOrigin(definition.layer==='floorDecoration'?.5:.5,definition.layer==='floorDecoration'?.5:1);
-    const targetWidth=Math.max(44,Math.min(180,definition.size||96));
-    if(this.width)this.setScale(targetWidth/this.width);
-    this.setFlipX(Boolean((item.r||0)%2));
+    this.setOrigin(display.originX,display.originY);
+    if(display.scale)this.setScale(display.scale);
+    else{
+      const targetWidth=Math.max(44,Math.min(180,definition.size||96));
+      if(this.width)this.setScale(targetWidth/this.width);
+    }
+    this.setFlipX(display.flipX);
     this.setDepth(DepthSystem.for(definition.layer||'floorObject',anchor.y));
     scene.add.existing(this);
     const minimumWorldHit=40/Math.max(.35,grid.room.camera.baseMinZoom);
@@ -27,8 +36,12 @@ export class FurnitureEntity extends Phaser.GameObjects.Image{
   sync(){
     const rotation=this.item.r||0;
     const anchor=this.grid.getAnchor(this.item.type,this.item.x,this.item.y,rotation);
+    const display=getFurnitureDisplayState(this.item.type,rotation,this.definition);
     this.setPosition(anchor.x,anchor.y);
-    this.setFlipX(Boolean(rotation%2));
+    if(display.texture&&this.texture.key!==display.texture)this.setTexture(display.texture);
+    this.setOrigin(display.originX,display.originY).setFlipX(display.flipX);
+    this.direction=display.direction;
+    this.missingDirection=Boolean(display.missingDirection);
     this.setDepth(DepthSystem.for(this.definition.layer||'floorObject',anchor.y));
   }
   setGridPosition(x,y,rotation=this.item.r||0){
@@ -40,5 +53,12 @@ export class FurnitureEntity extends Phaser.GameObjects.Image{
   }
   setDragVisual(state){this.setAlpha(state==='dragging'?.35:1);return this}
   setSelected(selected){this.setTint(selected?0xfff0a5:0xffffff)}
+  getArtDebugData(){
+    return {
+      id:this.item.id,type:this.item.type,direction:this.direction,
+      texture:this.texture.key,sizeFallback:this.usesSizeFallback,
+      missingDirection:this.missingDirection,visual:this.visual
+    };
+  }
   destroy(fromScene){this.scene?.input?.setDraggable(this,false);super.destroy(fromScene)}
 }

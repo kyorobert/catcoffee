@@ -1,4 +1,4 @@
-import {APP_VERSION, BUILD_ID, SAVE_KEY} from '../config/build-info.js?v=0550a1';
+import {APP_VERSION, BUILD_ID, SAVE_KEY} from '../config/build-info.js?v=0551a';
 
 const safeText = value => {
   if (value instanceof Error) return value.message || value.name;

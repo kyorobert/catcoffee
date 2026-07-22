@@ -1,5 +1,6 @@
-import {INPUT_MODE} from '../core/input-state.js?v=0550a1';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0550a1';
+import {INPUT_MODE} from '../core/input-state.js?v=0551a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0551a';
+import {getFurnitureDisplayState} from '../core/furniture-display-state.js?v=0551a';
 
 const DRAG_THRESHOLD_PX = 8;
 
@@ -160,12 +161,14 @@ export class FurnitureDragController {
   createGhost(item, sourceEntity) {
     this.ghost?.destroy();
     const definition = this.furniture[item.type];
+    const display = getFurnitureDisplayState(item.type, item.r || 0, definition);
     const anchor = this.grid.getAnchor(item.type, item.x, item.y, item.r || 0);
-    this.ghost = this.scene.add.image(anchor.x, anchor.y, `furniture:${item.type}`)
-      .setOrigin(sourceEntity?.originX ?? .5, sourceEntity?.originY ?? (definition.layer === 'floorDecoration' ? .5 : 1))
+    this.ghost = this.scene.add.image(anchor.x, anchor.y, display.texture)
+      .setOrigin(sourceEntity?.originX ?? display.originX, sourceEntity?.originY ?? display.originY)
       .setAlpha(.64)
       .setDepth(DepthSystem.for('ghost', anchor.y));
     if (sourceEntity) this.ghost.setScale(sourceEntity.scaleX, sourceEntity.scaleY);
+    else if(display.scale)this.ghost.setScale(display.scale);
     else {
       const targetWidth = Math.max(44, Math.min(180, definition.size || 96));
       if (this.ghost.width) this.ghost.setScale(targetWidth / this.ghost.width);
@@ -177,9 +180,12 @@ export class FurnitureDragController {
   syncGhost() {
     if (!this.drag || !this.ghost) return;
     const item = this.drag.candidate;
+    const display = getFurnitureDisplayState(item.type, item.r || 0, this.furniture[item.type]);
     const anchor = this.grid.getAnchor(item.type, item.x, item.y, item.r || 0);
+    if(display.texture&&this.ghost.texture.key!==display.texture)this.ghost.setTexture(display.texture);
     this.ghost.setPosition(anchor.x, anchor.y)
-      .setFlipX(Boolean((item.r || 0) % 2))
+      .setOrigin(display.originX,display.originY)
+      .setFlipX(display.flipX)
       .setDepth(DepthSystem.for('ghost', anchor.y));
   }
 

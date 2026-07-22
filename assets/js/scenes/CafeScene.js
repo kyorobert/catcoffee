@@ -1,23 +1,24 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0550a1';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0550a1';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0550a1';
-import {GridSystem} from '../systems/GridSystem.js?v=0550a1';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0550a1';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0550a1';
-import {CameraController} from '../systems/CameraController.js?v=0550a1';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0550a1';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0550a1';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0550a1';
-import {CatEntity} from '../entities/CatEntity.js?v=0550a1';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0550a1';
-import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0550a1';
-import {AmbientEffects} from '../entities/AmbientEffects.js?v=0550a1';
-import {INPUT_MODE} from '../core/input-state.js?v=0550a1';
-import {InputModeController} from '../phaser/InputModeController.js?v=0550a1';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0550a1';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0550a1';
-import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0550a1';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0550a1';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0551a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0551a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0551a';
+import {GridSystem} from '../systems/GridSystem.js?v=0551a';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0551a';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0551a';
+import {CameraController} from '../systems/CameraController.js?v=0551a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0551a';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0551a';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0551a';
+import {CatEntity} from '../entities/CatEntity.js?v=0551a';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0551a';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0551a';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0551a';
+import {INPUT_MODE} from '../core/input-state.js?v=0551a';
+import {InputModeController} from '../phaser/InputModeController.js?v=0551a';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0551a';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0551a';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0551a';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0551a';
+import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0551a';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -97,11 +98,13 @@ export class CafeScene extends Phaser.Scene{
       inputMode:this.inputMode,furnitureDragController:this.furnitureDragController,
       catBehaviorController:this.catBehaviorController,cameraController:this.cameraController
     });
+    this.artDebug=new ArtDebugRenderer(this,{grid:this.grid,entities:this.entities,definitions:FURNITURE_CONFIG});
     this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{
       this.careInteractionController?.destroy();
       this.cameraController?.destroy();
       this.catBehaviorController?.destroy();
       this.interactionDebug?.destroy();
+      this.artDebug?.destroy();
       this.wallDecorations?.forEach(decoration=>decoration.destroy());
       this.ambientEffects?.destroy();
     });
@@ -315,5 +318,6 @@ export class CafeScene extends Phaser.Scene{
     this.catBehaviorController?.update(time,delta);
     this.careInteractionController?.update(time,delta);
     this.interactionDebug?.update(time,delta);
+    this.artDebug?.update(time,delta);
   }
 }

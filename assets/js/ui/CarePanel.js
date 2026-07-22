@@ -1,4 +1,4 @@
-import {CARE_ACTIONS} from '../core/care-interaction-core.js?v=0550a1';
+import {CARE_ACTIONS} from '../core/care-interaction-core.js?v=0551a';
 
 const STAT_LABELS = Object.freeze({satiety: '飽足', mood: '心情', clean: '清潔', bond: '羈絆'});
 const clamp = value => Math.max(0, Math.min(100, Number(value) || 0));

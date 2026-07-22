@@ -104,7 +104,7 @@ try{
     if(!signature.every((byte,index)=>body[index]===byte))failures.push(`invalid cat PNG signature ${path}`);
     if(body.length<100)failures.push(`empty cat PNG ${path}`);
   }
-  for(const asset of ['./assets/environment/wall-window.png?v=0550a1','./assets/environment/menu-board.png?v=0550a1']){
+  for(const asset of ['./assets/environment/wall-window.png?v=0551a','./assets/environment/menu-board.png?v=0551a']){
     const path=new URL(asset,origin+'/').pathname;
     const response=await fetch(origin+path);
     const body=new Uint8Array(await response.arrayBuffer());
