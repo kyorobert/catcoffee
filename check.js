@@ -11,39 +11,35 @@ const requireFile=file=>{if(!existsSync(join(root,file)))failures.push(`missing:
 const required=[
   'index.html','manifest.webmanifest','.nojekyll','.gitignore','README.md','CREDITS.md','THIRD_PARTY_NOTICES.md',
   'package.json','package-lock.json','assets/vendor/phaser-3.90.0.min.js','assets/js/main.js',
-  'assets/js/core/input-state.js','assets/js/core/grid-pathfinder.js','assets/js/core/cat-behavior-core.js',
-  'assets/js/phaser/InputModeController.js','assets/js/phaser/FurnitureDragController.js','assets/js/phaser/CatBehaviorController.js',
+  'assets/js/core/input-state.js','assets/js/core/grid-pathfinder.js','assets/js/core/cat-behavior-core.js','assets/js/core/care-interaction-core.js',
+  'assets/js/phaser/InputModeController.js','assets/js/phaser/FurnitureDragController.js','assets/js/phaser/CatBehaviorController.js','assets/js/phaser/CareInteractionController.js',
   'assets/js/scenes/BootScene.js','assets/js/scenes/CafeScene.js','assets/js/entities/FurnitureEntity.js','assets/js/entities/CatEntity.js',
+  'assets/js/entities/CatReactionBubble.js','assets/js/entities/WallDecorationEntity.js','assets/js/ui/CarePanel.js',
   'assets/js/systems/GridSystem.js','assets/js/systems/PlacementSystem.js','assets/js/systems/OccupancySystem.js','assets/js/systems/CameraController.js',
   'assets/js/systems/SaveAdapter.js','tests/core.test.js','tests/interaction-core.test.js','tests/cat-ai-simulation.test.js',
-  'tests/furniture-drag.test.js','tests/http.test.js','tests/browser-smoke.test.js'
+  'tests/furniture-drag.test.js','tests/care-interaction-core.test.js','tests/cat-animation.test.js','tests/http.test.js','tests/browser-smoke.test.js',
+  'assets/environment/wall-window.png','assets/environment/menu-board.png'
 ];
 required.forEach(requireFile);
 
 const packageJson=JSON.parse(readFileSync('package.json','utf8'));
-if(packageJson.version!=='0.54.2-alpha')failures.push('package version is not 0.54.2-alpha');
+if(packageJson.version!=='0.55.0-alpha')failures.push('package version is not 0.55.0-alpha');
 if(packageJson.dependencies?.phaser!=='3.90.0')failures.push('Phaser dependency is not exactly 3.90.0');
 const digest=file=>createHash('sha256').update(readFileSync(file)).digest('hex');
 const protectedHashes={
   'assets/js/config/room-config.js':'e201e45bb8f1b4576966ab6a484a8b19ef2767ddc0bd4bdba6df3807d884e368',
-  'assets/js/systems/GridSystem.js':'b8f1c48f10f9a30a7893a687e17b36ad8724dcb97856c31599478d3a3550f92f',
-  'assets/cats/bean/bean-spritesheet.png':'7c3b60b818c11aea6d7482f94abfe447a9da62490e21d57f6ea1e4aed44eab0f',
-  'assets/cats/coal/coal-spritesheet.png':'ce66e3463b38d38b4c3cf33bc2ef0f57a210d6cd11742728766f2f9b638247bf',
-  'assets/cats/snow/snow-spritesheet.png':'69e3feeffaa49f9e6c99b752f2bda41a4c9cf2107075c59ced6b6f84ed44791d',
-  'assets/cats/latte/latte-spritesheet.png':'14744827670759701a343b88a33ab9fcfbb384c9b08ab95c26be5a28c64ff8e3',
-  'assets/cats/hana/hana-spritesheet.png':'418d1de80dd40ae7458cc273f81e34f4c68f0b555db1543fd78f9ef29c93e108',
-  'assets/cats/fallback/fallback-spritesheet.png':'95149e8e6fb4da445ac8593c8384c3dd9788563b23ae38719f364c9470ce2d2d'
+  'assets/js/systems/GridSystem.js':'b8f1c48f10f9a30a7893a687e17b36ad8724dcb97856c31599478d3a3550f92f'
 };
-for(const [file,hash] of Object.entries(protectedHashes))if(existsSync(file)&&digest(file)!==hash)failures.push(`protected geometry or cat art changed: ${file}`);
+for(const [file,hash] of Object.entries(protectedHashes))if(existsSync(file)&&digest(file)!==hash)failures.push(`protected room geometry changed: ${file}`);
 const phaserDigest='e92ddef111ba42e92d316979c732311757093688ea1810591cb7aa2858eba7a7';
 if(existsSync('assets/vendor/phaser-3.90.0.min.js')&&digest('assets/vendor/phaser-3.90.0.min.js')!==phaserDigest)failures.push('local Phaser runtime hash does not match 3.90.0');
 
 const html=readFileSync('index.html','utf8');
 if(/https?:\/\//i.test(html))failures.push('index.html contains an external URL');
 if(/legacy/i.test(html))failures.push('index.html loads or references legacy');
-if(!html.includes('./assets/vendor/phaser-3.90.0.min.js?v=0542a'))failures.push('versioned local Phaser path is missing');
-if(!html.includes('type="module" src="./assets/js/main.js?v=0542a"'))failures.push('v0542a entry module is missing');
-if(!html.includes('V0.54.2-alpha｜手機家具拖曳與貓咪行為恢復版'))failures.push('visible version text is missing');
+if(!html.includes('./assets/vendor/phaser-3.90.0.min.js?v=0550a'))failures.push('versioned local Phaser path is missing');
+if(!html.includes('type="module" src="./assets/js/main.js?v=0550a"'))failures.push('v0550a entry module is missing');
+if(!html.includes('V0.55.0-alpha｜貓咪生命感與沉浸式照顧互動第一階段'))failures.push('visible version text is missing');
 if(/(?:[A-Za-z]:\\|file:\/\/|localhost|127\.0\.0\.1)/i.test(html))failures.push('index.html contains a local absolute path');
 
 const walk=directory=>readdirSync(directory).flatMap(name=>{
@@ -58,7 +54,7 @@ for(const file of formalJs){
 const joined=formalJs.map(file=>readFileSync(file,'utf8')).join('\n');
 for(const forbidden of ['resizeWorld','world.style.left','world.style.top','world.style.transform'])if(joined.includes(forbidden))failures.push(`formal code contains legacy control: ${forbidden}`);
 
-const pureCore=['assets/js/core/input-state.js','assets/js/core/grid-pathfinder.js','assets/js/core/cat-behavior-core.js'];
+const pureCore=['assets/js/core/input-state.js','assets/js/core/grid-pathfinder.js','assets/js/core/cat-behavior-core.js','assets/js/core/care-interaction-core.js'];
 for(const file of pureCore){
   const source=readFileSync(file,'utf8');
   for(const forbidden of ['Phaser','document','window','localStorage'])if(source.includes(forbidden))failures.push(`${file} depends on ${forbidden}`);
@@ -72,6 +68,8 @@ for(const token of ["input.on('dragstart'","input.on('drag'","input.on('dragend'
 if(/handlePointerMove[\s\S]{0,600}(?:save\(|emit\(['"]toast)/.test(dragSource))failures.push('pointermove directly saves or emits a toast');
 const sceneSource=readFileSync('assets/js/scenes/CafeScene.js','utf8');
 if(!sceneSource.includes('this.furnitureDragController?.update(time,delta)')||!sceneSource.includes('this.catBehaviorController?.update(time,delta)'))failures.push('CafeScene.update does not run drag and cat controllers');
+if(!sceneSource.includes('this.careInteractionController?.update(time,delta)'))failures.push('CafeScene.update does not run care controller');
+if(/fillStyle\(0x8bd0dc|fillRoundedRect\(top\.x\+82/.test(sceneSource))failures.push('placeholder wall rectangles remain active');
 const occupancySource=readFileSync('assets/js/systems/OccupancySystem.js','utf8');
 if(!occupancySource.includes('getWalkabilitySnapshot()')||!occupancySource.includes("this.layers.get('floorObject').keys()")||occupancySource.match(/getWalkabilitySnapshot\(\)[\s\S]{0,250}floorDecoration/))failures.push('walkability snapshot is missing or rugs block cats');
 const catController=readFileSync('assets/js/phaser/CatBehaviorController.js','utf8');
@@ -79,6 +77,11 @@ for(const token of ['findPath(','getWalkabilitySnapshot()','speed * Math.max(0, 
 const saveSource=readFileSync('assets/js/systems/SaveAdapter.js','utf8');
 if(!saveSource.includes("CURRENT_KEY='catCafePhaserV0540'"))failures.push('save key changed unexpectedly');
 if(/setItem\(\s*['"]catCafeDecorV0/.test(saveSource))failures.push('legacy save key is written');
+if(joined.includes('v=0542a'))failures.push('formal modules mix obsolete v0542a cache queries');
+const careSource=readFileSync('assets/js/core/care-interaction-core.js','utf8');
+for(const token of ['createCareSession','prepareCareSession','commitCareSession','cancelCareSession'])if(!careSource.includes(token))failures.push(`care core missing ${token}`);
+const careController=readFileSync('assets/js/phaser/CareInteractionController.js','utf8');
+for(const token of ["pauseCat(catId, 'care-interaction')","resumeCat(catId, 'care-interaction')",'commitCareSession(','cameraController.setEnabled(false)','cameraController.setEnabled(true)'])if(!careController.includes(token))failures.push(`care controller missing ${token}`);
 
 function pngSize(file){
   const data=readFileSync(file);const signature=[0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a];
@@ -98,7 +101,8 @@ for(const token of ['node_modules/','legacy/','*_backup*/','*.zip','.DS_Store','
 const skipBrowser=process.argv.includes('--skip-browser');
 const tests=[
   ['core','./tests/core.test.js'],['portable interaction','./tests/interaction-core.test.js'],
-  ['cat AI simulation','./tests/cat-ai-simulation.test.js'],['furniture drag','./tests/furniture-drag.test.js'],['HTTP','./tests/http.test.js']
+  ['cat AI simulation','./tests/cat-ai-simulation.test.js'],['furniture drag','./tests/furniture-drag.test.js'],
+  ['care interaction','./tests/care-interaction-core.test.js'],['cat animation','./tests/cat-animation.test.js'],['HTTP','./tests/http.test.js']
 ];
 if(!skipBrowser)tests.push(['browser smoke','./tests/browser-smoke.test.js']);
 else console.warn('Browser smoke skipped by explicit --skip-browser; this is not a full deployment pass.');
@@ -131,5 +135,5 @@ if(zipFlag>=0){
   }catch(error){failures.push(`ZIP validation failed: ${error.message}`)}
 }
 
-if(failures.length){console.error('V0.54.2-alpha checks failed:\n- '+failures.join('\n- '));process.exit(1)}
-console.log(`V0.54.2-alpha ${skipBrowser?'static checks':'checks'} passed: portable core, drag lifecycle, 60-second cat AI, ${formalJs.length} modules${skipBrowser?' (browser smoke not run)':' and browser smoke'}.`);
+if(failures.length){console.error('V0.55.0-alpha checks failed:\n- '+failures.join('\n- '));process.exit(1)}
+console.log(`V0.55.0-alpha ${skipBrowser?'static checks':'checks'} passed: care rules, animation assets, portable core, drag lifecycle, 60-second cat AI, ${formalJs.length} modules${skipBrowser?' (browser smoke not run)':' and browser smoke'}.`);

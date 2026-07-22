@@ -7,31 +7,31 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="貓咪咖啡廳">
-  <title>V0.54.2-alpha｜手機家具拖曳與貓咪行為恢復版</title>
+  <title>V0.55.0-alpha｜貓咪生命感與沉浸式照顧互動第一階段</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icons/icon-180.png">
-  <link rel="stylesheet" href="./assets/css/base.css?v=0542a">
-  <link rel="stylesheet" href="./assets/css/hud.css?v=0542a">
-  <link rel="stylesheet" href="./assets/css/panels.css?v=0542a">
-  <link rel="stylesheet" href="./assets/css/mobile.css?v=0542a">
+  <link rel="stylesheet" href="./assets/css/base.css?v=0550a">
+  <link rel="stylesheet" href="./assets/css/hud.css?v=0550a">
+  <link rel="stylesheet" href="./assets/css/panels.css?v=0550a">
+  <link rel="stylesheet" href="./assets/css/mobile.css?v=0550a">
 </head>
 <body>
   <div id="gameApp">
     <header id="gameHud">
       <div class="brand">
-        <span class="brand-cat">🐈</span>
-        <div><b>貓咪咖啡廳 <small>Lv.<span id="hudLevel">1</span></small></b><em>V0.54.2-alpha｜手機家具拖曳與貓咪行為恢復版</em></div>
+        <span class="brand-cat" aria-hidden="true">猫</span>
+        <div><b>貓咪咖啡廳 <small>Lv.<span id="hudLevel">1</span></small></b><em>V0.55.0-alpha｜生命感與沉浸式照顧</em></div>
       </div>
-      <div class="hud-metrics">
-        <span>🪙 <b id="hudCoins">0</b></span>
-        <span>💗 <b id="hudReputation">0</b></span>
-        <span>⚡ <b id="hudEnergy">0/0</b></span>
-        <span>XP <b id="hudXp">0</b></span>
+      <div class="hud-metrics" aria-label="店鋪主要數值">
+        <span><i>金幣</i><b id="hudCoins">0</b></span>
+        <span><i>人氣</i><b id="hudReputation">0</b></span>
+        <span><i>體力</i><b id="hudEnergy">0/0</b></span>
+        <span><i>XP</i><b id="hudXp">0</b></span>
       </div>
-      <div class="operation-card">
+      <div class="operation-card" aria-label="今日營運">
         <b id="hudDay">Day 1</b>
         <span id="hudPhase">準備中</span>
-        <small>營收 🪙 <b id="hudRevenue">0</b> · 顧客 <b id="hudGuests">0</b></small>
+        <small>營收 NT$ <b id="hudRevenue">0</b> · 顧客 <b id="hudGuests">0</b></small>
         <div><button id="openDayBtn">開始營業</button><button id="nextPhaseBtn">下一階段</button></div>
       </div>
     </header>
@@ -43,76 +43,77 @@
           <div class="boot-loading">
             <span class="spinner"></span>
             <b>載入 Phaser 咖啡館…</b>
-            <span data-boot-status>初始化啟動流程…</span>
+            <span data-boot-status>準備遊戲資料與素材…</span>
             <progress data-boot-progress max="1" value="0" aria-label="遊戲載入進度"></progress>
           </div>
           <div class="boot-error" role="alert">
             <b>遊戲載入失敗</b>
-            <p data-boot-error>啟動時發生錯誤。</p>
-            <small data-boot-stage>發生階段：未知</small>
+            <p data-boot-error>發生未預期的錯誤。</p>
+            <small data-boot-stage>發生階段：啟動</small>
             <small data-boot-failures>進度 0% · 失敗素材 0</small>
-            <small data-boot-version>V0.54.2-alpha</small>
+            <small data-boot-version>V0.55.0-alpha</small>
             <div><button data-boot-reload>重新載入</button><button data-boot-clear>清除新版暫存並重試</button></div>
           </div>
         </div>
         <div id="gameToast" role="status" aria-live="polite"></div>
         <div id="selectionBar" class="selection-bar hidden">
           <b id="selectionName">家具</b>
-          <button id="rotateBtn">旋轉</button>
-          <button id="storeBtn">收納</button>
-          <button id="sellBtn">出售</button>
-          <button id="cancelPlacementBtn">取消</button>
+          <div class="selection-actions">
+            <button id="rotateBtn">旋轉</button>
+            <button id="storeBtn">收納</button>
+            <button id="sellBtn">出售</button>
+            <button id="cancelPlacementBtn">取消</button>
+          </div>
         </div>
       </div>
     </main>
 
-    <nav id="gameBottomBar">
-      <button id="openStoreBtn"><b>🛍️</b><span>家具商店</span></button>
-      <button id="helperBtn"><b>◇</b><span>放置輔助：關</span></button>
-      <button id="careBtn"><b>🐾</b><span>照顧貓咪</span></button>
-      <button id="reportBtn"><b>📊</b><span>每日報告</span></button>
-      <button id="settingsBtn"><b>⚙️</b><span>設定</span></button>
+    <nav id="gameBottomBar" aria-label="主要操作列">
+      <button id="openStoreBtn"><b class="nav-icon" aria-hidden="true">店</b><span>家具商店</span></button>
+      <button id="helperBtn"><b class="nav-icon" aria-hidden="true">輔</b><span>放置輔助：關</span></button>
+      <button id="careBtn"><b class="nav-icon" aria-hidden="true">照</b><span>照顧貓咪</span></button>
+      <button id="reportBtn"><b class="nav-icon" aria-hidden="true">報</b><span>每日報告</span></button>
+      <button id="settingsBtn"><b class="nav-icon" aria-hidden="true">設</b><span>設定</span></button>
     </nav>
   </div>
 
   <section id="storePanel" class="panel hidden" aria-label="家具商店">
     <div class="panel-dialog store-dialog">
-      <header><div><h2>家具商店</h2><small>購買家具後可直接拖曳到店內擺放</small></div><button data-close aria-label="關閉">×</button></header>
+      <header><div><h2>家具商店</h2><small>選擇家具後，可在場景中拖曳放置。</small></div><button data-close aria-label="關閉">×</button></header>
       <div class="store-tabs" data-store-tabs></div>
       <div class="store-catalog" data-store-catalog></div>
     </div>
   </section>
 
-  <section id="carePanel" class="panel hidden">
-    <div class="panel-dialog">
-      <header><h2>🐾 貓咪照顧</h2><button data-close-panel aria-label="關閉">×</button></header>
-      <div id="careCatList" class="cat-list"></div>
-      <div class="action-row"><button data-care="feed">餵食</button><button data-care="groom">梳毛</button><button data-care="play">玩耍</button></div>
+  <section id="carePanel" class="panel hidden" data-phase="closed" aria-label="照顧貓咪">
+    <div class="panel-dialog care-dialog">
+      <header><div><h2>照顧貓咪</h2><small>選擇一位夥伴，陪牠度過療癒時光。</small></div><button type="button" data-care-close aria-label="關閉">×</button></header>
+      <div data-care-content class="care-content"></div>
     </div>
   </section>
 
   <section id="reportPanel" class="panel hidden">
     <div class="panel-dialog">
-      <header><h2>📊 每日報告</h2><button data-close-panel aria-label="關閉">×</button></header>
+      <header><h2>每日報告</h2><button data-close-panel aria-label="關閉">×</button></header>
       <div id="reportContent"></div>
     </div>
   </section>
 
   <section id="settingsPanel" class="panel hidden">
     <div class="panel-dialog">
-      <header><h2>⚙️ 設定與版本</h2><button data-close-panel aria-label="關閉">×</button></header>
-      <p><b>V0.54.2-alpha｜手機家具拖曳與貓咪行為恢復版</b></p>
-      <p>Phaser 3.90.0 · Canvas Renderer · 本地離線引擎</p>
-      <p>場景貓咪使用原創 64×64 點陣 Sprite Sheet。</p>
+      <header><h2>設定與版本資訊</h2><button data-close-panel aria-label="關閉">×</button></header>
+      <p><b>V0.55.0-alpha｜貓咪生命感與沉浸式照顧互動第一階段</b></p>
+      <p>Phaser 3.90.0 · Canvas Renderer · 本地靜態資源</p>
+      <p>照顧流程支援餵食、梳毛與玩耍，未完成的演出不會扣除體力。</p>
       <p>Renderer: Canvas</p>
     </div>
   </section>
 
   <script>
     (() => {
-      const version = 'V0.54.2-alpha';
+      const version = 'V0.55.0-alpha';
       const showError = (error, context = '啟動') => {
-        const message = error?.message || String(error || '未知啟動錯誤');
+        const message = error?.message || String(error || '未知載入錯誤');
         if (document.body?.dataset.gameReady === '1') {
           console.error(`[${context}]`, error);
           return;
@@ -129,7 +130,7 @@
       };
       window.__CAT_CAFE_BOOT_ERROR__ = showError;
       window.addEventListener('error', event => showError(event.error || event.message || event.target?.src || '資源載入失敗', 'window.error'), true);
-      window.addEventListener('unhandledrejection', event => showError(event.reason || '未處理的 Promise 拒絕', 'unhandledrejection'));
+      window.addEventListener('unhandledrejection', event => showError(event.reason || '未處理的 Promise 錯誤', 'unhandledrejection'));
       const overlay = document.getElementById('bootOverlay');
       overlay.dataset.buttonsBound = '1';
       overlay.querySelector('[data-boot-reload]').addEventListener('click', () => location.reload());
@@ -139,7 +140,7 @@
       });
     })();
   </script>
-  <script src="./assets/vendor/phaser-3.90.0.min.js?v=0542a" onerror="window.__CAT_CAFE_BOOT_ERROR__?.('Phaser 引擎檔載入失敗','Phaser script')"></script>
-  <script type="module" src="./assets/js/main.js?v=0542a"></script>
+  <script src="./assets/vendor/phaser-3.90.0.min.js?v=0550a" onerror="window.__CAT_CAFE_BOOT_ERROR__?.('Phaser 引擎檔載入失敗','Phaser script')"></script>
+  <script type="module" src="./assets/js/main.js?v=0550a"></script>
 </body>
 </html>

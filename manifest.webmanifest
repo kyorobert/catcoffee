@@ -9,7 +9,7 @@
   "orientation": "any",
   "background_color": "#3b291f",
   "theme_color": "#8f5a43",
-  "description": "V0.54.2-alpha｜手機家具拖曳與貓咪行為恢復版",
+  "description": "V0.55.0-alpha｜貓咪生命感與沉浸式照顧互動第一階段",
   "icons": [
     {"src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
     {"src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},

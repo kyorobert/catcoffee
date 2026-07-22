@@ -7,7 +7,17 @@
 - 來源：依專案既有合法角色大頭貼、名字與毛色設定重新設計
 - 授權：隨本專案使用
 - 修改內容：建立 64×64 Frame、透明背景的 Phaser Sprite Sheet，包含 idle、walk、sit、sleep、happy、serve 與上下方向幀
+- V0.55.0 修改：以本地 Pillow 腳本重新製作 walk row 的腳步交替、重心與尾巴節奏；未改變角色識別設計
 - 專案路徑：`assets/cats/*/*-spritesheet.png`
+
+## 牆面窗戶與菜單板
+
+- 名稱：左牆像素窗戶、右牆咖啡菜單板
+- 作者：本專案原創；以 OpenAI imagegen 產生原創來源稿
+- 來源：專案既有咖啡廳前景僅作為色彩與氣氛參考
+- 授權：隨本專案使用
+- 修改內容：移除 chroma-key、裁切、最近鄰像素縮放並預先依左右牆方向剪切
+- 專案路徑：`assets/environment/wall-window.png`、`assets/environment/menu-board.png`
 
 ## 貓咪名冊大頭貼
 
