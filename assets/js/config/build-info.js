@@ -1,7 +1,7 @@
 export const APP_VERSION =
-  'V0.55.2-alpha｜Prototype 家具全面重繪版';
+  'V0.56.0-alpha｜淺俯視投影原型版';
 
-export const BUILD_ID = '0552a';
+export const BUILD_ID = '0560a';
 
 // This key is part of the public save contract. Never change it for cache recovery.
 export const SAVE_KEY = 'catCafePhaserV0540';

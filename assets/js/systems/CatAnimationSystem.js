@@ -1,4 +1,4 @@
-import {CAT_ANIMATION_LAYOUT, FALLBACK_CAT} from '../config/cat-config.js?v=0552a';
+import {CAT_ANIMATION_LAYOUT, FALLBACK_CAT} from '../config/cat-config.js?v=0560a';
 
 const DIRECTIONS = Object.freeze(['down', 'up']);
 const FRAMES_PER_DIRECTION = 4;

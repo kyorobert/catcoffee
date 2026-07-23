@@ -8,7 +8,7 @@ assert.equal(entries.length,47);
 for(const id of V0552_REDRAW_FURNITURE_IDS){
   const entry=entries.find(candidate=>candidate.id===id);
   assert.ok(entry,`${id}: not restored to store`);
-  assert.ok(entry.visual.texturePathByDirection['down-right'].endsWith('.png?v=0552a'),`${id}: old store thumbnail`);
+  assert.ok(entry.visual.texturePathByDirection['down-right'].endsWith('.png?v=0560a'),`${id}: old store thumbnail`);
 }
 assert.ok(entries.every(entry=>!['prototype','retired'].includes(entry.visual.artStatus)));
 console.log('Furniture store re-enable passed: 25 redraws restored, 47 catalog entries visible.');

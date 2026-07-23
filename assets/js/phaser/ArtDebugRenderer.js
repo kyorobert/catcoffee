@@ -1,4 +1,4 @@
-import {FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0552a';
+import {FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0560a';
 
 export class ArtDebugRenderer{
   constructor(scene,{grid,entities,definitions}={}){

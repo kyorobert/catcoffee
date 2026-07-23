@@ -1,11 +1,22 @@
-# 貓咪咖啡廳 V0.55.2-alpha
+# 貓咪咖啡廳 V0.56.0-alpha
 
-版本：`V0.55.2-alpha｜Prototype 家具全面重繪版`  
-Build ID：`0552a`
+版本：`V0.56.0-alpha｜淺俯視投影原型版`  
+Build ID：`0560a`
 
-V0.55.2-alpha 將 V0.55.1 稽核出的 25 件白底／文字 Prototype 全面替換為原創 2:1 等角透明 PNG。遊戲世界、Grid、Occupancy、Placement、Camera、貓咪 AI、經濟數值與存檔 key 均沿用既有 Phaser 架構。
+V0.56.0-alpha 在既有 SpatialGrid／IsoProjection 架構上新增 **`FlatProjection`（淺斜／淺俯視）Prototype**，透過網址 `?projection=flat` opt-in 啟動；**預設仍為 2:1 等角（iso）**。投影僅改變畫面呈現，**不搬動家具邏輯座標、不寫入存檔**：家具 `x/y/r`、Occupancy、Placement、Pathfinding 與存檔 key `catCafePhaserV0540` 完全不變。Flat 尚非正式預設，家具尚未完成 flat 逐件視覺校準。
 
-## 本版內容
+## 投影模式（V0.56.0）
+
+- 預設（iso）：`index.html` 或 `?projection=iso`
+- Flat Prototype：`?projection=flat`
+- Flat + Art Debug：`?projection=flat&artDebug=1`
+- 非法值（如 `?projection=abc`）安全回退 iso。
+- 投影模式不寫入存檔；重整後是否 flat 只由網址參數決定。
+- 詳見 [V0562 結果](./docs/V0562_FLAT_PROJECTION_RESULT.md)、[V0562 人工驗收](./docs/V0562_FLAT_PROJECTION_ACCEPTANCE.md)、截圖 `docs/evidence/v0562/`。
+
+## V0.55.2 家具重繪內容（前版，保留）
+
+V0.55.2-alpha 將 V0.55.1 稽核出的 25 件白底／文字 Prototype 全面替換為原創 2:1 等角透明 PNG。遊戲世界、Grid、Occupancy、Placement、Camera、貓咪 AI、經濟數值與存檔 key 均沿用既有 Phaser 架構。以下為該版詳細：
 
 - 25 件 Prototype 全部重繪，P0 10 件／P1 9 件／P2 6 件。
 - 每件提供 `down-right`、`down-left`、`up-right`、`up-left` 四張原生方向圖，共 100 張 RGBA PNG。
@@ -23,6 +34,17 @@ V0.55.2-alpha 將 V0.55.1 稽核出的 25 件白底／文字 Prototype 全面替
 - [逐件重繪結果](./docs/PROTOTYPE_REDRAW_RESULT.md)
 - [前後 Contact Sheet](./docs/PROTOTYPE_REDRAW_CONTACT_SHEET.html)
 - [人工瀏覽器驗收](./docs/V0552_MANUAL_BROWSER_ACCEPTANCE.md)
+
+## 專案治理與交接
+
+- [代理協作規範](./AGENTS.md)
+- [Claude Code 操作指南](./CLAUDE.md)
+- [專案決策紀錄](./docs/decisions.md)
+- [開發日誌](./docs/devlog.md)
+- [目前狀態](./docs/current-state.md)
+- [暫定路線圖](./docs/roadmap.md)
+- [Task Card 模板](./docs/templates/TASK_CARD.md)
+- [V0.55.2 → Claude Code 交接](./docs/handoffs/V0552_TO_CLAUDE.md)
 
 ## 執行時素材與相容性
 

@@ -1,24 +1,25 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0552a';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0552a';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0552a';
-import {GridSystem} from '../systems/GridSystem.js?v=0552a';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0552a';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0552a';
-import {CameraController} from '../systems/CameraController.js?v=0552a';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0552a';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0552a';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0552a';
-import {CatEntity} from '../entities/CatEntity.js?v=0552a';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0552a';
-import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0552a';
-import {AmbientEffects} from '../entities/AmbientEffects.js?v=0552a';
-import {INPUT_MODE} from '../core/input-state.js?v=0552a';
-import {InputModeController} from '../phaser/InputModeController.js?v=0552a';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0552a';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0552a';
-import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0552a';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0552a';
-import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0552a';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0560a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0560a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0560a';
+import {GridSystem} from '../systems/GridSystem.js?v=0560a';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0560a';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0560a';
+import {CameraController} from '../systems/CameraController.js?v=0560a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0560a';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0560a';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0560a';
+import {CatEntity} from '../entities/CatEntity.js?v=0560a';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0560a';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0560a';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0560a';
+import {INPUT_MODE} from '../core/input-state.js?v=0560a';
+import {InputModeController} from '../phaser/InputModeController.js?v=0560a';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0560a';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0560a';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0560a';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0560a';
+import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0560a';
+import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0560a';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -63,7 +64,8 @@ export class CafeScene extends Phaser.Scene{
     this.selectedCatId=null;
   }
   initializeGrid(){
-    this.grid=new GridSystem(ROOM_CONFIG,FURNITURE_CONFIG);
+    this.projectionMode=projectionModeFromSearch(typeof location!=='undefined'?location.search:'');
+    this.grid=new GridSystem(ROOM_CONFIG,FURNITURE_CONFIG,{mode:this.projectionMode});
     this.inputMode=new InputModeController({getSelectedItemId:()=>this.selectedId});
   }
   migrateSaveIfNeeded(){
@@ -118,6 +120,7 @@ export class CafeScene extends Phaser.Scene{
     if(this.state.migrationWarnings?.length)this.game.events.emit('toast',{message:`${this.state.migrationWarnings.length} 件無法直接遷移的家具已安全保留`,key:'migration-warning',priority:2,duration:4200});
   }
   drawRoom(){
+    if(this.projectionMode===PROJECTION_MODE.FLAT){this.drawRoomFlat();return;}
     const graphics=this.add.graphics();
     const {floor,walls}=ROOM_CONFIG;
     const top=this.grid.getCellDiamond(0,0)[0];
@@ -143,6 +146,46 @@ export class CafeScene extends Phaser.Scene{
       new WallDecorationEntity(this,{texture:'environment:menu-board',x:top.x+155,y:top.y-walls.height+124,scale:.9})
     ];
     this.ambientEffects=new AmbientEffects(this,{top,floor});
+  }
+  // Flat Prototype room rendering. Derived entirely from the projected outer frame
+  // and per-cell polygons (via the GridSystem Facade), so it uses no iso-specific
+  // constants and never touches the logical walkable area. The iso branch above is
+  // left untouched. Flat back-wall height is the single local render constant.
+  drawRoomFlat(){
+    const graphics=this.add.graphics();
+    const {floor,walls}=ROOM_CONFIG;
+    const cols=floor.cols,rows=floor.rows;
+    const FLAT_WALL_HEIGHT=176;
+    const cornerTL=this.grid.getCellDiamond(0,0)[0];
+    const cornerTR=this.grid.getCellDiamond(cols-1,0)[1];
+    const cornerBR=this.grid.getCellDiamond(cols-1,rows-1)[2];
+    const cornerBL=this.grid.getCellDiamond(0,rows-1)[3];
+    graphics.fillStyle(walls.right.fill,1).fillPoints([
+      cornerTL,cornerTR,{x:cornerTR.x,y:cornerTR.y-FLAT_WALL_HEIGHT},{x:cornerTL.x,y:cornerTL.y-FLAT_WALL_HEIGHT}
+    ],true);
+    graphics.lineStyle(6,walls.right.accent,1).strokePoints([
+      {x:cornerTL.x,y:cornerTL.y-FLAT_WALL_HEIGHT},{x:cornerTR.x,y:cornerTR.y-FLAT_WALL_HEIGHT}
+    ],false);
+    for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
+      const diamond=this.grid.getCellDiamond(x,y);
+      const color=floor.colors[(x+y*3)%floor.colors.length];
+      graphics.fillStyle(color,1).fillPoints(diamond,true);
+      graphics.lineStyle(1,floor.lineColor,.32).strokePoints([...diamond,diamond[0]],false);
+    }
+    graphics.lineStyle(4,walls.left.accent,1).strokePoints([cornerTL,cornerTR,cornerBR,cornerBL,cornerTL],false);
+    ROOM_CONFIG.entrance.cells.forEach(cell=>{
+      const diamond=this.grid.getCellDiamond(cell.x,cell.y);
+      graphics.fillStyle(0x9f765a,.48).fillPoints(diamond,true);
+    });
+    graphics.setDepth(-1000);
+    const backMidY=cornerTL.y-FLAT_WALL_HEIGHT*0.52;
+    const spanX=cornerTR.x-cornerTL.x;
+    this.wallDecorations=[
+      new WallDecorationEntity(this,{texture:'environment:wall-window',x:cornerTL.x+spanX*0.28,y:backMidY,scale:.82}),
+      new WallDecorationEntity(this,{texture:'environment:menu-board',x:cornerTL.x+spanX*0.72,y:backMidY,scale:.8})
+    ];
+    // Ambient window glow/dust are positioned from iso-specific origin coordinates,
+    // so they are intentionally omitted in the flat Prototype (known limitation).
   }
   createFurniture(){
     this.entities.forEach(entity=>entity.destroy());

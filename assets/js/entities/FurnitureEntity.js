@@ -1,5 +1,5 @@
-import {DepthSystem} from '../systems/DepthSystem.js?v=0552a';
-import {getFurnitureDisplayState} from '../core/furniture-display-state.js?v=0552a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0560a';
+import {getFurnitureDisplayState} from '../core/furniture-display-state.js?v=0560a';
 
 export class FurnitureEntity extends Phaser.GameObjects.Image{
   constructor(scene,item,definition,grid){

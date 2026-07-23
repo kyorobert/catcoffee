@@ -43,7 +43,7 @@ export function validateFurnitureVisualConfig({definitions,visualConfig,prototyp
     if(visual.texturePathByDirection){
       for(const direction of DIRECTIONS){
         const path=visual.texturePathByDirection[direction];
-        if(typeof path!=='string'||!/^\.\/assets\/.+\.png\?v=0552a$/.test(path))errors.push(`${id}: invalid ${direction} runtime PNG path`);
+        if(typeof path!=='string'||!/^\.\/assets\/.+\.png\?v=0560a$/.test(path))errors.push(`${id}: invalid ${direction} runtime PNG path`);
       }
     }
     if(visual.artStatus==='prototype'&&!planIds.has(id))errors.push(`${id}: prototype missing from redraw plan`);

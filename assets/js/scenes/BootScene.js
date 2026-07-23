@@ -1,7 +1,7 @@
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0552a';
-import {FURNITURE_DIRECTIONS,FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0552a';
-import {CAT_PROFILES, FALLBACK_CAT} from '../config/cat-config.js?v=0552a';
-import {hasCompleteCatSheet, registerCatAnimations} from '../systems/CatAnimationSystem.js?v=0552a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0560a';
+import {FURNITURE_DIRECTIONS,FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0560a';
+import {CAT_PROFILES, FALLBACK_CAT} from '../config/cat-config.js?v=0560a';
+import {hasCompleteCatSheet, registerCatAnimations} from '../systems/CatAnimationSystem.js?v=0560a';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -59,8 +59,8 @@ export class BootScene extends Phaser.Scene {
         frameHeight: profile.frameHeight
       });
     }
-    this.load.image('environment:wall-window', './assets/environment/wall-window.png?v=0552a');
-    this.load.image('environment:menu-board', './assets/environment/menu-board.png?v=0552a');
+    this.load.image('environment:wall-window', './assets/environment/wall-window.png?v=0560a');
+    this.load.image('environment:menu-board', './assets/environment/menu-board.png?v=0560a');
   }
 
   create() {

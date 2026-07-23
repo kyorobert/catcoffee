@@ -25,7 +25,7 @@ export function validateFurnitureAssetRecord({id,definition,visual,pngByPath={}}
     const key=visual.textureByDirection?.[direction];
     const path=visual.texturePathByDirection?.[direction];
     if(key!==`furniture:${id}:${direction}`)errors.push(`${direction}:invalid-texture-key`);
-    if(typeof path!=='string'||!path.startsWith(`./assets/furniture/redrawn/${id}/`)||!path.endsWith(`-${direction}.png?v=0552a`)){
+    if(typeof path!=='string'||!path.startsWith(`./assets/furniture/redrawn/${id}/`)||!path.endsWith(`-${direction}.png?v=0560a`)){
       errors.push(`${direction}:invalid-texture-path`);
       continue;
     }
