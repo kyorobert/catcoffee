@@ -1,6 +1,8 @@
 # 貓咪咖啡廳 Art Bible
 
-版本：V0.55.1-alpha｜美術規格與素材清理版
+版本：V0.55.2-alpha｜Prototype 家具全面重繪版
+
+V0.55.2 交付補充：正式重繪家具使用四方向透明 RGBA PNG、最近鄰縮放與固定 Build `0552a`。原 Prototype SVG 僅供 Contact Sheet 歷史對照，不得作為 runtime texture 或商店縮圖。
 
 本文件是房間、家具、角色及環境素材的唯一美術規格。邏輯資料仍以 `room-config.js`、`furniture-config.js` 與各角色設定為準；美術不得反向改動 ID、價格、footprint 或存檔座標。
 
@@ -118,4 +120,3 @@
 ## 13. Prototype 重繪驗收
 
 移除白卡和素材內文字，改為透明、2:1 等角像素家具；比例符合 footprint，腳底與陰影清楚，至少提供安全四方向策略。營業設備需辨識操作面並保留 interaction socket；地毯不得阻擋行走；重繪只替換 texture/visual metadata，不改 ID、價格、解鎖與存檔。
-

@@ -31,6 +31,15 @@
 - 來源：專案既有素材與 V0.54.0 原創 Phaser Graphics 房間
 - 用途：咖啡廳場景、家具、PWA 圖示與啟動畫面
 
+## V0.55.2 Prototype 家具重繪
+
+- 名稱：25 件 Prototype 家具、四方向共 100 張等角像素 PNG
+- 作者：本專案原創；以 OpenAI imagegen 產生逐件原創來源稿，再經本地透明背景、裁切、最近鄰縮放、限色色盤與方向切片流程整理
+- 來源：`docs/ART_BIBLE.md` 與既有家具功能 brief；未使用外部遊戲截圖或商業遊戲素材
+- 授權：隨本專案使用
+- 修改內容：移除 chroma-key／棋盤背景、校正 footprint 尺度、透明邊距、輪廓、光源與四方向 texture
+- 專案路徑：`assets/furniture/redrawn/*/*.png`
+
 ## 第三方程式庫
 
 - Phaser 3.90.0：Phaser Studio Inc.，MIT License；完整記錄見 `THIRD_PARTY_NOTICES.md`。

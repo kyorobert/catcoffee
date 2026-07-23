@@ -23,7 +23,7 @@ export function validateFurnitureVisualConfig({definitions,visualConfig,prototyp
     if(!(Number.isFinite(visual.anchor?.y)&&visual.anchor.y>=0&&visual.anchor.y<=1))errors.push(`${id}: anchor.y out of range`);
     const textures=Object.values(visual.textureByDirection || {}).filter(value=>typeof value==='string'&&value.length>0);
     if(!textures.length)errors.push(`${id}: no directional texture`);
-    if(textures.some(value=>!/^furniture:[A-Za-z0-9_-]+$/.test(value)&&!/^\.\//.test(value)))errors.push(`${id}: unresolvable texture reference`);
+    if(textures.some(value=>!/^furniture:[A-Za-z0-9_-]+(?::(?:down-right|down-left|up-right|up-left))?$/.test(value)&&!/^\.\//.test(value)))errors.push(`${id}: unresolvable texture reference`);
     if(visual.footprint?.width!==definition.foot?.[0]||visual.footprint?.height!==definition.foot?.[1])errors.push(`${id}: footprint changed`);
     if(!HEIGHT_CLASSES.has(visual.heightClass))errors.push(`${id}: invalid heightClass`);
     if(!Array.isArray(visual.interactionSockets))errors.push(`${id}: interactionSockets must be an array`);
@@ -39,7 +39,13 @@ export function validateFurnitureVisualConfig({definitions,visualConfig,prototyp
     if(!STATION_TYPES.has(visual.stationType))errors.push(`${id}: invalid stationType`);
     if(typeof visual.walkBlocking!=='boolean')errors.push(`${id}: walkBlocking must be boolean`);
     if(['prototype','retired'].includes(visual.artStatus)&&visual.storeVisible)errors.push(`${id}: ${visual.artStatus} must be hidden from store`);
-    if((whiteCardIds.has(id)||textSvgIds.has(id))&&visual.artStatus==='production')errors.push(`${id}: card/text SVG cannot be production`);
+    if((whiteCardIds.has(id)||textSvgIds.has(id))&&visual.artStatus==='production'&&visual.sourceFormat==='svg')errors.push(`${id}: card/text SVG cannot be production runtime art`);
+    if(visual.texturePathByDirection){
+      for(const direction of DIRECTIONS){
+        const path=visual.texturePathByDirection[direction];
+        if(typeof path!=='string'||!/^\.\/assets\/.+\.png\?v=0552a$/.test(path))errors.push(`${id}: invalid ${direction} runtime PNG path`);
+      }
+    }
     if(visual.artStatus==='prototype'&&!planIds.has(id))errors.push(`${id}: prototype missing from redraw plan`);
     if(visual.replacementId&&!knownIds.has(visual.replacementId))errors.push(`${id}: invalid replacementId`);
     if((visual.authoredDirections||[]).length<4)warnings.push(`${id}: missing authored direction artwork`);
@@ -51,4 +57,3 @@ export function validateFurnitureVisualConfig({definitions,visualConfig,prototyp
     summary:{furniture:ids.length,configured:ids.filter(id=>visualConfig?.[id]).length,errors:errors.length,warnings:warnings.length}
   };
 }
-

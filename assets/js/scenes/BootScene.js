@@ -1,6 +1,7 @@
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0551a';
-import {CAT_PROFILES, FALLBACK_CAT} from '../config/cat-config.js?v=0551a';
-import {hasCompleteCatSheet, registerCatAnimations} from '../systems/CatAnimationSystem.js?v=0551a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0552a';
+import {FURNITURE_DIRECTIONS,FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0552a';
+import {CAT_PROFILES, FALLBACK_CAT} from '../config/cat-config.js?v=0552a';
+import {hasCompleteCatSheet, registerCatAnimations} from '../systems/CatAnimationSystem.js?v=0552a';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -35,6 +36,13 @@ export class BootScene extends Phaser.Scene {
     });
 
     for (const [id, definition] of Object.entries(FURNITURE_CONFIG)) {
+      const visual = FURNITURE_VISUAL_CONFIG[id];
+      if (visual?.texturePathByDirection) {
+        for (const direction of FURNITURE_DIRECTIONS) {
+          this.load.image(visual.textureByDirection[direction], visual.texturePathByDirection[direction]);
+        }
+        continue;
+      }
       const key = `furniture:${id}`;
       const path = new URL(definition.texture, location.href).pathname.toLowerCase();
       if (path.endsWith('.svg')) this.load.svg(key, definition.texture);
@@ -51,8 +59,8 @@ export class BootScene extends Phaser.Scene {
         frameHeight: profile.frameHeight
       });
     }
-    this.load.image('environment:wall-window', './assets/environment/wall-window.png?v=0551a');
-    this.load.image('environment:menu-board', './assets/environment/menu-board.png?v=0551a');
+    this.load.image('environment:wall-window', './assets/environment/wall-window.png?v=0552a');
+    this.load.image('environment:menu-board', './assets/environment/menu-board.png?v=0552a');
   }
 
   create() {
@@ -63,11 +71,14 @@ export class BootScene extends Phaser.Scene {
     const combined = [...this.failures, ...furnitureFailures, ...catFailures]
       .filter((entry, index, all) => all.findIndex(other => other.key === entry.key) === index);
 
+    const failedFurnitureEntries = combined.filter(entry => entry.key.startsWith('furniture:'));
+    const failedFurnitureIds = new Set(failedFurnitureEntries.map(entry => entry.key.split(':')[1]));
     this.registry.set('furniture-load-report', {
       total: Object.keys(FURNITURE_CONFIG).length,
-      failed: combined.filter(entry => entry.key.startsWith('furniture:')),
+      totalTextures: new Set(Object.values(FURNITURE_VISUAL_CONFIG).flatMap(visual => Object.values(visual.textureByDirection))).size,
+      failed: failedFurnitureEntries,
       fallbackKeys: furnitureFailures.map(entry => entry.key),
-      successful: Object.keys(FURNITURE_CONFIG).length - furnitureFailures.length
+      successful: Object.keys(FURNITURE_CONFIG).length - failedFurnitureIds.size
     });
     this.registry.set('cat-load-report', {
       total: CAT_PROFILES.length,
@@ -100,10 +111,15 @@ export class BootScene extends Phaser.Scene {
   ensureFurnitureTextures() {
     const missing = [];
     for (const id of Object.keys(FURNITURE_CONFIG)) {
-      const key = `furniture:${id}`;
-      if (this.textures.exists(key)) continue;
-      missing.push({key, url: FURNITURE_CONFIG[id].texture, type: 'fallback', error: 'texture-missing-after-load'});
-      this.createFurnitureFallbackTexture(key);
+      const visual = FURNITURE_VISUAL_CONFIG[id];
+      const records = visual?.texturePathByDirection
+        ? FURNITURE_DIRECTIONS.map(direction => ({key:visual.textureByDirection[direction],url:visual.texturePathByDirection[direction]}))
+        : [{key:`furniture:${id}`,url:FURNITURE_CONFIG[id].texture}];
+      for (const record of records) {
+        if (this.textures.exists(record.key)) continue;
+        missing.push({id, ...record, type:'fallback', error:'texture-missing-after-load'});
+        this.createFurnitureFallbackTexture(record.key);
+      }
     }
     return missing;
   }

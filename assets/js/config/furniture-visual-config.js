@@ -1,4 +1,4 @@
-import {FURNITURE_CONFIG} from './furniture-config.js?v=0551a';
+import {FURNITURE_CONFIG} from './furniture-config.js?v=0552a';
 
 // Visual-only metadata. Prices, unlocks, footprints and save data remain owned by
 // furniture-config.js and SaveAdapter; this module never mutates those sources.
@@ -44,8 +44,20 @@ export const PROTOTYPE_FURNITURE_IDS = Object.freeze([
   'pawRug', 'creamPlaidRug', 'starNightRug', 'childrenPlayArea'
 ]);
 
+// Historical audit set: these 25 IDs were the V0.55.1 placeholder SVGs.
+// V0.55.2 preserves IDs and gameplay metadata while replacing only runtime art.
+export const V0552_REDRAW_FURNITURE_IDS = PROTOTYPE_FURNITURE_IDS;
+export const FURNITURE_REDRAW_ASSET_VERSION = '0552a';
+export const V0552_REDRAW_BATCHES = Object.freeze({
+  P0:Object.freeze(['squareCafeTable','windowHighChair','wallBench','catEarChair','creamSofa','pawSofa','cardboardNest','scratchPost','windowHammock','doubleCatTree']),
+  P1:Object.freeze(['catTent','catCastle','coffeeMachine','oven','washStation','smartOrder','pawRug','creamPlaidRug','starNightRug']),
+  P2:Object.freeze(['welcomeSign','dryFlower','monsterPlant','photoBackdrop','aquarium','childrenPlayArea'])
+});
+
 const prototypeIds = new Set(PROTOTYPE_FURNITURE_IDS);
 const redrawIds = new Set(['sofa', 'kitchen', 'console', 'catBed']);
+const v0552RedrawIds = new Set(V0552_REDRAW_FURNITURE_IDS);
+const needsFinalPolishIds = new Set(['childrenPlayArea']);
 const mirrorAllowedIds = new Set([
   'roundTable', 'pinkTable', 'rugPink', 'rugStripe', 'rugRed',
   'pawRug', 'creamPlaidRug', 'starNightRug'
@@ -120,6 +132,11 @@ function socketsFor(stationType) {
 }
 
 function statusFor(id) {
+  if (v0552RedrawIds.has(id)) {
+    return needsFinalPolishIds.has(id)
+      ? FURNITURE_ART_STATUS.REDRAW
+      : FURNITURE_ART_STATUS.PRODUCTION;
+  }
   if (prototypeIds.has(id)) return FURNITURE_ART_STATUS.PROTOTYPE;
   if (redrawIds.has(id)) return FURNITURE_ART_STATUS.REDRAW;
   return FURNITURE_ART_STATUS.PRODUCTION;
@@ -142,26 +159,41 @@ function createVisualDefinition(id, definition) {
   const textureKey = `furniture:${id}`;
   const layer = definition.layer || 'floorObject';
   const stationType = stationById[id] || FURNITURE_STATION_TYPE.NONE;
-  const sourceFormat = definition.texture.toLowerCase().endsWith('.svg') ? 'svg' : 'png';
+  const hasDirectionalRedraw = v0552RedrawIds.has(id);
+  const textureByDirection = hasDirectionalRedraw
+    ? Object.fromEntries(FURNITURE_DIRECTIONS.map(direction => [direction, `furniture:${id}:${direction}`]))
+    : Object.fromEntries(FURNITURE_DIRECTIONS.map(direction => [direction, textureKey]));
+  const texturePathByDirection = hasDirectionalRedraw
+    ? Object.fromEntries(FURNITURE_DIRECTIONS.map(direction => [
+      direction,
+      `./assets/furniture/redrawn/${id}/${id}-${direction}.png?v=${FURNITURE_REDRAW_ASSET_VERSION}`
+    ]))
+    : null;
+  const sourceFormat = hasDirectionalRedraw
+    ? 'png'
+    : definition.texture.toLowerCase().endsWith('.svg') ? 'svg' : 'png';
   return Object.freeze({
     artStatus,
     storeVisible: artStatus === FURNITURE_ART_STATUS.PRODUCTION || artStatus === FURNITURE_ART_STATUS.REDRAW,
     visualScale: visualScaleById[id],
     anchor:Object.freeze({x:.5,y:layer === 'floorDecoration' ? .5 : 1}),
-    textureByDirection:Object.freeze(Object.fromEntries(FURNITURE_DIRECTIONS.map(direction=>[direction,textureKey]))),
-    fallbackTexture:textureKey,
+    textureByDirection:Object.freeze(textureByDirection),
+    texturePathByDirection:texturePathByDirection ? Object.freeze(texturePathByDirection) : null,
+    fallbackTexture:hasDirectionalRedraw ? textureByDirection['down-right'] : textureKey,
     fallbackDirection:'down-right',
-    authoredDirections:Object.freeze(['down-right']),
+    authoredDirections:Object.freeze(hasDirectionalRedraw ? [...FURNITURE_DIRECTIONS] : ['down-right']),
     footprint:Object.freeze({width:definition.foot[0],height:definition.foot[1]}),
     heightClass:heightById[id],
     interactionSockets:socketsFor(stationType),
     stationType,
     walkBlocking:layer !== 'floorDecoration' && layer !== 'wallObject',
-    mirrorAllowed:mirrorAllowedIds.has(id),
+    mirrorAllowed:hasDirectionalRedraw ? false : mirrorAllowedIds.has(id),
     redrawReason:redrawReasonFor(id,artStatus),
     replacementId:null,
     sourceFormat,
-    notes:artStatus === FURNITURE_ART_STATUS.PROTOTYPE
+    notes:hasDirectionalRedraw
+      ? 'V0.55.2 原創四方向透明 PNG；舊 SVG 僅保留歷史稽核，不進入正式 Loader。'
+      : artStatus === FURNITURE_ART_STATUS.PROTOTYPE
       ? 'Prototype 僅供舊存檔與 Art Debug；正常商店、新遊戲與自動生成均不使用。'
       : '目前只有 down-right 原生方向；其他方向採安全 fallback，不建立不存在的素材路徑。'
   });
@@ -174,4 +206,3 @@ export const FURNITURE_VISUAL_CONFIG = Object.freeze(Object.fromEntries(
 export function getFurnitureVisualDefinition(id) {
   return FURNITURE_VISUAL_CONFIG[id] || null;
 }
-

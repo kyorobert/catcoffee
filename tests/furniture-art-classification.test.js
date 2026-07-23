@@ -14,12 +14,11 @@ for(const [id,definition] of Object.entries(FURNITURE_CONFIG)){
     const source=readFileSync(new URL(`../${definition.texture.replace('./','')}`,import.meta.url),'utf8');
     if(/<rect[^>]+width="150"[^>]+height="112"[^>]+rx="14"[^>]+fill="#fff/i.test(source))whiteCards++;
     if(/<text\b/i.test(source))textSvg++;
-    assert.equal(visual.artStatus,FURNITURE_ART_STATUS.PROTOTYPE,`${id} SVG classification`);
-    assert.equal(visual.storeVisible,false,`${id} prototype store`);
+    assert.equal(visual.sourceFormat,'png',`${id} runtime classification`);
+    assert.equal(visual.storeVisible,true,`${id} redraw store`);
   }
 }
 assert.deepEqual({png,svg,whiteCards,textSvg},{png:22,svg:25,whiteCards:25,textSvg:24});
-assert.deepEqual(counts,{production:18,redraw:4,prototype:25,retired:0});
+assert.deepEqual(counts,{production:42,redraw:5,prototype:0,retired:0});
 assert.equal(PROTOTYPE_FURNITURE_IDS.length,25);
-console.log('Furniture classification passed: 18 production, 4 redraw, 25 prototype, 0 retired.');
-
+console.log('Furniture classification passed: 42 production, 5 redraw, 0 prototype, 0 retired.');

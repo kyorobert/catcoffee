@@ -1,5 +1,5 @@
-import {FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0551a';
-import {getPurchasableFurniture} from '../core/furniture-catalog-selector.js?v=0551a';
+import {FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0552a';
+import {getPurchasableFurniture} from '../core/furniture-catalog-selector.js?v=0552a';
 
 function requireElement(element, label) {
   if (!(element instanceof Element)) throw new TypeError(`${label} 必須是有效的 Element`);
@@ -47,10 +47,10 @@ export class StorePanel {
     this.tabs.innerHTML = categories.map(category => `<button class="${category === this.category ? 'active' : ''}" data-category="${category}">${category}</button>`).join('');
     const state = this.saveAdapter.state;
     const entries = getPurchasableFurniture({definitions:this.furniture,visualConfig:FURNITURE_VISUAL_CONFIG,category:this.category});
-    this.catalog.innerHTML = entries.map(({id,definition:item}) => `
+    this.catalog.innerHTML = entries.map(({id,definition:item,visual}) => `
       <button class="store-card" data-id="${id}">
         <span class="owned">持有 ${state.inventory[id] || 0}</span>
-        <img src="${item.texture}" alt="${item.name}">
+        <img src="${visual.texturePathByDirection?.['down-right'] || item.texture}" alt="${item.name}">
         <b>${item.name}</b>
         <small>NT$ ${Number(item.price || 0).toLocaleString('zh-TW')}・${item.foot.join('×')}</small>
       </button>`).join('');

@@ -2,6 +2,7 @@ import {createServer} from 'node:http';
 import {readFileSync,existsSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
+import {FURNITURE_VISUAL_CONFIG} from '../assets/js/config/furniture-visual-config.js';
 import {CAT_PROFILES,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const root=process.cwd();
@@ -89,6 +90,16 @@ try{
       try{validateSvgXml(new TextDecoder().decode(body),path)}catch(error){failures.push(error.message)}
     }
   }
+  for(const visual of Object.values(FURNITURE_VISUAL_CONFIG)){
+    for(const texture of Object.values(visual.texturePathByDirection||{})){
+      const path=new URL(texture,origin+'/').pathname;
+      const response=await fetch(origin+path);
+      if(!response.ok){failures.push(`${response.status} runtime furniture ${path}`);continue;}
+      if(!(response.headers.get('content-type')||'').includes('image/png'))failures.push(`runtime furniture content-type ${path}`);
+      const body=Buffer.from(await response.arrayBuffer());
+      if(body.length<24||!body.subarray(0,8).equals(Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a])))failures.push(`invalid runtime PNG ${path}`);
+    }
+  }
   const catAssets=[
     ...CAT_PROFILES.flatMap(profile=>[profile.spriteSheet,profile.portrait]),
     FALLBACK_CAT.spriteSheet
@@ -104,7 +115,7 @@ try{
     if(!signature.every((byte,index)=>body[index]===byte))failures.push(`invalid cat PNG signature ${path}`);
     if(body.length<100)failures.push(`empty cat PNG ${path}`);
   }
-  for(const asset of ['./assets/environment/wall-window.png?v=0551a','./assets/environment/menu-board.png?v=0551a']){
+  for(const asset of ['./assets/environment/wall-window.png?v=0552a','./assets/environment/menu-board.png?v=0552a']){
     const path=new URL(asset,origin+'/').pathname;
     const response=await fetch(origin+path);
     const body=new Uint8Array(await response.arrayBuffer());

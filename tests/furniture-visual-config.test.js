@@ -23,8 +23,11 @@ for(const [id,definition] of Object.entries(FURNITURE_CONFIG)){
   assert.ok(visual.visualScale>0,`${id} scale`);
   assert.ok(visual.anchor.x>=0&&visual.anchor.x<=1&&visual.anchor.y>=0&&visual.anchor.y<=1,`${id} anchor`);
   assert.deepEqual([visual.footprint.width,visual.footprint.height],definition.foot,`${id} footprint`);
-  assert.ok(Object.values(visual.textureByDirection).every(key=>key===`furniture:${id}`),`${id} texture key`);
+  if(visual.texturePathByDirection){
+    assert.equal(new Set(Object.values(visual.textureByDirection)).size,4,`${id} directional texture keys`);
+    assert.equal(visual.authoredDirections.length,4,`${id} authored directions`);
+  }else assert.ok(Object.values(visual.textureByDirection).every(key=>key===`furniture:${id}`),`${id} texture key`);
   if(visual.artStatus==='prototype')assert.ok(plan.includes(`| ${id} |`),`${id} redraw plan`);
 }
-console.log(`Furniture visual config passed: ${report.summary.configured} configured, ${report.warnings.length} expected direction warnings.`);
-
+assert.equal(Object.values(FURNITURE_VISUAL_CONFIG).filter(visual=>visual.artStatus==='prototype').length,0);
+console.log(`Furniture visual config passed: ${report.summary.configured} configured, 0 Prototype remaining.`);

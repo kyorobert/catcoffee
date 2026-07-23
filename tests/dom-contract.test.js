@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {
   DomContractError, REQUIRED_DOM_IDS, REQUIRED_NESTED_SELECTORS, resolveDomContract
-} from '../assets/js/ui/dom-contract.js?v=0551a';
+} from '../assets/js/ui/dom-contract.js?v=0552a';
 
 class FakeElement {
   constructor(id = '') { this.id = id; this.children = new Map(); }

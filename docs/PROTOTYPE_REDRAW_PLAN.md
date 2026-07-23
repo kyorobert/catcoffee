@@ -1,5 +1,7 @@
 # V0.55.2-alpha Prototype 家具全面重繪計畫
 
+> 執行結果（2026-07-23）：25／25 已完成四方向透明 PNG，Prototype remaining: 0。24 件為 production，`childrenPlayArea` 為 redraw；逐件紀錄見 `PROTOTYPE_REDRAW_RESULT.md`。
+
 本清單涵蓋全部 25 件 Prototype。重繪只替換場景素材與 visual metadata；家具 ID、價格、解鎖、footprint、玩家座標與存檔 key 均不得改變。
 
 | 優先級 | ID | 名稱 | 現有素材 | Footprint | 問題 | 未來正式造型 Brief | 需要方向 | Station Type | Socket | 備註 |
@@ -37,4 +39,3 @@
 - P2：6 件，完成裝飾與拍照／親子概念。
 
 每件交付需通過 Art Bible 的透明背景、2:1 等角、統一光源、腳底 Anchor、footprint 比例、方向、socket 與授權檢查。
-

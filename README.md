@@ -1,50 +1,45 @@
-# 貓咪咖啡廳 V0.55.1-alpha
+# 貓咪咖啡廳 V0.55.2-alpha
 
-版本：`V0.55.1-alpha｜美術規格與素材清理版`  
-Build ID：`0551a`
+版本：`V0.55.2-alpha｜Prototype 家具全面重繪版`  
+Build ID：`0552a`
 
-V0.55.1-alpha 建立正式家具美術規格與資產資料管線。遊戲世界、Grid、Occupancy、Placement、Camera、貓咪 AI、經濟數值與存檔 key 均沿用已穩定的 Phaser 架構。
+V0.55.2-alpha 將 V0.55.1 稽核出的 25 件白底／文字 Prototype 全面替換為原創 2:1 等角透明 PNG。遊戲世界、Grid、Occupancy、Placement、Camera、貓咪 AI、經濟數值與存檔 key 均沿用既有 Phaser 架構。
 
 ## 本版內容
 
-- [Art Bible](./docs/ART_BIBLE.md)：唯一 2:1 等角、光源、陰影、像素密度、比例、anchor、方向與角色基準。
-- [家具完整稽核](./docs/FURNITURE_AUDIT.md)：47 件家具、22 PNG、25 SVG 的格式、問題、分類與處理。
-- [Prototype 重繪計畫](./docs/PROTOTYPE_REDRAW_PLAN.md)：下一版 25 件白底示意素材的 P0/P1/P2 完整 brief。
-- 四種美術狀態：`production` 正式可用、`redraw` 保留使用並排程重畫、`prototype` 僅保留相容、`retired` 僅保留舊資料。
-- 所有白底／文字 SVG 均為 Prototype；不出現在正常商店、新遊戲預設場景、任務獎勵或自動生成。
-- 舊存檔中的 Prototype 不會被刪除或替換，仍可顯示、選取、拖曳、旋轉、收納與出售。
-- 本版不全面重畫 Prototype；預定 V0.55.2-alpha 依重繪計畫逐件交付正式透明等角素材。
+- 25 件 Prototype 全部重繪，P0 10 件／P1 9 件／P2 6 件。
+- 每件提供 `down-right`、`down-left`、`up-right`、`up-left` 四張原生方向圖，共 100 張 RGBA PNG。
+- 白色圖卡、圖片內名稱與執行時 SVG 已從正式 Loader／商店移除。
+- 原 furniture ID、名稱、價格、meta、解鎖、footprint、layer、rotation 與存檔座標完全不變。
+- `furniture-visual-config.js` 集中提供方向 texture key、相對路徑、scale、anchor、station、socket 與 walkBlocking。
+- 24 件升級為 `production`；`childrenPlayArea` 為可用的 `redraw`，陰影邊緣保留後續像素精修；Prototype remaining 為 0。
+- 本版不包含店員 AI、顧客 AI、訂單流程或故事系統。
 
-## 家具視覺資料
+文件：
 
-`assets/js/config/furniture-visual-config.js` 為每個既有家具 ID 提供：
+- [Art Bible](./docs/ART_BIBLE.md)
+- [家具完整稽核](./docs/FURNITURE_AUDIT.md)
+- [Prototype 重繪計畫](./docs/PROTOTYPE_REDRAW_PLAN.md)
+- [逐件重繪結果](./docs/PROTOTYPE_REDRAW_RESULT.md)
+- [前後 Contact Sheet](./docs/PROTOTYPE_REDRAW_CONTACT_SHEET.html)
+- [人工瀏覽器驗收](./docs/V0552_MANUAL_BROWSER_ACCEPTANCE.md)
 
-- `artStatus`、`storeVisible`
-- `visualScale`、normalized `anchor`
-- `textureByDirection`、`mirrorAllowed` 與安全 fallback
-- 與既有設定一致的 `footprint`
-- `heightClass`、`walkBlocking`
-- 未來營運用 `stationType`、`interactionSockets`
-- `redrawReason`、`replacementId`、`sourceFormat`、`notes`
+## 執行時素材與相容性
 
-重畫家具不得變更 furniture ID、價格、解鎖、footprint 或玩家存檔座標。
+新素材位於 `assets/furniture/redrawn/{id}/{id}-{direction}.png`。舊 SVG 留在原路徑作歷史稽核，但正式 `BootScene` 與 `StorePanel` 不再讀取它們。舊存檔以相同家具 ID 自動顯示新圖，無需 ID migration，也不會搬動家具或重新扣款。
+
+正式存檔 key 固定為 `catCafePhaserV0540`；Phaser 固定使用本地 `assets/vendor/phaser-3.90.0.min.js`。GitHub Pages 不需要 `node_modules`、`tools` 或 CDN。
 
 ## Art Debug
 
-透過以下網址啟用：
-
 ```text
 http://127.0.0.1:8765/?artDebug=1
+http://127.0.0.1:8765/?artDebug=1&artFilter=v0552
+http://127.0.0.1:8765/?artDebug=1&artFilter=redraw
+http://127.0.0.1:8765/?artDebug=1&artFilter=missing-direction
 ```
 
-可檢查 sprite bounds、anchor、footprint、socket、方向、texture、scale、分類及 fallback。Debug 不攔截 Pointer、不修改存檔，正常網址完全不顯示。
-
-## 啟動安全與存檔
-
-- HTML、JavaScript 與 runtime module 使用固定 Build ID `0551a`。
-- 建立 `Phaser.Game` 前檢查 Build 與 DOM Contract；錯誤會顯示完整診斷，不會永遠轉圈。
-- 正式存檔 key 維持 `catCafePhaserV0540`，不清除、不改名、不覆寫 legacy key。
-- 商店顯示狀態與存檔實例載入完全分離；`storeVisible=false` 不會刪除玩家家具。
+Debug 顯示 sprite bounds、anchor、footprint、socket、方向、texture 路徑、scale、分類及 fallback；不攔截 Pointer、不修改存檔，正常網址不顯示。
 
 ## 本機啟動
 
@@ -66,22 +61,19 @@ npm.cmd run test:ai
 npm.cmd run test:drag
 npm.cmd run test:care
 npm.cmd run test:animation
-npm.cmd run test:furniture-visual
-npm.cmd run test:furniture-classification
-npm.cmd run test:furniture-store
-npm.cmd run test:furniture-save
-npm.cmd run test:furniture-direction
-npm.cmd run test:prototype-plan
-npm.cmd run test:dom
-npm.cmd run test:build
+npm.cmd run test:prototype-redraw
+npm.cmd run test:furniture-assets
+npm.cmd run test:furniture-redraw-direction
+npm.cmd run test:furniture-id
+npm.cmd run test:furniture-footprint
+npm.cmd run test:furniture-store-reenable
+npm.cmd run test:furniture-save-redraw
 npm.cmd run test:http
-npm.cmd run test:browser
 npm.cmd run check:deploy
 ```
 
-`check:dev` 會再要求本機 Chrome／Edge browser smoke。`node_modules` 僅供本機開發測試，不能放入 GitHub Pages 或部署 ZIP。
+`test:browser`／`check:dev` 需要本機 Chrome 或 Edge。若自動化環境沒有瀏覽器，版本維持 alpha，依人工驗收文件在實際裝置完成最後檢查；這不影響靜態檢查與部署 ZIP 產出。
 
 ## GitHub Pages
 
-正式執行載入本地 `assets/vendor/phaser-3.90.0.min.js`，不依賴 CDN 或 npm runtime。部署 ZIP 根目錄可直接發布，並保留 Prototype SVG，因舊存檔仍可能引用這些 ID。
-
+將部署 ZIP 根目錄內容直接發布即可。正式 Runtime 僅使用相對路徑、內建 Phaser 與 PNG 素材，不依賴 `node_modules`、Python、Pillow、生成工具或外部 CDN。

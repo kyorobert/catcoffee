@@ -1,5 +1,7 @@
 # 家具與環境素材稽核
 
+> V0.55.2 runtime 更新：下方 25 筆 SVG／prototype 欄位保留為 V0.55.1 基線稽核。正式執行已全部改讀 `assets/furniture/redrawn/{id}/{id}-{direction}.png`；目前 runtime 為 42 production、5 redraw、0 prototype。舊 SVG 不再由 BootScene 或 StorePanel 載入。
+
 版本：V0.55.1-alpha。掃描來源為 `FURNITURE_CONFIG` 與 `assets/furniture/`。
 
 ## 摘要

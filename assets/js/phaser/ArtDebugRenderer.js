@@ -1,4 +1,4 @@
-import {FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0551a';
+import {FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0552a';
 
 export class ArtDebugRenderer{
   constructor(scene,{grid,entities,definitions}={}){
@@ -7,6 +7,7 @@ export class ArtDebugRenderer{
     this.entities=entities;
     this.definitions=definitions;
     this.enabled=new URLSearchParams(location.search).get('artDebug')==='1';
+    this.filter=new URLSearchParams(location.search).get('artFilter')||'all';
     this.graphics=null;
     this.labels=new Map();
     this.lastSignature='';
@@ -33,6 +34,15 @@ export class ArtDebugRenderer{
       const visual=data.visual;
       const definition=this.definitions[data.type];
       if(!visual||!definition)continue;
+      const isV0552=Boolean(visual.texturePathByDirection);
+      const isIncomplete=(visual.authoredDirections||[]).length<4;
+      const filterMatch=this.filter==='all'
+        ||(this.filter==='v0552'&&isV0552)
+        ||(this.filter==='production'&&visual.artStatus==='production')
+        ||(this.filter==='redraw'&&visual.artStatus==='redraw')
+        ||(this.filter==='incomplete'&&isIncomplete)
+        ||(this.filter==='missing-direction'&&data.missingDirection);
+      if(!filterMatch)continue;
       const bounds=entity.getBounds();
       const polygon=this.grid.getFootprintPolygon(data.type,entity.item.x,entity.item.y,entity.item.r||0);
       this.graphics.lineStyle(1,0x4cc9f0,.9).strokeRect(bounds.x,bounds.y,bounds.width,bounds.height);
@@ -52,6 +62,7 @@ export class ArtDebugRenderer{
         `${visual.artStatus} store:${visual.storeVisible} ${visual.sourceFormat}`,
         `scale:${visual.visualScale} anchor:${visual.anchor.x},${visual.anchor.y} foot:${visual.footprint.width}x${visual.footprint.height}`,
         `${visual.heightClass} ${data.direction} ${data.texture}`,
+        `path:${visual.texturePathByDirection?.[data.direction]||definition.texture}`,
         `station:${visual.stationType} block:${visual.walkBlocking} sockets:${visual.interactionSockets.length}`,
         `sizeFallback:${data.sizeFallback} missingDir:${data.missingDirection} redraw:${visual.artStatus==='prototype'||visual.artStatus==='redraw'}`
       ]);
