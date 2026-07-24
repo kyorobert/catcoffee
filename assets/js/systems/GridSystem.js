@@ -1,7 +1,8 @@
-import {SpatialGrid} from './SpatialGrid.js?v=0560a';
-import {IsoProjection} from './IsoProjection.js?v=0560a';
-import {FlatProjection} from './FlatProjection.js?v=0560a';
-import {PROJECTION_MODE} from '../core/projection-mode.js?v=0560a';
+import {SpatialGrid} from './SpatialGrid.js?v=0561a';
+import {IsoProjection} from './IsoProjection.js?v=0561a';
+import {FlatProjection} from './FlatProjection.js?v=0561a';
+import {PROJECTION_MODE} from '../core/projection-mode.js?v=0561a';
+import {getFlatPreset} from '../config/flat-projection-presets.js?v=0561a';
 
 // GridSystem is a compatibility Facade. It composes the projection-independent
 // SpatialGrid with the active SceneProjection and keeps the full public API
@@ -13,8 +14,12 @@ import {PROJECTION_MODE} from '../core/projection-mode.js?v=0560a';
 //
 // The optional third argument selects the projection. Omitting it (the legacy
 // 2-arg call) keeps IsoProjection — the default and safe baseline. Passing
-// `{mode: 'flat'}` swaps in FlatProjection on the SAME SpatialGrid. GridSystem
-// never reads the URL itself; the assembly layer resolves the mode and passes it in.
+// `{mode: 'flat'}` swaps in FlatProjection on the SAME SpatialGrid. `options.flatPreset`
+// (an already-resolved preset id string) picks which Flat composition preset to use;
+// it is only consulted in flat mode and defaults to the ARCH-0562 baseline. GridSystem
+// never reads the URL itself; the assembly layer resolves the mode/preset and passes
+// them in. In flat mode `this.flatPreset` holds the resolved preset (render metadata
+// included) for the scene; in iso mode it is null.
 export class GridSystem {
   constructor(roomConfig, furnitureConfig, options = {}) {
     this.room = roomConfig;
@@ -22,9 +27,13 @@ export class GridSystem {
     this.furniture = furnitureConfig;
     this.spatialGrid = new SpatialGrid(roomConfig, furnitureConfig);
     this.projectionMode = options.mode === PROJECTION_MODE.FLAT ? PROJECTION_MODE.FLAT : PROJECTION_MODE.ISO;
-    this.projection = this.projectionMode === PROJECTION_MODE.FLAT
-      ? new FlatProjection(roomConfig, this.spatialGrid, furnitureConfig)
-      : new IsoProjection(roomConfig, this.spatialGrid, furnitureConfig);
+    if (this.projectionMode === PROJECTION_MODE.FLAT) {
+      this.flatPreset = getFlatPreset(options.flatPreset);
+      this.projection = new FlatProjection(roomConfig, this.spatialGrid, furnitureConfig, this.flatPreset.projection);
+    } else {
+      this.flatPreset = null;
+      this.projection = new IsoProjection(roomConfig, this.spatialGrid, furnitureConfig);
+    }
   }
   // --- SpatialGrid: projection-independent logical grid ---
   getFootprintSize(type, rotation = 0) { return this.spatialGrid.getFootprintSize(type, rotation); }

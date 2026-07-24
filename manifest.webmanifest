@@ -2,17 +2,17 @@
   "name": "貓咪咖啡廳",
   "short_name": "貓咪咖啡廳",
   "id": "./",
-  "start_url": "./?source=pwa&v=0560a",
+  "start_url": "./?source=pwa&v=0561a",
   "scope": "./",
   "display": "standalone",
   "display_override": ["fullscreen", "standalone"],
   "orientation": "any",
   "background_color": "#3b291f",
   "theme_color": "#8f5a43",
-  "description": "V0.56.0-alpha｜淺俯視投影原型版",
+  "description": "V0.56.1-alpha｜淺俯視構圖比較版",
   "icons": [
-    {"src": "./icons/icon-192.png?v=0560a", "sizes": "192x192", "type": "image/png", "purpose": "any"},
-    {"src": "./icons/icon-512.png?v=0560a", "sizes": "512x512", "type": "image/png", "purpose": "any"},
-    {"src": "./icons/icon-maskable-512.png?v=0560a", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+    {"src": "./icons/icon-192.png?v=0561a", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "./icons/icon-512.png?v=0561a", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "./icons/icon-maskable-512.png?v=0561a", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
   ]
 }

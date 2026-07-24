@@ -1,7 +1,7 @@
-import {ToastManager} from '../systems/ToastManager.js?v=0560a';
-import {StorePanel} from './StorePanel.js?v=0560a';
-import {CarePanel} from './CarePanel.js?v=0560a';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0560a';
+import {ToastManager} from '../systems/ToastManager.js?v=0561a';
+import {StorePanel} from './StorePanel.js?v=0561a';
+import {CarePanel} from './CarePanel.js?v=0561a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0561a';
 
 export class UiBridge {
   constructor(game, saveAdapter, furnitureConfig, {startup = null, dom} = {}) {

@@ -1,7 +1,7 @@
 export const APP_VERSION =
-  'V0.56.0-alpha｜淺俯視投影原型版';
+  'V0.56.1-alpha｜淺俯視構圖比較版';
 
-export const BUILD_ID = '0560a';
+export const BUILD_ID = '0561a';
 
 // This key is part of the public save contract. Never change it for cache recovery.
 export const SAVE_KEY = 'catCafePhaserV0540';

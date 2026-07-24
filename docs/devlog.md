@@ -2,6 +2,35 @@
 
 每筆紀錄包含版本、目標、完成內容、驗證、已知限制與下一步。歷史版本若 repository 沒有完整日期或測試輸出，會明確標示為回溯摘要，不補造證據。
 
+## 2026-07-24｜ARCH-0563-FLAT-VISUAL-PRESET-COMPARISON
+
+- 版本／Build：**V0.56.1-alpha｜淺俯視構圖比較版** / **0561a**（由 V0.56.0-alpha / 0560a 升版；存檔 key `catCafePhaserV0540` 不變）
+- 目標：`ARCH-0562` Flat 技術可運作但過度扁平、家具像散落斜棋盤、後牆／空間感不足。建立三個「可同時比較」的 Flat 構圖 Preset（A｜Near Iso、B｜Balanced、C｜Current Flat），相同配置與鏡頭下提供桌面／手機截圖供產品負責人選定。**不自行選定正式方案。**
+- 三 Preset：共用同一 `FlatProjection`，參數集中於**新增** `assets/js/config/flat-projection-presets.js`。以 iso 與現行 Flat 為端點插值後逐項驗證定案：
+  - A `near-iso` axisX{78,22}/axisY{-37,48}/det 4558；B `balanced` axisX{93,13}/axisY{-10,63}/det 5989；C `current`＝`FLAT_PROJECTION_PARAMS`（axisX{112,0}/axisY{26,84}/det 9408，**以參照沿用、未調整**）。
+  - determinant 單調 `iso<A<B<C`；每個 Preset 全 cell 在世界 bounds、round-trip 穩定、房間 centroid 皆對齊世界中心 `(780,560)`（取景公平）。
+- URL／resolver：純函式 `resolveFlatPreset`/`flatPresetFromSearch`／`getFlatPreset`（`?projection=flat&flatPreset=near-iso|balanced|current`；無／未知／空→current；`projection` 非 flat 忽略 flatPreset；不寫 localStorage/存檔）；`GridSystem` 收已解析 id、不讀 URL；`CafeScene` 解析並公開 `grid.flatPreset`。**未**建立玩家可見 Preset 切換按鈕。
+- 房間 rendering：`drawRoomFlat` 改 metadata 驅動（後牆高度、可選側牆、外框線寬、牆飾位置），全由投影幾何推導、僅視覺、深度 -1000；A/B 加左側牆＋後牆形成清楚牆角，C 重現 `ARCH-0562` 單一水平後牆；**iso branch 未動**。未改 cols/rows、placeableMask、entrance、家具 `x/y/r`、footprint、layer、rotation、Occupancy、Pathfinding、存檔。
+- 修改檔案：新增 `flat-projection-presets.js`、`tests/flat-preset.test.js`、`.gitattributes`、`docs/evidence/v0563/`（14 張截圖）、`V0561_FLAT_PRESET_COMPARISON_RESULT.md`／`_ACCEPTANCE.md`；改 `GridSystem.js`、`CafeScene.js`；版本機械升版（build-info、index.html、manifest、package/lock、全 `assets/js` 模組 query、`CAT_ASSET_VERSION`/`FURNITURE_REDRAW_ASSET_VERSION`→0561a）、`check.js`（版本/Build/obsolete 新增 `?v=0560a`/import-query→0561a、protected hash 更新 GridSystem＋新增 presets 模組、required、tests）、`tests/build-consistency.test.js` 等測試 query、README/decisions（DEC-016）/current-state/roadmap。`FlatProjection`/`IsoProjection`/`SpatialGrid`/`projection-mode` hash **未變**。
+- 驗證：`npm test` 通過；`tests/flat-preset.test.js`、`flat-projection`、`grid-projection-compat`（iso golden 未動）、`projection-mode`、`build-consistency` 皆通過；`npm run check:deploy` 通過（Build 0561a、49 modules）；`npm run check:dev` 通過（含**本機 Chrome 實際 browser smoke**）；三 Preset 桌面（1440）＋手機（390/430）＋Art Debug 共 14 張 real-browser 截圖，同一 viewport 下三 Preset 初始 Camera 完全相同、零 page error、projectionMode/preset 正確。
+- 已知限制／未完成：**正式 Flat Preset 未選定**；未做家具 flat 逐件校準／override／重畫；未新增營運／角色系統；手機實機（iPhone Safari／Android Chrome）人工驗收仍 pending；本環境無 `.git`（未 git init、未部署、未 push）。
+- 下一步：產品負責人依 `docs/evidence/v0563/` 與 [V0561 驗收](./V0561_FLAT_PRESET_COMPARISON_ACCEPTANCE.md) 選定 Preset；選定後才啟動 `ART-0563-FLAT-FURNITURE-CALIBRATION`（Codex 家具校準）。
+
+## 2026-07-24｜DEPLOY-0560A-GITHUB-PACKAGE
+
+- 版本／Build：V0.56.0-alpha｜淺俯視投影原型版 / `0560a`（未改動）
+- 目標：為現行 V0.56.0-alpha 建立可直接上傳 GitHub Pages 的部署資料夾與 ZIP；僅打包，不改 Runtime。
+- 完成：
+  - 部署資料夾 `dist/cat_cafe_v0560a_git_deploy/`（先清空再重建）。
+  - `cat_cafe_v0560a_git_deploy.zip`（專案根目錄，286 檔、約 7.03 MB、正斜線、無多包一層、無其他 ZIP）。
+  - ZIP 根直接含 `index.html`、`manifest.webmanifest`、`.nojekyll`、`.gitignore`、根 `.md`、`check.js`、`package*.json`、`assets/`、`docs/`、`icons/`、`splash/`、`tests/`；含 `assets/js/systems/FlatProjection.js`、`assets/js/core/projection-mode.js` 與 100 張 redraw PNG、`docs/evidence/v0562/` 5 張截圖。
+  - 排除 `node_modules/`、`legacy/`、`tools/`、`dist/`、舊 ZIP、備份/暫存。
+  - 新增 `docs/V0560A_GITHUB_DEPLOY_PACKAGE.md`。
+- 驗證：`npm test` 通過；`npm run check:deploy` 通過；`node check.js --deploy --zip cat_cafe_v0560a_git_deploy.zip` 通過；以本機 Chrome 服務**部署資料夾**逐一驗證 `/`、`?projection=iso`、`?projection=flat`、`?projection=flat&artDebug=1`、`?projection=invalid`（回退 iso）——全部 gameReady、projectionMode 正確、無 page error。
+- 未修改：JavaScript／HTML／CSS／素材／存檔／版本／Build 皆未改（僅複製打包）。
+- 已知限制：部署包內 `check.js`、`tests/`、`docs/` 為開發用途，靜態網站不會載入，保留供驗證與交接。
+- 下一步：由專案負責人解壓縮後上傳 GitHub Pages 根目錄（勿直接上傳 ZIP），並完成 [V0562 Flat 人工驗收](./V0562_FLAT_PROJECTION_ACCEPTANCE.md)。
+
 ## 2026-07-24｜ARCH-0562-FLAT-PROJECTION-PROTOTYPE
 
 - 版本／Build：**V0.56.0-alpha｜淺俯視投影原型版** / **0560a**（由 V0.55.2-alpha / 0552a 升版；存檔 key `catCafePhaserV0540` 不變）

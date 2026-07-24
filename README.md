@@ -1,18 +1,20 @@
-# 貓咪咖啡廳 V0.56.0-alpha
+# 貓咪咖啡廳 V0.56.1-alpha
 
-版本：`V0.56.0-alpha｜淺俯視投影原型版`  
-Build ID：`0560a`
+版本：`V0.56.1-alpha｜淺俯視構圖比較版`  
+Build ID：`0561a`
 
-V0.56.0-alpha 在既有 SpatialGrid／IsoProjection 架構上新增 **`FlatProjection`（淺斜／淺俯視）Prototype**，透過網址 `?projection=flat` opt-in 啟動；**預設仍為 2:1 等角（iso）**。投影僅改變畫面呈現，**不搬動家具邏輯座標、不寫入存檔**：家具 `x/y/r`、Occupancy、Placement、Pathfinding 與存檔 key `catCafePhaserV0540` 完全不變。Flat 尚非正式預設，家具尚未完成 flat 逐件視覺校準。
+V0.56.1-alpha 在既有 SpatialGrid／IsoProjection／FlatProjection 架構上新增**三個共用同一 `FlatProjection` 的淺俯視構圖 Preset（A｜Near Iso、B｜Balanced、C｜Current Flat）**，供產品負責人在相同配置與鏡頭下比較。**預設仍為 2:1 等角（iso）**；三個 Preset 皆為比較用，正式 Flat Preset 尚未選定。投影與 Preset **僅改變畫面呈現**：家具 `x/y/r`、Occupancy、Placement、Pathfinding 與存檔 key `catCafePhaserV0540` 完全不變，且**不寫入存檔**。
 
-## 投影模式（V0.56.0）
+## 投影模式與 Flat 構圖 Preset（V0.56.1）
 
 - 預設（iso）：`index.html` 或 `?projection=iso`
-- Flat Prototype：`?projection=flat`
-- Flat + Art Debug：`?projection=flat&artDebug=1`
-- 非法值（如 `?projection=abc`）安全回退 iso。
-- 投影模式不寫入存檔；重整後是否 flat 只由網址參數決定。
-- 詳見 [V0562 結果](./docs/V0562_FLAT_PROJECTION_RESULT.md)、[V0562 人工驗收](./docs/V0562_FLAT_PROJECTION_ACCEPTANCE.md)、截圖 `docs/evidence/v0562/`。
+- Flat｜Preset C（相容路徑）：`?projection=flat` 或 `?projection=flat&flatPreset=current`
+- Flat｜Preset A：`?projection=flat&flatPreset=near-iso`
+- Flat｜Preset B：`?projection=flat&flatPreset=balanced`
+- 疊 Art Debug：於上述後加 `&artDebug=1`
+- 未知／空 `flatPreset` → Preset C；`projection` 非 flat 時忽略 `flatPreset`；非法 `projection`（如 `?projection=abc`）回退 iso。
+- 投影模式與 Preset 皆不寫入存檔；重整後由網址參數決定。
+- 詳見 [V0561 構圖比較結果](./docs/V0561_FLAT_PRESET_COMPARISON_RESULT.md)、[V0561 人工驗收](./docs/V0561_FLAT_PRESET_COMPARISON_ACCEPTANCE.md)、截圖 `docs/evidence/v0563/`；前一版 Prototype 見 [V0562 結果](./docs/V0562_FLAT_PROJECTION_RESULT.md)。
 
 ## V0.55.2 家具重繪內容（前版，保留）
 

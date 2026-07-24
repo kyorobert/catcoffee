@@ -1,4 +1,4 @@
-# V0.56.0-alpha 專案現況
+# V0.56.1-alpha 專案現況
 
 本文件描述 repository 目前可直接查證的狀態，不代表未來產品承諾。決策以 [decisions.md](./decisions.md) 為準。
 
@@ -6,9 +6,9 @@
 
 | 項目 | 現況 |
 |---|---|
-| 版本 | `V0.56.0-alpha｜淺俯視投影原型版` |
-| Build ID | `0560a` |
-| package version | `0.56.0-alpha` |
+| 版本 | `V0.56.1-alpha｜淺俯視構圖比較版` |
+| Build ID | `0561a` |
+| package version | `0.56.1-alpha` |
 | 引擎 | Phaser `3.90.0`，Canvas renderer |
 | 引擎來源 | `assets/vendor/phaser-3.90.0.min.js` |
 | 部署 | GitHub Pages 純靜態相對路徑，不依賴 CDN |
@@ -16,13 +16,17 @@
 | 存檔 key | `catCafePhaserV0540`（V0.56.0 未變） |
 | Legacy save | 只讀 legacy key，原始資料備份至 `catCafeLegacySaveBackupV0532` |
 
-### A2. 場景投影（V0.56.0 新增）
+### A2. 場景投影與 Flat 構圖三方案（V0.56.1 更新）
 
-- `GridSystem` 已於 V0.56.0 前一版拆為 `SpatialGrid`（投影無關邏輯）＋ `SceneProjection`；本版新增 `IsoProjection`（現行 2:1 等角）以外的 **`FlatProjection`（淺斜／淺俯視）Prototype**。
-- **預設投影仍為 iso**；`FlatProjection` 僅由網址 `?projection=flat` opt-in（`?projection=flat&artDebug=1` 疊 Art Debug；非法值回退 iso）。
-- **投影模式不寫入存檔**；重整後是否 flat 只由網址參數決定。家具邏輯座標 `x/y/r`、Occupancy、Placement、Pathfinding 未因投影改變。
-- **Flat 尚非正式預設**；家具目前沿用 iso 透視素材，尚未完成 flat 逐件視覺校準。
-- 人工實機驗收狀態：real-browser 截圖證據見 `docs/evidence/v0562/`；觸控互動與部分手機視角仍 `pending`，見 [V0562 人工驗收](./V0562_FLAT_PROJECTION_ACCEPTANCE.md)。實作細節見 [V0562 結果](./V0562_FLAT_PROJECTION_RESULT.md)。
+- `GridSystem` 為 `SpatialGrid`（投影無關邏輯）＋ `SceneProjection` 的相容 Facade；投影有 `IsoProjection`（現行 2:1 等角）與 `FlatProjection`（淺斜／淺俯視）。
+- **預設投影仍為 iso**；`FlatProjection` 由網址 `?projection=flat` opt-in。本版新增**三個共用同一 `FlatProjection` 的構圖 Preset**（參數集中於 `assets/js/config/flat-projection-presets.js`）：
+  - **A｜Near Iso**：`?projection=flat&flatPreset=near-iso`
+  - **B｜Balanced**：`?projection=flat&flatPreset=balanced`
+  - **C｜Current Flat**：`?projection=flat&flatPreset=current`（＝`?projection=flat`，沿用 `ARCH-0562`）
+  - 未知／空字串 → `current`；`projection` 非 flat 時忽略 `flatPreset`；可疊 `&artDebug=1`。
+- **投影模式與 Preset 皆不寫入存檔**；重整後由網址決定。家具 `x/y/r`、Occupancy、Placement、Pathfinding、存檔 key／schema 未因投影或 Preset 改變。
+- Flat 房間 rendering 由 Preset metadata 決定（後牆高度、可選側牆、外框線寬、牆飾位置），僅屬視覺、深度 -1000；iso 呈現未動。
+- **三個 Preset 皆為 Proposed 比較方案，正式 Flat Preset 尚未選定**；未做家具 flat 逐件校準。real-browser 截圖見 `docs/evidence/v0563/`，比較說明見 [V0561 構圖比較結果](./V0561_FLAT_PRESET_COMPARISON_RESULT.md) 與 [V0561 人工驗收](./V0561_FLAT_PRESET_COMPARISON_ACCEPTANCE.md)；前一版 Prototype 紀錄見 [V0562 結果](./V0562_FLAT_PROJECTION_RESULT.md)。
 
 ## B. 架構地圖
 
@@ -90,7 +94,9 @@
 ### 本次文件任務實際執行
 
 - `npm.cmd test`：通過。
-- `npm.cmd run check:deploy`：通過；檢查 Build `0552a`、35 DOM IDs、13 nested selectors、44 JavaScript modules。
+- `npm.cmd run check:deploy`：通過；檢查 Build `0561a`、35 DOM IDs、13 nested selectors、49 JavaScript modules。
+- `npm.cmd run check:dev`：通過（含真實 Chrome browser smoke）。
+- `node tests/flat-preset.test.js`：通過（Flat 三 Preset resolver 與幾何）。
 
 ### Repository 內已有
 

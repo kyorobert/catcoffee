@@ -1,25 +1,26 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0560a';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0560a';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0560a';
-import {GridSystem} from '../systems/GridSystem.js?v=0560a';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0560a';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0560a';
-import {CameraController} from '../systems/CameraController.js?v=0560a';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0560a';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0560a';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0560a';
-import {CatEntity} from '../entities/CatEntity.js?v=0560a';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0560a';
-import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0560a';
-import {AmbientEffects} from '../entities/AmbientEffects.js?v=0560a';
-import {INPUT_MODE} from '../core/input-state.js?v=0560a';
-import {InputModeController} from '../phaser/InputModeController.js?v=0560a';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0560a';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0560a';
-import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0560a';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0560a';
-import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0560a';
-import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0560a';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0561a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0561a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0561a';
+import {GridSystem} from '../systems/GridSystem.js?v=0561a';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0561a';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0561a';
+import {CameraController} from '../systems/CameraController.js?v=0561a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0561a';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0561a';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0561a';
+import {CatEntity} from '../entities/CatEntity.js?v=0561a';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0561a';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0561a';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0561a';
+import {INPUT_MODE} from '../core/input-state.js?v=0561a';
+import {InputModeController} from '../phaser/InputModeController.js?v=0561a';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0561a';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0561a';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0561a';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0561a';
+import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0561a';
+import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0561a';
+import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0561a';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -64,8 +65,10 @@ export class CafeScene extends Phaser.Scene{
     this.selectedCatId=null;
   }
   initializeGrid(){
-    this.projectionMode=projectionModeFromSearch(typeof location!=='undefined'?location.search:'');
-    this.grid=new GridSystem(ROOM_CONFIG,FURNITURE_CONFIG,{mode:this.projectionMode});
+    const search=typeof location!=='undefined'?location.search:'';
+    this.projectionMode=projectionModeFromSearch(search);
+    this.flatPresetId=flatPresetFromSearch(search);
+    this.grid=new GridSystem(ROOM_CONFIG,FURNITURE_CONFIG,{mode:this.projectionMode,flatPreset:this.flatPresetId});
     this.inputMode=new InputModeController({getSelectedItemId:()=>this.selectedId});
   }
   migrateSaveIfNeeded(){
@@ -147,45 +150,60 @@ export class CafeScene extends Phaser.Scene{
     ];
     this.ambientEffects=new AmbientEffects(this,{top,floor});
   }
-  // Flat Prototype room rendering. Derived entirely from the projected outer frame
-  // and per-cell polygons (via the GridSystem Facade), so it uses no iso-specific
-  // constants and never touches the logical walkable area. The iso branch above is
-  // left untouched. Flat back-wall height is the single local render constant.
+  // Flat room rendering, shared by all three composition presets (ARCH-0563). Every
+  // point is derived from the projected outer frame and per-cell polygons via the
+  // GridSystem Facade, so it uses no iso-specific constants and never touches the
+  // logical walkable area. Back-wall height, whether a left side wall is drawn, the
+  // outline widths and the wall-decoration placement all come from the resolved
+  // preset's `room` metadata (config/flat-projection-presets.js) — no per-preset
+  // numbers live here. The iso branch above is left untouched. Walls are purely visual
+  // (depth -1000) and change no grid, occupancy or pathfinding data. Current Flat
+  // (sideWall:false, height 176) reproduces the ARCH-0562 rendering exactly.
   drawRoomFlat(){
     const graphics=this.add.graphics();
     const {floor,walls}=ROOM_CONFIG;
     const cols=floor.cols,rows=floor.rows;
-    const FLAT_WALL_HEIGHT=176;
+    const frame=this.grid.flatPreset.room;
+    const wallHeight=frame.backWallHeight;
     const cornerTL=this.grid.getCellDiamond(0,0)[0];
     const cornerTR=this.grid.getCellDiamond(cols-1,0)[1];
     const cornerBR=this.grid.getCellDiamond(cols-1,rows-1)[2];
     const cornerBL=this.grid.getCellDiamond(0,rows-1)[3];
-    graphics.fillStyle(walls.right.fill,1).fillPoints([
-      cornerTL,cornerTR,{x:cornerTR.x,y:cornerTR.y-FLAT_WALL_HEIGHT},{x:cornerTL.x,y:cornerTL.y-FLAT_WALL_HEIGHT}
-    ],true);
-    graphics.lineStyle(6,walls.right.accent,1).strokePoints([
-      {x:cornerTL.x,y:cornerTL.y-FLAT_WALL_HEIGHT},{x:cornerTR.x,y:cornerTR.y-FLAT_WALL_HEIGHT}
-    ],false);
+    const raise=point=>({x:point.x,y:point.y-wallHeight});
+    // Optional left side wall (near-iso/balanced): clarifies the back corner and room
+    // enclosure. Current Flat omits it, matching the ARCH-0562 single-wall look.
+    if(frame.sideWall){
+      graphics.fillStyle(walls.left.fill,1).fillPoints([cornerTL,cornerBL,raise(cornerBL),raise(cornerTL)],true);
+      graphics.lineStyle(frame.backWallTopWidth,walls.left.accent,1).strokePoints([raise(cornerTL),raise(cornerBL)],false);
+    }
+    // Back wall: a strip standing above the back edge (it slants when the preset keeps
+    // column tilt, and is horizontal for Current Flat).
+    graphics.fillStyle(walls.right.fill,1).fillPoints([cornerTL,cornerTR,raise(cornerTR),raise(cornerTL)],true);
+    graphics.lineStyle(frame.backWallTopWidth,walls.right.accent,1).strokePoints([raise(cornerTL),raise(cornerTR)],false);
     for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
       const diamond=this.grid.getCellDiamond(x,y);
       const color=floor.colors[(x+y*3)%floor.colors.length];
       graphics.fillStyle(color,1).fillPoints(diamond,true);
       graphics.lineStyle(1,floor.lineColor,.32).strokePoints([...diamond,diamond[0]],false);
     }
-    graphics.lineStyle(4,walls.left.accent,1).strokePoints([cornerTL,cornerTR,cornerBR,cornerBL,cornerTL],false);
+    graphics.lineStyle(frame.floorOutlineWidth,walls.left.accent,1).strokePoints([cornerTL,cornerTR,cornerBR,cornerBL,cornerTL],false);
     ROOM_CONFIG.entrance.cells.forEach(cell=>{
       const diamond=this.grid.getCellDiamond(cell.x,cell.y);
       graphics.fillStyle(0x9f765a,.48).fillPoints(diamond,true);
     });
     graphics.setDepth(-1000);
-    const backMidY=cornerTL.y-FLAT_WALL_HEIGHT*0.52;
+    const deco=frame.decoration;
     const spanX=cornerTR.x-cornerTL.x;
+    const spanY=cornerTR.y-cornerTL.y;
+    const decoAt=fx=>({x:cornerTL.x+spanX*fx,y:cornerTL.y+spanY*fx-wallHeight*deco.heightFactor});
+    const windowPos=decoAt(deco.windowFx);
+    const boardPos=decoAt(deco.boardFx);
     this.wallDecorations=[
-      new WallDecorationEntity(this,{texture:'environment:wall-window',x:cornerTL.x+spanX*0.28,y:backMidY,scale:.82}),
-      new WallDecorationEntity(this,{texture:'environment:menu-board',x:cornerTL.x+spanX*0.72,y:backMidY,scale:.8})
+      new WallDecorationEntity(this,{texture:'environment:wall-window',x:windowPos.x,y:windowPos.y,scale:deco.windowScale}),
+      new WallDecorationEntity(this,{texture:'environment:menu-board',x:boardPos.x,y:boardPos.y,scale:deco.boardScale})
     ];
     // Ambient window glow/dust are positioned from iso-specific origin coordinates,
-    // so they are intentionally omitted in the flat Prototype (known limitation).
+    // so they are intentionally omitted in the flat presets (known limitation).
   }
   createFurniture(){
     this.entities.forEach(entity=>entity.destroy());

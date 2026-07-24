@@ -23,7 +23,7 @@
 
 ## Phase 2｜核准後的場景可讀性實作
 
-- **進度（2026-07-24）：進行中／Prototype 階段。** Stage 1（`ARCH-0561`：SpatialGrid + IsoProjection Facade 拆分）已完成；Stage 2（`ARCH-0562`：`FlatProjection` 淺俯視 Prototype，`?projection=flat` opt-in、預設仍 iso、不入存檔）已完成並有 real-browser 截圖證據。**尚未**進入正式預設或手機 UI 重製；家具 flat 逐件校準與 Flat 視覺人工驗收待辦（見 [DEC-015](./decisions.md)、[V0562 驗收](./V0562_FLAT_PROJECTION_ACCEPTANCE.md)）。
+- **進度（2026-07-24）：進行中／構圖比較階段。** Stage 1（`ARCH-0561`：SpatialGrid + IsoProjection Facade 拆分）已完成；Stage 2（`ARCH-0562`：`FlatProjection` 淺俯視 Prototype，`?projection=flat` opt-in、預設仍 iso、不入存檔）已完成；Stage 3（`ARCH-0563`：三個共用 `FlatProjection` 的構圖 Preset A/B/C，`?projection=flat&flatPreset=…`、集中設定、房間 rendering 由 metadata 驅動）已完成並有 real-browser 桌面＋手機截圖證據。**尚未**選定正式 Flat Preset、尚未進入正式預設或手機 UI 重製；正式 Preset 選定、家具 flat 逐件校準與 Flat 視覺人工／實機驗收待辦（見 [DEC-016](./decisions.md)、[V0561 構圖比較結果](./V0561_FLAT_PRESET_COMPARISON_RESULT.md)、[V0561 驗收](./V0561_FLAT_PRESET_COMPARISON_ACCEPTANCE.md)）。
 - 目標：依 Phase 1 核准方案改善直立手機的場景平面感與資訊可讀性。
 - 前置：產品核准投影方案、存檔策略、資產策略與驗收畫面。
 - 非目標：同時新增店長、店員、顧客完整 AI 或經濟重做。

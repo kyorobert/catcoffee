@@ -1,4 +1,4 @@
-import {INPUT_MODE, canTransitionInputMode, stableInputMode} from '../core/input-state.js?v=0560a';
+import {INPUT_MODE, canTransitionInputMode, stableInputMode} from '../core/input-state.js?v=0561a';
 
 export class InputModeController {
   constructor({getSelectedItemId = () => null, onChange = null} = {}) {

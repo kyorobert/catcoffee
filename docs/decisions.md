@@ -165,3 +165,22 @@
 - 決策（待核准）：**Flat 尚未取代 iso**；是否成為正式預設，須由產品負責人完成 Flat 視覺人工驗收後另行核准。
 - 影響：不得把 Flat 寫成正式預設或「平面化場景已完成」；家具尚未完成 flat 正式美術；手機實機驗收未完成前不得宣稱通過。real-browser 截圖證據見 `docs/evidence/v0562/`，逐項驗收見 `docs/V0562_FLAT_PROJECTION_ACCEPTANCE.md`。
 - 後續：候選 `ART-0563-FLAT-FURNITURE-CALIBRATION`（家具 flat 校準）、`ARCH-0563-ECONOMY-EXTRACT`、`ARCH-0563-STATION-REGISTRY`，均未核准前不執行。
+
+## DEC-016｜Flat 淺俯視構圖三方案比較（Proposed，待產品選擇）
+
+- 日期：2026-07-24
+- 狀態：Proposed（三方案皆為比較用；正式 Flat Preset 尚未選定）
+- 背景：`ARCH-0562` 的 Flat Prototype 技術可運作，但產品負責人比較畫面後認為現行 Flat 過度扁平、家具像散落在斜棋盤、後牆與空間感不足、上方家具易近 HUD，尚不適合直接設為正式視角，也不適合現在就全面校準 47 件家具。需要在相同配置與鏡頭條件下比較不同「保留多少 iso 深度」的構圖。
+- 決策（本任務 `ARCH-0563-FLAT-VISUAL-PRESET-COMPARISON` 完成）：
+  - 建立**三個共用同一個 `FlatProjection` 實作**的構圖 Preset，參數集中於純設定模組 [`assets/js/config/flat-projection-presets.js`](../assets/js/config/flat-projection-presets.js)：
+    - **Preset A｜Near Iso**（`near-iso`）：axisX `{78,22}`、axisY `{-37,48}`、det `4558`。最接近 iso，只稍平，保留較強房間深度與牆角。
+    - **Preset B｜Balanced Shallow**（`balanced`）：axisX `{93,13}`、axisY `{-10,63}`、det `5989`。介於 iso 與現行 Flat 之間。
+    - **Preset C｜Current Flat**（`current`）：axisX `{112,0}`、axisY `{26,84}`、det `9408`。**完整沿用 `ARCH-0562` 的 `FLAT_PROJECTION_PARAMS`（以參照沿用，未調整）**，作為比較基準。
+  - basis 以 iso 與現行 Flat 為兩端點插值後，逐項驗證 determinant 非零、cell 可逆、cell 共邊、房間落在世界 bounds、家具 anchor 合法、房間 centroid 皆對齊世界中心（公平取景），確認後定案（非機械插值直接完成）。
+  - URL：`?projection=flat`（無 preset）維持 **Preset C**，不改變 `ARCH-0562` 既有語意；新增 `?projection=flat&flatPreset=near-iso|balanced|current`（另可疊 `&artDebug=1`）。`projection` 非 flat 時忽略 `flatPreset`；未知／空字串 → `current`。解析器為純函式、可單元測試；`GridSystem` 不直接讀 URL（由組裝層解析後傳入 id）。
+  - Flat 房間 rendering 由 Preset metadata 決定（後牆高度、可選側牆、牆角、外框線寬、牆飾位置），仍全由投影幾何推導、僅屬視覺、深度 -1000；**iso branch 完全未動**。
+  - **不改任何邏輯資料**：cols/rows、placeableMask、entrance cells、家具 `x/y/r`、footprint、layer、rotation、Occupancy、Pathfinding、存檔 key `catCafePhaserV0540` 與 schema 全部不變；投影／Preset 不寫入存檔、不含任何角色身份。
+  - 版本升為 `V0.56.1-alpha｜淺俯視構圖比較版`／Build `0561a`（僅版本與 cache-bust 機械變更）。
+- 決策（待產品負責人）：由產品負責人比較桌面與手機截圖後，選出值得進入後續家具校準的 Preset。**Claude Code 不得自行選定正式方案，不得自行把任一 Preset 設為正式預設。**
+- 影響：本次未進行正式家具校準、未新增營運／角色系統；家具沿用 iso 素材，透視落差為已知、待選定後由 Codex 校準。real-browser 截圖證據見 `docs/evidence/v0563/`；逐項說明見 [V0561 構圖比較結果](./V0561_FLAT_PRESET_COMPARISON_RESULT.md) 與 [V0561 人工驗收](./V0561_FLAT_PRESET_COMPARISON_ACCEPTANCE.md)。
+- 後續：產品選定 Preset 後，`ART-0563-FLAT-FURNITURE-CALIBRATION`（Codex，家具 flat 逐件校準）方可啟動；未選定前不執行。
