@@ -1,26 +1,28 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0561a';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0561a';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0561a';
-import {GridSystem} from '../systems/GridSystem.js?v=0561a';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0561a';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0561a';
-import {CameraController} from '../systems/CameraController.js?v=0561a';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0561a';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0561a';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0561a';
-import {CatEntity} from '../entities/CatEntity.js?v=0561a';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0561a';
-import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0561a';
-import {AmbientEffects} from '../entities/AmbientEffects.js?v=0561a';
-import {INPUT_MODE} from '../core/input-state.js?v=0561a';
-import {InputModeController} from '../phaser/InputModeController.js?v=0561a';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0561a';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0561a';
-import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0561a';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0561a';
-import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0561a';
-import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0561a';
-import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0561a';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0570a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0570a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0570a';
+import {GridSystem} from '../systems/GridSystem.js?v=0570a';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0570a';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0570a';
+import {CameraController} from '../systems/CameraController.js?v=0570a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0570a';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0570a';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0570a';
+import {CatEntity} from '../entities/CatEntity.js?v=0570a';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0570a';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0570a';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0570a';
+import {INPUT_MODE} from '../core/input-state.js?v=0570a';
+import {InputModeController} from '../phaser/InputModeController.js?v=0570a';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0570a';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0570a';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0570a';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0570a';
+import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0570a';
+import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0570a';
+import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0570a';
+import {ORTHOGONAL_ROOM_RENDER} from '../systems/OrthogonalProjection.js?v=0570a';
+import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0570a';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -68,13 +70,19 @@ export class CafeScene extends Phaser.Scene{
     const search=typeof location!=='undefined'?location.search:'';
     this.projectionMode=projectionModeFromSearch(search);
     this.flatPresetId=flatPresetFromSearch(search);
+    // Demo composition is orthogonal-only and display-only; it never writes the save.
+    this.demoLayoutActive=this.projectionMode===PROJECTION_MODE.ORTHO&&isDemoLayoutRequested(search);
+    this.demoItems=this.demoLayoutActive?buildOrthoDemoItems():null;
     this.grid=new GridSystem(ROOM_CONFIG,FURNITURE_CONFIG,{mode:this.projectionMode,flatPreset:this.flatPresetId});
     this.inputMode=new InputModeController({getSelectedItemId:()=>this.selectedId});
   }
+  // Items shown in the scene: the ortho demo composition (opt-in) or the real save.
+  // The demo layout NEVER touches state.items, inventory, coins or the save.
+  getLayoutItems(){return this.demoLayoutActive?this.demoItems:this.state.items;}
   migrateSaveIfNeeded(){
     this.saveAdapter.migrateIfNeeded(this.grid);
     this.occupancy=new OccupancySystem(this.grid,FURNITURE_CONFIG);
-    this.occupancy.build(this.state.items);
+    this.occupancy.build(this.getLayoutItems());
     this.placement=new PlacementSystem(this.grid,this.occupancy,FURNITURE_CONFIG);
   }
   createSceneFurniture(){
@@ -123,6 +131,7 @@ export class CafeScene extends Phaser.Scene{
     if(this.state.migrationWarnings?.length)this.game.events.emit('toast',{message:`${this.state.migrationWarnings.length} 件無法直接遷移的家具已安全保留`,key:'migration-warning',priority:2,duration:4200});
   }
   drawRoom(){
+    if(this.projectionMode===PROJECTION_MODE.ORTHO){this.drawRoomOrtho();return;}
     if(this.projectionMode===PROJECTION_MODE.FLAT){this.drawRoomFlat();return;}
     const graphics=this.add.graphics();
     const {floor,walls}=ROOM_CONFIG;
@@ -205,16 +214,67 @@ export class CafeScene extends Phaser.Scene{
     // Ambient window glow/dust are positioned from iso-specific origin coordinates,
     // so they are intentionally omitted in the flat presets (known limitation).
   }
+  // Orthogonal room rendering: a true front-facing rectangle. Every point is derived
+  // from the projected outer frame and per-cell rectangles (via the GridSystem Facade),
+  // never from fixed screen coordinates, and nothing here is skewed, sheared or rotated.
+  // Framing constants live in ORTHOGONAL_ROOM_RENDER; the palette comes from ROOM_CONFIG.
+  // Walls are purely visual (depth -1000) and change no grid/occupancy/pathfinding data.
+  // The iso and flat branches above are left untouched.
+  drawRoomOrtho(){
+    const graphics=this.add.graphics();
+    const {floor,walls,worldWidth,worldHeight}=ROOM_CONFIG;
+    const cols=floor.cols,rows=floor.rows;
+    const R=ORTHOGONAL_ROOM_RENDER;
+    const TL=this.grid.getCellDiamond(0,0)[0];
+    const TR=this.grid.getCellDiamond(cols-1,0)[1];
+    const BR=this.grid.getCellDiamond(cols-1,rows-1)[2];
+    const BL=this.grid.getCellDiamond(0,rows-1)[3];
+    const floorW=TR.x-TL.x;
+    // Room base fills the whole world (side margins, ceiling, below-floor) so the
+    // rectangular room never sits on a black or oblique void.
+    graphics.fillStyle(walls.left.fill,1).fillRect(0,0,worldWidth,worldHeight);
+    // Horizontal top wall band standing above the back edge.
+    const wallTopY=Math.max(0,TL.y-R.topWallHeight);
+    graphics.fillStyle(walls.right.fill,1).fillRect(TL.x,wallTopY,floorW,TL.y-wallTopY);
+    // Floor cells: axis-aligned rectangles with faint, Placement-aligned grid lines.
+    for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
+      const rect=this.grid.getCellDiamond(x,y);
+      const color=floor.colors[(x+y*3)%floor.colors.length];
+      graphics.fillStyle(color,1).fillPoints(rect,true);
+      graphics.lineStyle(1,floor.lineColor,.28).strokePoints([...rect,rect[0]],false);
+    }
+    // Wall/floor seam, rectangular floor outline and emphasised vertical side edges.
+    graphics.lineStyle(R.topWallLineWidth,walls.right.accent,1).strokePoints([TL,TR],false);
+    graphics.lineStyle(R.floorOutlineWidth,walls.left.accent,1).strokePoints([TL,TR,BR,BL,TL],false);
+    graphics.lineStyle(R.sideEdgeLineWidth,walls.left.accent,1).strokePoints([TL,BL],false);
+    graphics.lineStyle(R.sideEdgeLineWidth,walls.left.accent,1).strokePoints([TR,BR],false);
+    // Logical entrance is unchanged; mark it clearly on the floor.
+    ROOM_CONFIG.entrance.cells.forEach(cell=>{
+      const rect=this.grid.getCellDiamond(cell.x,cell.y);
+      graphics.fillStyle(0x9f765a,.5).fillPoints(rect,true);
+    });
+    graphics.setDepth(-1000);
+    // Wall decorations along the horizontal top wall (window + menu board).
+    const deco=R.decoration;
+    const decoY=TL.y-R.topWallHeight*deco.heightFactor;
+    this.wallDecorations=[
+      new WallDecorationEntity(this,{texture:'environment:wall-window',x:TL.x+floorW*deco.windowFx,y:decoY,scale:deco.windowScale}),
+      new WallDecorationEntity(this,{texture:'environment:menu-board',x:TL.x+floorW*deco.boardFx,y:decoY,scale:deco.boardScale})
+    ];
+  }
   createFurniture(){
     this.entities.forEach(entity=>entity.destroy());
     this.entities.clear();
-    this.state.items.forEach(item=>this.addFurnitureEntity(item));
+    this.getLayoutItems().forEach(item=>this.addFurnitureEntity(item,{interactive:!this.demoLayoutActive}));
   }
-  addFurnitureEntity(item){
+  addFurnitureEntity(item,{interactive=true}={}){
     const definition=FURNITURE_CONFIG[item.type];
     if(!definition)return null;
     const entity=new FurnitureEntity(this,item,definition,this.grid);
-    entity.on('pointerdown',pointer=>this.furnitureDragController?.onEntityPointerDown(pointer,item.id));
+    // Demo-composition entities are display-only (they are not in state.items), so they
+    // are non-interactive to keep drag/selection strictly on the real saved layout.
+    if(interactive)entity.on('pointerdown',pointer=>this.furnitureDragController?.onEntityPointerDown(pointer,item.id));
+    else{entity.disableInteractive();this.input.setDraggable(entity,false);}
     this.entities.set(item.id,entity);
     return entity;
   }

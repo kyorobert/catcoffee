@@ -1,4 +1,4 @@
-# V0.56.1-alpha 專案現況
+# V0.57.0-alpha 專案現況
 
 本文件描述 repository 目前可直接查證的狀態，不代表未來產品承諾。決策以 [decisions.md](./decisions.md) 為準。
 
@@ -6,9 +6,9 @@
 
 | 項目 | 現況 |
 |---|---|
-| 版本 | `V0.56.1-alpha｜淺俯視構圖比較版` |
-| Build ID | `0561a` |
-| package version | `0.56.1-alpha` |
+| 版本 | `V0.57.0-alpha｜正交平面咖啡廳原型版` |
+| Build ID | `0570a` |
+| package version | `0.57.0-alpha` |
 | 引擎 | Phaser `3.90.0`，Canvas renderer |
 | 引擎來源 | `assets/vendor/phaser-3.90.0.min.js` |
 | 部署 | GitHub Pages 純靜態相對路徑，不依賴 CDN |
@@ -16,17 +16,15 @@
 | 存檔 key | `catCafePhaserV0540`（V0.56.0 未變） |
 | Legacy save | 只讀 legacy key，原始資料備份至 `catCafeLegacySaveBackupV0532` |
 
-### A2. 場景投影與 Flat 構圖三方案（V0.56.1 更新）
+### A2. 場景投影：正交平面原型（V0.57.0）
 
-- `GridSystem` 為 `SpatialGrid`（投影無關邏輯）＋ `SceneProjection` 的相容 Facade；投影有 `IsoProjection`（現行 2:1 等角）與 `FlatProjection`（淺斜／淺俯視）。
-- **預設投影仍為 iso**；`FlatProjection` 由網址 `?projection=flat` opt-in。本版新增**三個共用同一 `FlatProjection` 的構圖 Preset**（參數集中於 `assets/js/config/flat-projection-presets.js`）：
-  - **A｜Near Iso**：`?projection=flat&flatPreset=near-iso`
-  - **B｜Balanced**：`?projection=flat&flatPreset=balanced`
-  - **C｜Current Flat**：`?projection=flat&flatPreset=current`（＝`?projection=flat`，沿用 `ARCH-0562`）
-  - 未知／空字串 → `current`；`projection` 非 flat 時忽略 `flatPreset`；可疊 `&artDebug=1`。
-- **投影模式與 Preset 皆不寫入存檔**；重整後由網址決定。家具 `x/y/r`、Occupancy、Placement、Pathfinding、存檔 key／schema 未因投影或 Preset 改變。
-- Flat 房間 rendering 由 Preset metadata 決定（後牆高度、可選側牆、外框線寬、牆飾位置），僅屬視覺、深度 -1000；iso 呈現未動。
-- **三個 Preset 皆為 Proposed 比較方案，正式 Flat Preset 尚未選定**；未做家具 flat 逐件校準。real-browser 截圖見 `docs/evidence/v0563/`，比較說明見 [V0561 構圖比較結果](./V0561_FLAT_PRESET_COMPARISON_RESULT.md) 與 [V0561 人工驗收](./V0561_FLAT_PRESET_COMPARISON_ACCEPTANCE.md)；前一版 Prototype 紀錄見 [V0562 結果](./V0562_FLAT_PROJECTION_RESULT.md)。
+- `GridSystem` 為 `SpatialGrid`（投影無關邏輯）＋ `SceneProjection` 的相容 Facade；投影模組有 `IsoProjection`（2:1 等角）、`FlatProjection`（淺斜／淺俯視，**已被產品拒絕，保留回歸**）與 **`OrthogonalProjection`（正交平面，本版新增）**。
+- **`OrthogonalProjection`**：真正軸對齊 `axisX={104,0}`、`axisY={0,88}`（`axisX.y=0`、`axisY.x=0`，無 skew／shear／rotation），cell 為矩形、determinant 9152、origin 由房間 centroid 推導置中；集中於 `ORTHOGONAL_PROJECTION_PARAMS`（`assets/js/systems/OrthogonalProjection.js`）。
+- **URL**：`/`／`?projection=iso`→iso（**預設**）；`?projection=ortho`（別名 `orthogonal`）→正交；`?projection=ortho&demoLayout=1`→正交 + 非存檔 Demo 構圖；可疊 `&artDebug=1`；`?projection=flat`（含 `flatPreset=near-iso/balanced/current`）保留作歷史回歸；非法值回退 iso。
+- **Demo Layout**：`assets/js/config/ortho-demo-layout.js` 純資料 fixture（23 件現有家具，服務／座位／貓咪分區），僅 ortho 有效、display-only；**不寫入存檔、不改 `state.items`／inventory／coins、不觸發 save**。
+- **預設仍為 iso**；Orthogonal 尚未成為正式預設，待產品視覺驗收。投影與 demoLayout **不寫入存檔**。家具 `x/y/r`、Occupancy、Placement、Pathfinding、存檔 key／schema 未因投影改變。
+- **Flat A／B／C 已被產品負責人拒絕**（見 [DEC-016 Superseded](./decisions.md)、[DEC-017](./decisions.md)）；正交房間幾何正確，但現有等角家具仍為 Placeholder，**正式家具重作尚未開始**（見 [V0570 家具重作計畫](./V0570_ORTHOGONAL_ASSET_REBUILD_PLAN.md)）。
+- real-browser 截圖見 `docs/evidence/v0570/`；細節見 [V0570 結果](./V0570_ORTHOGONAL_ROOM_RESULT.md)、[V0570 驗收](./V0570_ORTHOGONAL_ROOM_ACCEPTANCE.md)、[比較 HTML](./V0570_ORTHOGONAL_COMPARISON.html)；前版 Flat 紀錄見 [V0561 構圖比較結果](./V0561_FLAT_PRESET_COMPARISON_RESULT.md)。
 
 ## B. 架構地圖
 
@@ -94,9 +92,9 @@
 ### 本次文件任務實際執行
 
 - `npm.cmd test`：通過。
-- `npm.cmd run check:deploy`：通過；檢查 Build `0561a`、35 DOM IDs、13 nested selectors、49 JavaScript modules。
-- `npm.cmd run check:dev`：通過（含真實 Chrome browser smoke）。
-- `node tests/flat-preset.test.js`：通過（Flat 三 Preset resolver 與幾何）。
+- `npm.cmd run check:deploy`：通過；檢查 Build `0570a`、35 DOM IDs、13 nested selectors、51 JavaScript modules。
+- `npm.cmd run check:dev`：通過（含真實 Chrome browser smoke，涵蓋 ortho／ortho-demo boot 與 invalid 回退）。
+- `node tests/ortho-projection.test.js`、`node tests/ortho-demo-layout.test.js`：通過（正交數學／footprint／資料相容／Demo 隔離與可達性）。
 
 ### Repository 內已有
 

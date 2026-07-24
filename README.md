@@ -1,20 +1,20 @@
-# 貓咪咖啡廳 V0.56.1-alpha
+# 貓咪咖啡廳 V0.57.0-alpha
 
-版本：`V0.56.1-alpha｜淺俯視構圖比較版`  
-Build ID：`0561a`
+版本：`V0.57.0-alpha｜正交平面咖啡廳原型版`  
+Build ID：`0570a`
 
-V0.56.1-alpha 在既有 SpatialGrid／IsoProjection／FlatProjection 架構上新增**三個共用同一 `FlatProjection` 的淺俯視構圖 Preset（A｜Near Iso、B｜Balanced、C｜Current Flat）**，供產品負責人在相同配置與鏡頭下比較。**預設仍為 2:1 等角（iso）**；三個 Preset 皆為比較用，正式 Flat Preset 尚未選定。投影與 Preset **僅改變畫面呈現**：家具 `x/y/r`、Occupancy、Placement、Pathfinding 與存檔 key `catCafePhaserV0540` 完全不變，且**不寫入存檔**。
+V0.57.0-alpha 在既有 SpatialGrid／IsoProjection／FlatProjection 架構上新增 **`OrthogonalProjection`（正交平面）原型**：真正軸對齊（`axisX={104,0}`、`axisY={0,88}`，無 skew／shear／rotation），房間為水平／垂直矩形，符合手機直立、正向可讀的平面咖啡廳方向。**預設仍為 2:1 等角（iso）**；Orthogonal 為 opt-in 原型，尚未設為正式預設，等產品視覺驗收。**Flat A／B／C 已被產品負責人拒絕**（保留作歷史回歸）。投影**僅改變畫面呈現**：家具 `x/y/r`、Occupancy、Placement、Pathfinding 與存檔 key `catCafePhaserV0540` 完全不變，且**不寫入存檔**。現有等角家具在正交地板為 Placeholder（透視待重作）。
 
-## 投影模式與 Flat 構圖 Preset（V0.56.1）
+## 投影模式（V0.57.0）
 
 - 預設（iso）：`index.html` 或 `?projection=iso`
-- Flat｜Preset C（相容路徑）：`?projection=flat` 或 `?projection=flat&flatPreset=current`
-- Flat｜Preset A：`?projection=flat&flatPreset=near-iso`
-- Flat｜Preset B：`?projection=flat&flatPreset=balanced`
-- 疊 Art Debug：於上述後加 `&artDebug=1`
-- 未知／空 `flatPreset` → Preset C；`projection` 非 flat 時忽略 `flatPreset`；非法 `projection`（如 `?projection=abc`）回退 iso。
-- 投影模式與 Preset 皆不寫入存檔；重整後由網址參數決定。
-- 詳見 [V0561 構圖比較結果](./docs/V0561_FLAT_PRESET_COMPARISON_RESULT.md)、[V0561 人工驗收](./docs/V0561_FLAT_PRESET_COMPARISON_ACCEPTANCE.md)、截圖 `docs/evidence/v0563/`；前一版 Prototype 見 [V0562 結果](./docs/V0562_FLAT_PROJECTION_RESULT.md)。
+- **Orthogonal 正交平面**：`?projection=ortho`（別名 `?projection=orthogonal`）
+- **Orthogonal + Demo 構圖（不寫存檔）**：`?projection=ortho&demoLayout=1`
+- 疊 Art Debug：於上述後加 `&artDebug=1`（如 `?projection=ortho&demoLayout=1&artDebug=1`）
+- Flat（已拒絕，保留回歸）：`?projection=flat`（含 `flatPreset=near-iso/balanced/current`）
+- 非法 `projection`（如 `?projection=abc`）安全回退 iso。
+- 投影模式與 `demoLayout` 皆**不寫入存檔**；重整後由網址參數決定。
+- 詳見 [V0570 結果](./docs/V0570_ORTHOGONAL_ROOM_RESULT.md)、[V0570 人工驗收](./docs/V0570_ORTHOGONAL_ROOM_ACCEPTANCE.md)、[比較 HTML](./docs/V0570_ORTHOGONAL_COMPARISON.html)、[家具重作計畫](./docs/V0570_ORTHOGONAL_ASSET_REBUILD_PLAN.md)、截圖 `docs/evidence/v0570/`；前版 Flat 見 [V0561 構圖比較](./docs/V0561_FLAT_PRESET_COMPARISON_RESULT.md)。
 
 ## V0.55.2 家具重繪內容（前版，保留）
 

@@ -1,8 +1,9 @@
-import {SpatialGrid} from './SpatialGrid.js?v=0561a';
-import {IsoProjection} from './IsoProjection.js?v=0561a';
-import {FlatProjection} from './FlatProjection.js?v=0561a';
-import {PROJECTION_MODE} from '../core/projection-mode.js?v=0561a';
-import {getFlatPreset} from '../config/flat-projection-presets.js?v=0561a';
+import {SpatialGrid} from './SpatialGrid.js?v=0570a';
+import {IsoProjection} from './IsoProjection.js?v=0570a';
+import {FlatProjection} from './FlatProjection.js?v=0570a';
+import {OrthogonalProjection} from './OrthogonalProjection.js?v=0570a';
+import {PROJECTION_MODE} from '../core/projection-mode.js?v=0570a';
+import {getFlatPreset} from '../config/flat-projection-presets.js?v=0570a';
 
 // GridSystem is a compatibility Facade. It composes the projection-independent
 // SpatialGrid with the active SceneProjection and keeps the full public API
@@ -26,12 +27,16 @@ export class GridSystem {
     this.floor = roomConfig.floor;
     this.furniture = furnitureConfig;
     this.spatialGrid = new SpatialGrid(roomConfig, furnitureConfig);
-    this.projectionMode = options.mode === PROJECTION_MODE.FLAT ? PROJECTION_MODE.FLAT : PROJECTION_MODE.ISO;
-    if (this.projectionMode === PROJECTION_MODE.FLAT) {
+    this.flatPreset = null;
+    if (options.mode === PROJECTION_MODE.FLAT) {
+      this.projectionMode = PROJECTION_MODE.FLAT;
       this.flatPreset = getFlatPreset(options.flatPreset);
       this.projection = new FlatProjection(roomConfig, this.spatialGrid, furnitureConfig, this.flatPreset.projection);
+    } else if (options.mode === PROJECTION_MODE.ORTHO) {
+      this.projectionMode = PROJECTION_MODE.ORTHO;
+      this.projection = new OrthogonalProjection(roomConfig, this.spatialGrid, furnitureConfig);
     } else {
-      this.flatPreset = null;
+      this.projectionMode = PROJECTION_MODE.ISO;
       this.projection = new IsoProjection(roomConfig, this.spatialGrid, furnitureConfig);
     }
   }

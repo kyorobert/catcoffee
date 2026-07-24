@@ -3,16 +3,20 @@
 // raw value (or the whole search string) in; this module only normalises it.
 export const PROJECTION_MODE = Object.freeze({
   ISO: 'iso',
-  FLAT: 'flat'
+  FLAT: 'flat',
+  ORTHO: 'ortho'
 });
 
 export const PROJECTION_QUERY_KEY = 'projection';
 
-// Any value that is not exactly `flat` (after trim + lowercase) resolves to iso,
-// so empty, missing, mixed-case, padded and unknown values all fall back safely.
+// Default is iso. `flat` opts into the (rejected, regression-only) shallow-oblique
+// Flat; `ortho` and its alias `orthogonal` opt into the axis-aligned Orthogonal
+// prototype. Any other value (empty, missing, mixed-case, padded, unknown) falls back
+// safely to iso.
 export function resolveProjectionMode(rawValue) {
   const normalized = typeof rawValue === 'string' ? rawValue.trim().toLowerCase() : '';
   if (normalized === PROJECTION_MODE.FLAT) return PROJECTION_MODE.FLAT;
+  if (normalized === PROJECTION_MODE.ORTHO || normalized === 'orthogonal') return PROJECTION_MODE.ORTHO;
   if (normalized === PROJECTION_MODE.ISO) return PROJECTION_MODE.ISO;
   return PROJECTION_MODE.ISO;
 }

@@ -5,7 +5,7 @@ import {existsSync,readFileSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0561a';
+import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0570a';
 import {CAT_PROFILES,CAT_ANIMATION_LAYOUT,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const root=process.cwd();
@@ -44,7 +44,7 @@ const server=createServer((request,response)=>{
     response.end(readFileSync(file,'utf8').replace('id="careBtn"','id="careBtn-missing"'));return;
   }
   if(relativePath==='index.html'&&requestUrl.searchParams.get('fixture')==='build-mismatch'){
-    response.end(readFileSync(file,'utf8').replace('data-build-id="0561a"','data-build-id="0550-old"'));return;
+    response.end(readFileSync(file,'utf8').replace('data-build-id="0570a"','data-build-id="0550-old"'));return;
   }
   response.end(readFileSync(file));
 });
@@ -145,7 +145,7 @@ try{
     });
     const problems=[];
     if(!state.phaser||!state.game)problems.push('Phaser global or game missing');
-    if(state.htmlBuildId!=='0561a'||state.jsBuildId!=='0561a')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
+    if(state.htmlBuildId!=='0570a'||state.jsBuildId!=='0570a')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
     if(state.gameReady!=='1')problems.push(`gameReady is ${state.gameReady}`);
     if(loadedUrls.some(url=>/\?v=0550a(?:$|[&#])/.test(url)||url.includes('?v=0542a')))problems.push('obsolete runtime cache query loaded');
     if(state.canvasCount!==1||state.canvasWidth<=0||state.canvasHeight<=0)problems.push(`invalid canvas ${state.canvasCount} ${state.canvasWidth}x${state.canvasHeight}`);
@@ -175,7 +175,7 @@ try{
        if(storeIds.length!==47)problems.push(`normal store contains ${storeIds.length} items instead of 47`);
        if(PROTOTYPE_FURNITURE_IDS.some(id=>!storeIds.includes(id)))problems.push('a V0.55.2 redraw is missing from the store');
        const redrawThumbnails=await page.locator(PROTOTYPE_FURNITURE_IDS.map(id=>`.store-card[data-id="${id}"] img`).join(',')).evaluateAll(images=>images.map(image=>({src:image.getAttribute('src'),width:image.naturalWidth,height:image.naturalHeight})));
-       if(redrawThumbnails.length!==25||redrawThumbnails.some(image=>!image.src?.includes('/redrawn/')||!image.src.endsWith('.png?v=0561a')||image.width<=0||image.height<=0))problems.push(`invalid redraw store thumbnails: ${JSON.stringify(redrawThumbnails)}`);
+       if(redrawThumbnails.length!==25||redrawThumbnails.some(image=>!image.src?.includes('/redrawn/')||!image.src.endsWith('.png?v=0570a')||image.width<=0||image.height<=0))problems.push(`invalid redraw store thumbnails: ${JSON.stringify(redrawThumbnails)}`);
        const redrawBefore=await page.evaluate(()=>({coins:window.gameController.getState().coins,count:window.gameController.getState().items.length}));
        await page.click('.store-card[data-id="squareCafeTable"]');
        await page.waitForTimeout(100);
@@ -317,6 +317,55 @@ try{
   if(!artState.enabled||!artState.graphics||artState.labels<1||artState.canvasCount!==1)throw new Error(`Art Debug failed: ${JSON.stringify(artState)}`);
   results.push({scenario:'art-debug',viewport:'1366x768',...artState,problems:[]});
   await artContext.close();
+  // Orthogonal prototype: existing layout + demo layout boot cleanly on a portrait phone.
+  for(const ortho of [
+    {name:'ortho-existing',query:'?projection=ortho',demo:false},
+    {name:'ortho-demo',query:'?projection=ortho&demoLayout=1&artDebug=1',demo:true}
+  ]){
+    const context=await browser.newContext({viewport:{width:390,height:844}});
+    await context.addInitScript(()=>localStorage.clear());
+    const page=await context.newPage();
+    const pageErrors=[];
+    page.on('pageerror',error=>pageErrors.push(error.message));
+    page.on('console',message=>{if(message.type()==='error')pageErrors.push('console:'+message.text())});
+    await page.goto(origin+'/'+ortho.query,{waitUntil:'domcontentloaded',timeout:20000});
+    await page.waitForFunction(()=>document.body.dataset.gameReady==='1'&&document.getElementById('bootOverlay')?.classList.contains('hidden'),null,{timeout:20000});
+    const state=await page.evaluate(()=>{
+      const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+      const saved=JSON.parse(localStorage.getItem('catCafePhaserV0540')||'null');
+      const cats=[...scene.catEntities.values()].map(entity=>({x:entity.sprite.x,y:entity.sprite.y}));
+      return {
+        mode:scene.projectionMode,demo:Boolean(scene.demoLayoutActive),
+        entities:scene.entities.size,stateItems:scene.state.items.length,
+        savedLeak:saved?('projection' in saved||'demoLayout' in saved):false,
+        catsFinite:cats.length>0&&cats.every(cat=>Number.isFinite(cat.x)&&Number.isFinite(cat.y)),
+        artDebug:scene.artDebug?.enabled||false,
+        canvasRenderer:window.__CAT_CAFE_GAME__.renderer.type===Phaser.CANVAS
+      };
+    });
+    const problems=[];
+    if(state.mode!=='ortho')problems.push(`mode is ${state.mode}`);
+    if(state.demo!==ortho.demo)problems.push(`demoLayoutActive is ${state.demo}`);
+    if(ortho.demo&&state.stateItems!==18)problems.push(`demo mutated state.items (${state.stateItems})`);
+    if(state.savedLeak)problems.push('projection/demoLayout leaked into the save');
+    if(!state.catsFinite)problems.push('a cat has a non-finite position');
+    if(!state.canvasRenderer)problems.push('renderer is not Canvas');
+    if(ortho.demo&&!state.artDebug)problems.push('Art Debug did not enable');
+    if(pageErrors.length)problems.push(JSON.stringify(pageErrors));
+    results.push({scenario:ortho.name,viewport:'390x844',...state,problems});
+    await context.close();
+    if(problems.length)throw new Error(`${ortho.name}: ${problems.join('; ')}`);
+  }
+  // Invalid projection value safely falls back to iso.
+  {
+    const context=await browser.newContext({viewport:{width:390,height:844}});
+    const page=await context.newPage();
+    await page.goto(origin+'/?projection=invalid',{waitUntil:'domcontentloaded',timeout:20000});
+    await page.waitForFunction(()=>document.body.dataset.gameReady==='1',null,{timeout:20000});
+    const mode=await page.evaluate(()=>window.__CAT_CAFE_GAME__.scene.getScene('CafeScene').projectionMode);
+    if(mode!=='iso')throw new Error(`invalid projection did not fall back to iso: ${mode}`);
+    await context.close();
+  }
 }finally{
   await browser?.close();
   await new Promise(resolveClose=>server.close(resolveClose));

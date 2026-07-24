@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V0.57.0-alpha｜Orthogonal 對比：iso／Flat C／Orthogonal</title>
+<style>
+  :root{--bg:#2b1f18;--card:#3b2b22;--ink:#f6ead9;--sub:#c9ad97;--edge:#5b4436;--accent:#e0a56b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,"Noto Sans TC",sans-serif;line-height:1.6}
+  header{padding:24px 20px;border-bottom:1px solid var(--edge)}
+  h1{margin:0 0 6px;font-size:1.4rem}
+  h2{margin:32px 20px 8px;font-size:1.1rem;border-left:4px solid var(--accent);padding-left:10px}
+  p.note{margin:6px 20px;color:var(--sub);font-size:.92rem}
+  .banner{margin:16px 20px;padding:10px 14px;background:#4a2f26;border:1px solid var(--edge);border-radius:8px;color:#ffd9b8;font-size:.92rem}
+  .grid{display:grid;gap:14px;padding:8px 20px 24px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+  figure{margin:0;background:var(--card);border:1px solid var(--edge);border-radius:10px;overflow:hidden}
+  figure img{display:block;width:100%;height:auto;background:#000;cursor:zoom-in}
+  figcaption{padding:8px 10px;font-size:.86rem}
+  figcaption b{color:var(--accent)}
+  figcaption .url{display:block;color:var(--sub);font-family:ui-monospace,monospace;font-size:.76rem;word-break:break-all;margin-top:2px}
+  .rej{color:#e79}
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+  .lightbox:target{display:flex}
+  .lightbox img{max-width:100%;max-height:88vh;object-fit:contain}
+  .lightbox .close{position:absolute;top:14px;right:20px;color:#fff;font-size:2rem;text-decoration:none}
+  footer{padding:20px;color:var(--sub);font-size:.85rem;border-top:1px solid var(--edge)}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1>貓咪咖啡廳｜Orthogonal 正交平面 對比</h1>
+  <p class="note">V0.57.0-alpha｜Build 0570a・真實 Chrome 截圖（HTTP，非 file://）・相同預設配置、固定沉澱・點圖放大</p>
+</header>
+
+<div class="banner">
+  本頁僅供理解構圖與可讀性比較，<b>不代表 Orthogonal 已通過產品驗收</b>。預設仍為 iso；Flat A／B／C 已被產品負責人拒絕；正交房間方向待
+  <a href="./V0570_ORTHOGONAL_ROOM_ACCEPTANCE.md">人工驗收</a>。等角家具在正交地板為 Placeholder（透視待重作）。
+</div>
+
+<h2>桌面（1440×900）</h2>
+<div class="grid">
+  <figure><a href="#lb-d-iso"><img src="evidence/v0570/desktop-iso.png" alt="desktop iso"></a>
+    <figcaption><b>iso</b>（現行預設）<span class="url">/?projection=iso</span></figcaption></figure>
+  <figure><a href="#lb-d-flatc"><img src="evidence/v0570/desktop-flat-c.png" alt="desktop flat c"></a>
+    <figcaption><b class="rej">Flat C（已拒絕）</b><span class="url">/?projection=flat&flatPreset=current</span></figcaption></figure>
+  <figure><a href="#lb-d-orthoe"><img src="evidence/v0570/desktop-ortho-existing-layout.png" alt="desktop ortho existing"></a>
+    <figcaption><b>Orthogonal｜既有布局</b><span class="url">/?projection=ortho</span></figcaption></figure>
+  <figure><a href="#lb-d-orthod"><img src="evidence/v0570/desktop-ortho-demo-layout.png" alt="desktop ortho demo"></a>
+    <figcaption><b>Orthogonal｜Demo 構圖</b><span class="url">/?projection=ortho&demoLayout=1</span></figcaption></figure>
+</div>
+
+<h2>手機直立（390×844）</h2>
+<div class="grid">
+  <figure><a href="#lb-m-iso"><img src="evidence/v0570/mobile-390-iso.png" alt="mobile iso"></a>
+    <figcaption><b>iso</b><span class="url">/?projection=iso</span></figcaption></figure>
+  <figure><a href="#lb-m-flata"><img src="evidence/v0570/mobile-390-flat-a.png" alt="mobile flat a"></a>
+    <figcaption><b class="rej">Flat A（已拒絕）</b><span class="url">flatPreset=near-iso</span></figcaption></figure>
+  <figure><a href="#lb-m-flatb"><img src="evidence/v0570/mobile-390-flat-b.png" alt="mobile flat b"></a>
+    <figcaption><b class="rej">Flat B（已拒絕）</b><span class="url">flatPreset=balanced</span></figcaption></figure>
+  <figure><a href="#lb-m-flatc"><img src="evidence/v0570/mobile-390-flat-c.png" alt="mobile flat c"></a>
+    <figcaption><b class="rej">Flat C（已拒絕）</b><span class="url">flatPreset=current</span></figcaption></figure>
+  <figure><a href="#lb-m-orthoe"><img src="evidence/v0570/mobile-390-ortho-existing-layout.png" alt="mobile ortho existing"></a>
+    <figcaption><b>Orthogonal｜既有布局</b><span class="url">/?projection=ortho</span></figcaption></figure>
+  <figure><a href="#lb-m-orthod"><img src="evidence/v0570/mobile-390-ortho-demo-layout.png" alt="mobile ortho demo"></a>
+    <figcaption><b>Orthogonal｜Demo 構圖</b><span class="url">/?projection=ortho&demoLayout=1</span></figcaption></figure>
+  <figure><a href="#lb-m-orthoad"><img src="evidence/v0570/mobile-390-ortho-demo-artdebug.png" alt="mobile ortho demo artdebug"></a>
+    <figcaption><b>Orthogonal｜Demo + Art Debug</b><span class="url">…&artDebug=1</span></figcaption></figure>
+</div>
+
+<h2>其他手機尺寸（Demo 構圖）</h2>
+<div class="grid">
+  <figure><a href="#lb-393"><img src="evidence/v0570/mobile-393-ortho-demo-layout.png" alt="393 ortho demo"></a>
+    <figcaption><b>393×852</b><span class="url">/?projection=ortho&demoLayout=1</span></figcaption></figure>
+  <figure><a href="#lb-430"><img src="evidence/v0570/mobile-430-ortho-demo-layout.png" alt="430 ortho demo"></a>
+    <figcaption><b>430×932</b><span class="url">/?projection=ortho&demoLayout=1</span></figcaption></figure>
+</div>
+
+<footer>
+  相關：<a href="./V0570_ORTHOGONAL_ROOM_RESULT.md">結果</a>・
+  <a href="./V0570_ORTHOGONAL_ROOM_ACCEPTANCE.md">驗收</a>・
+  <a href="./V0570_ORTHOGONAL_ASSET_REBUILD_PLAN.md">家具重作計畫</a>・
+  <a href="./decisions.md">decisions（DEC-017）</a>
+</footer>
+
+<div class="lightbox" id="lb-d-iso"><a class="close" href="#">×</a><img src="evidence/v0570/desktop-iso.png" alt=""></div>
+<div class="lightbox" id="lb-d-flatc"><a class="close" href="#">×</a><img src="evidence/v0570/desktop-flat-c.png" alt=""></div>
+<div class="lightbox" id="lb-d-orthoe"><a class="close" href="#">×</a><img src="evidence/v0570/desktop-ortho-existing-layout.png" alt=""></div>
+<div class="lightbox" id="lb-d-orthod"><a class="close" href="#">×</a><img src="evidence/v0570/desktop-ortho-demo-layout.png" alt=""></div>
+<div class="lightbox" id="lb-m-iso"><a class="close" href="#">×</a><img src="evidence/v0570/mobile-390-iso.png" alt=""></div>
+<div class="lightbox" id="lb-m-flata"><a class="close" href="#">×</a><img src="evidence/v0570/mobile-390-flat-a.png" alt=""></div>
+<div class="lightbox" id="lb-m-flatb"><a class="close" href="#">×</a><img src="evidence/v0570/mobile-390-flat-b.png" alt=""></div>
+<div class="lightbox" id="lb-m-flatc"><a class="close" href="#">×</a><img src="evidence/v0570/mobile-390-flat-c.png" alt=""></div>
+<div class="lightbox" id="lb-m-orthoe"><a class="close" href="#">×</a><img src="evidence/v0570/mobile-390-ortho-existing-layout.png" alt=""></div>
+<div class="lightbox" id="lb-m-orthod"><a class="close" href="#">×</a><img src="evidence/v0570/mobile-390-ortho-demo-layout.png" alt=""></div>
+<div class="lightbox" id="lb-m-orthoad"><a class="close" href="#">×</a><img src="evidence/v0570/mobile-390-ortho-demo-artdebug.png" alt=""></div>
+<div class="lightbox" id="lb-393"><a class="close" href="#">×</a><img src="evidence/v0570/mobile-393-ortho-demo-layout.png" alt=""></div>
+<div class="lightbox" id="lb-430"><a class="close" href="#">×</a><img src="evidence/v0570/mobile-430-ortho-demo-layout.png" alt=""></div>
+</body>
+</html>

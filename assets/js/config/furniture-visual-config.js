@@ -1,4 +1,4 @@
-import {FURNITURE_CONFIG} from './furniture-config.js?v=0561a';
+import {FURNITURE_CONFIG} from './furniture-config.js?v=0570a';
 
 // Visual-only metadata. Prices, unlocks, footprints and save data remain owned by
 // furniture-config.js and SaveAdapter; this module never mutates those sources.
@@ -47,7 +47,7 @@ export const PROTOTYPE_FURNITURE_IDS = Object.freeze([
 // Historical audit set: these 25 IDs were the V0.55.1 placeholder SVGs.
 // V0.55.2 preserves IDs and gameplay metadata while replacing only runtime art.
 export const V0552_REDRAW_FURNITURE_IDS = PROTOTYPE_FURNITURE_IDS;
-export const FURNITURE_REDRAW_ASSET_VERSION = '0561a';
+export const FURNITURE_REDRAW_ASSET_VERSION = '0570a';
 export const V0552_REDRAW_BATCHES = Object.freeze({
   P0:Object.freeze(['squareCafeTable','windowHighChair','wallBench','catEarChair','creamSofa','pawSofa','cardboardNest','scratchPost','windowHammock','doubleCatTree']),
   P1:Object.freeze(['catTent','catCastle','coffeeMachine','oven','washStation','smartOrder','pawRug','creamPlaidRug','starNightRug']),

@@ -6,13 +6,17 @@ import {PROJECTION_MODE, PROJECTION_QUERY_KEY, resolveProjectionMode, projection
 // E. Projection mode resolver: default iso, opt-in flat, safe fallback.
 assert.equal(PROJECTION_MODE.ISO, 'iso');
 assert.equal(PROJECTION_MODE.FLAT, 'flat');
+assert.equal(PROJECTION_MODE.ORTHO, 'ortho');
 assert.equal(PROJECTION_QUERY_KEY, 'projection');
 
 // resolveProjectionMode(rawValue)
 const rawCases = [
   [undefined, 'iso'], [null, 'iso'], ['', 'iso'], ['iso', 'iso'], ['flat', 'flat'],
   ['abc', 'iso'], ['FLAT', 'flat'], [' flat ', 'flat'], ['ISO', 'iso'], ['  ', 'iso'],
-  ['Flat', 'flat'], ['flatten', 'iso'], [123, 'iso'], [{}, 'iso'], ['iso ', 'iso']
+  ['Flat', 'flat'], ['flatten', 'iso'], [123, 'iso'], [{}, 'iso'], ['iso ', 'iso'],
+  // ortho + its orthogonal alias (default stays iso for everything else)
+  ['ortho', 'ortho'], ['orthogonal', 'ortho'], ['ORTHO', 'ortho'], [' ortho ', 'ortho'],
+  ['Orthogonal', 'ortho'], ['ortho ', 'ortho'], ['orthographic', 'iso'], ['ort', 'iso']
 ];
 for (const [input, expected] of rawCases) {
   assert.equal(resolveProjectionMode(input), expected, `resolveProjectionMode(${JSON.stringify(input)})`);
@@ -23,7 +27,10 @@ const searchCases = [
   ['', 'iso'], ['?projection=flat', 'flat'], ['projection=flat', 'flat'], ['?projection=iso', 'iso'],
   ['?projection=abc', 'iso'], ['?projection=', 'iso'], ['?foo=bar', 'iso'],
   ['?projection=flat&artDebug=1', 'flat'], ['?artDebug=1&projection=FLAT', 'flat'],
-  ['?projection=%20flat%20', 'flat'], [undefined, 'iso'], [null, 'iso']
+  ['?projection=%20flat%20', 'flat'], [undefined, 'iso'], [null, 'iso'],
+  ['?projection=ortho', 'ortho'], ['?projection=orthogonal', 'ortho'],
+  ['?projection=ortho&demoLayout=1', 'ortho'], ['?artDebug=1&projection=ORTHO', 'ortho'],
+  ['?projection=%20ortho%20', 'ortho']
 ];
 for (const [search, expected] of searchCases) {
   assert.equal(projectionModeFromSearch(search), expected, `projectionModeFromSearch(${JSON.stringify(search)})`);

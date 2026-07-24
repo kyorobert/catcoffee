@@ -2,6 +2,21 @@
 
 每筆紀錄包含版本、目標、完成內容、驗證、已知限制與下一步。歷史版本若 repository 沒有完整日期或測試輸出，會明確標示為回溯摘要，不補造證據。
 
+## 2026-07-25｜ARCH-0570-ORTHOGONAL-ROOM-PROTOTYPE
+
+- 版本／Build：**V0.57.0-alpha｜正交平面咖啡廳原型版** / **0570a**（由 V0.56.1-alpha / 0561a 升版；存檔 key `catCafePhaserV0540`、schema 5401、migration 5401 皆不變）
+- 目標：產品負責人拒絕 Flat A／B／C（整體歪斜、方向不清），改採手機直立、水平／垂直、正向閱讀的平面咖啡廳。停止斜投影微調，建立單一 `OrthogonalProjection`（正交平面）原型；iso 仍為預設。
+- 產品決策落檔：Flat A/B/C = Rejected；DEC-016 = Superseded；DEC-017（正交方向、房間水平/垂直、核心家具可重作、不再以沿用全部等角家具為前提）= Accepted；DEC-008 部分更新（保留邏輯/投影分離，取代「淺斜為最終/不採正交」）。
+- OrthogonalProjection（新增，自足、受保護 hash）：`axisX={104,0}`、`axisY={0,88}`（`axisX.y=0`、`axisY.x=0`，無 skew/shear/rotation）；det 9152；origin 由 centroid 推導置中（`gridToWorld(4.5,3.5)=(780,560)`）；`getCellDiamond` 回傳矩形 `[TL,TR,BR,BL]`；cellWidth/cellHeight 集中於 `ORTHOGONAL_PROJECTION_PARAMS`（依 10×8 房間、1560×1120 world、手機直立可讀性選定，經截圖驗證）。介面與 iso/flat 相容，經 GridSystem Facade 共用同一 SpatialGrid。
+- Resolver/URL：`projection-mode.js` 加 `ortho` 與別名 `orthogonal`（純函式、非法回退 iso、不寫 localStorage/存檔）；`GridSystem` 第三參數選投影、不讀 URL、舊二參仍 iso；預設 iso。
+- 正交房間 rendering（`drawRoomOrtho`，僅視覺、深度 -1000）：水平/垂直矩形地板、水平上牆、房間基色填滿側/下邊界（無黑區/非斜棋盤）、入口標示；全由投影幾何推導、非固定畫面座標、非 CSS transform；iso/flat branch 未動。
+- Demo Layout（非存檔）：`ortho-demo-layout.js` 純資料 fixture（23 件現有家具，服務/座位/貓咪分區，入口淨空、走道可達），`?projection=ortho&demoLayout=1` opt-in、display-only；**不改 state.items/inventory/coins、不觸發 save、存檔不含 projection/demoLayout**（測試 + real-browser 驗證）。
+- 家具相容：47 件在 ortho 無 Runtime error；ID/`x/y/r`/footprint/layer/rotation/price/socket/walkBlocking 不變；Entity/Ghost/ArtDebug 共用同一 Orthogonal anchor；**未加 override、未逐件校準、未重畫**（等角 sprite 為 Placeholder，待 ART-0571）。
+- 修改檔案：新增 `OrthogonalProjection.js`、`ortho-demo-layout.js`、`tests/ortho-projection.test.js`、`tests/ortho-demo-layout.test.js`、`docs/V0570_*`（結果/驗收/家具重作計畫/比較 HTML）、`docs/evidence/v0570/`（13 張）；改 `GridSystem.js`、`CafeScene.js`（ortho 分支 + demo 接線）、`projection-mode.js`（+ortho）、擴充 `projection-mode.test.js` 與 `browser-smoke.test.js`（ortho boot + invalid 回退）；版本機械升版 0561a→0570a（含 CAT/FURNITURE_REDRAW 版本、index.html、manifest、package/lock）、`check.js`（版本/Build/obsolete +`?v=0561a`/protected hash 更新 GridSystem/projection-mode/flat-presets + 新增 OrthogonalProjection/required/tests）；docs decisions/current-state/roadmap/handoff/README。`FlatProjection`/`IsoProjection`/`SpatialGrid`/`room-config`/`furniture-config` hash 未變。
+- 驗證：`npm test`、`ortho-projection`、`ortho-demo-layout`、`projection-mode`、`flat-*`、`grid-projection-compat`（iso/Flat C golden 未改）、`build-consistency` 皆通過；`npm run check:deploy` 通過（Build 0570a、51 modules）；`npm run check:dev` 通過（**本機 Chrome 實際 browser smoke**，含 ortho/ortho-demo boot、demo 隔離、invalid 回退）；13 張 real-browser 截圖零 page error，Art Debug 矩形 footprint 對齊 cell。
+- 已知限制／未完成：Orthogonal 未設正式預設；等角家具透視為 Placeholder（待重作，本版不校準）；上牆較薄、手機因固定 landscape world 只顯示中央垂直帶需左右 pan；未新增營運/角色系統；手機實機驗收 pending；本環境無 `.git`（未 git init/commit/push/部署）。
+- 下一步：產品負責人依 `docs/evidence/v0570/`、[比較 HTML](./V0570_ORTHOGONAL_COMPARISON.html) 與 [V0570 驗收](./V0570_ORTHOGONAL_ROOM_ACCEPTANCE.md) 判斷方向；通過後才啟動 `ART-0571-CORE-ORTHOGONAL-FURNITURE`（核心 10～12 件）。
+
 ## 2026-07-24｜ARCH-0563-FLAT-VISUAL-PRESET-COMPARISON
 
 - 版本／Build：**V0.56.1-alpha｜淺俯視構圖比較版** / **0561a**（由 V0.56.0-alpha / 0560a 升版；存檔 key `catCafePhaserV0540` 不變）
