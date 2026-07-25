@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0571a';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0571a';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0571a';
-import {ORTHO_DEMO_LAYOUT, buildOrthoDemoItems, isDemoLayoutRequested}
-  from '../assets/js/config/ortho-demo-layout.js?v=0571a';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0572a';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0572a';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0572a';
+import {ORTHO_DEMO_LAYOUT, ORTHO_DEMO_ENTRANCE, buildOrthoDemoItems, isDemoLayoutRequested}
+  from '../assets/js/config/ortho-demo-layout.js?v=0572a';
 
 const {cols, rows} = ROOM_CONFIG.floor;
 
@@ -68,11 +68,13 @@ function reachFrom(sx, sy) {
   }
   return seen;
 }
-// a walkable cell adjacent to the (reserved) entrance
-assert.ok(walkable(7, 7) || walkable(8, 6) || walkable(9, 6), 'entrance has a walkable neighbour');
-const reach = reachFrom(7, 7);
-for (const k of ['2,1', '3,1']) assert.ok(reach.has(k), `counter front reachable from entrance: ${k}`);
-for (const k of ['3,4', '4,3', '6,3', '4,5']) assert.ok(reach.has(k), `seating approach reachable from entrance: ${k}`);
+// The demo customer entrance is the top-corner door; it must be walkable and connect the cafe.
+assert.deepEqual(ORTHO_DEMO_ENTRANCE, {x: 9, y: 0}, 'demo entrance is the top-right door corner');
+assert.ok(walkable(ORTHO_DEMO_ENTRANCE.x, ORTHO_DEMO_ENTRANCE.y), 'demo entrance cell is walkable');
+const reach = reachFrom(ORTHO_DEMO_ENTRANCE.x, ORTHO_DEMO_ENTRANCE.y);
+for (const k of ['1,1', '2,1', '3,1', '4,1', '5,1', '6,1']) assert.ok(reach.has(k), `counter front reachable from door: ${k}`);
+for (const k of ['3,4', '4,4', '5,4', '4,5']) assert.ok(reach.has(k), `seating approach reachable from door: ${k}`);
+for (const k of ['4,6', '5,6']) assert.ok(reach.has(k), `cat area reachable from door: ${k}`);
 assert.ok(reach.size >= 40, 'a large connected walkable area (aisles not a one-cell maze)');
 
 // --- Purity: no engine/DOM/storage/save, no actor identity ---

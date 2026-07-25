@@ -2,16 +2,16 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-// Import via the same `?v=0571a` specifier the runtime uses so `instanceof` resolves
+// Import via the same `?v=0572a` specifier the runtime uses so `instanceof` resolves
 // against the same module instance GridSystem composes internally.
-import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0571a';
-import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0571a';
+import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0572a';
+import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0572a';
 import {OrthogonalProjection, ORTHOGONAL_PROJECTION_PARAMS, ORTHOGONAL_ROOM_RENDER}
-  from '../assets/js/systems/OrthogonalProjection.js?v=0571a';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0571a';
-import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0571a';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0571a';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0571a';
+  from '../assets/js/systems/OrthogonalProjection.js?v=0572a';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0572a';
+import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0572a';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0572a';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0572a';
 
 const approx = (a, b, eps = 1e-9) => Math.abs(a - b) <= eps;
 const {cols, rows} = ROOM_CONFIG.floor;
@@ -24,13 +24,13 @@ const iso = new IsoProjection(ROOM_CONFIG, spatial, FURNITURE_CONFIG);
 assert.equal(ORTHOGONAL_PROJECTION_PARAMS.id, 'ortho');
 assert.equal(ortho.axisX.y, 0, 'axisX.y must be exactly 0 (columns perfectly vertical)');
 assert.equal(ortho.axisY.x, 0, 'axisY.x must be exactly 0 (rows perfectly horizontal)');
-assert.deepEqual(ortho.axisX, {x: 104, y: 0});
-assert.deepEqual(ortho.axisY, {x: 0, y: 88});
-assert.equal(ortho.determinant, 104 * 88);
+assert.deepEqual(ortho.axisX, {x: 88, y: 0});
+assert.deepEqual(ortho.axisY, {x: 0, y: 120});
+assert.equal(ortho.determinant, 88 * 120);
 assert.notEqual(ortho.determinant, 0, 'basis must be invertible');
-assert.deepStrictEqual(ortho.origin, {x: 312, y: 252}, 'origin derived to centre the floor');
-assert.deepStrictEqual(ortho.gridToWorld(0, 0), {x: 312, y: 252});
-assert.deepStrictEqual(ortho.gridToWorld(9, 7), {x: 1248, y: 868});
+assert.deepStrictEqual(ortho.origin, {x: 384, y: 140}, 'origin derived to centre the floor');
+assert.deepStrictEqual(ortho.gridToWorld(0, 0), {x: 384, y: 140});
+assert.deepStrictEqual(ortho.gridToWorld(9, 7), {x: 1176, y: 980});
 assert.deepStrictEqual(ortho.gridToWorld(4.5, 3.5), {x: worldW / 2, y: worldH / 2}, 'floor centroid → world centre');
 // invertibility + finiteness at origin, centre, edges, corners and OUTSIDE the room
 const probePts = [[0, 0], [4.5, 3.5], [9, 0], [0, 7], [9, 7], [2.5, 3.5], [-2, -2], [12, 10], [5, 0], [0, 4]];
@@ -73,10 +73,10 @@ for (const [x, y] of [[0, 0], [3, 5], [8, 6]]) {
   assert.deepStrictEqual(a[2], down[1], `bottom-right shared (${x},${y})`);
 }
 // Room outer frame is a clean rectangle inside the world.
-assert.deepStrictEqual(ortho.getCellDiamond(0, 0)[0], {x: 260, y: 208});
-assert.deepStrictEqual(ortho.getCellDiamond(cols - 1, rows - 1)[2], {x: 1300, y: 912});
+assert.deepStrictEqual(ortho.getCellDiamond(0, 0)[0], {x: 340, y: 80});
+assert.deepStrictEqual(ortho.getCellDiamond(cols - 1, rows - 1)[2], {x: 1220, y: 1040});
 assert.ok(minX >= 0 || true); // (bounds already asserted per-cell)
-assert.ok(ORTHOGONAL_ROOM_RENDER.topWallHeight > 0, 'render metadata present');
+assert.ok(ORTHOGONAL_ROOM_RENDER.wallHeight > 0 && ORTHOGONAL_ROOM_RENDER.entrance?.cell, 'render metadata present (wall + entrance door)');
 
 // --- C. Footprint: logical cells identical to iso; polygon is an axis-aligned rect ---
 const footCases = [
@@ -99,7 +99,7 @@ for (const [type, x, y, r] of footCases) {
   assert.equal(poly[1].x, poly[2].x, `foot right vertical (${type})`);
 }
 // anchor rules: floorObject/wallObject = front-bottom-edge midpoint; floorDecoration = centroid.
-assert.deepStrictEqual(ortho.getAnchor('woodTable', 2, 4, 0), {x: 572, y: 648}, 'floorObject foot anchor (bottom-centre of the 2-wide footprint)');
+assert.deepStrictEqual(ortho.getAnchor('woodTable', 2, 4, 0), {x: 604, y: 680}, 'floorObject foot anchor (bottom-centre of the 2-wide footprint)');
 {
   const poly = ortho.getFootprintPolygon('woodTable', 2, 4, 0);
   assert.deepStrictEqual(ortho.getAnchor('woodTable', 2, 4, 0),

@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {deriveOverlayInsets, computeSafeViewport} from '../assets/js/core/scene-viewport.js?v=0571a';
+import {deriveOverlayInsets, computeSafeViewport} from '../assets/js/core/scene-viewport.js?v=0572a';
 import {computeFitZoom, clampCenterToContent, computeInitialFraming, ORTHO_FRAMING}
-  from '../assets/js/core/camera-framing.js?v=0571a';
+  from '../assets/js/core/camera-framing.js?v=0572a';
 
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
-// The orthogonal room content used at runtime (floor + top wall), world px.
-const content = {x: 260, y: 48, width: 1040, height: 896};
+// The orthogonal room content used at runtime (floor + full back wall), world px (ARCH-0572).
+const content = {x: 340, y: -120, width: 880, height: 1184};
 
 // --- A. Safe viewport: overlay insets + clamped usable rect (Node-testable, no DOM) ---
 const canvas = {left: 0, top: 86, right: 390, bottom: 782}; // 390x696 canvas below the HUD

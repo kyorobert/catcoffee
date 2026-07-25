@@ -1,4 +1,4 @@
-# V0.57.1-alpha 專案現況
+# V0.57.2-alpha 專案現況
 
 本文件描述 repository 目前可直接查證的狀態，不代表未來產品承諾。決策以 [decisions.md](./decisions.md) 為準。
 
@@ -6,9 +6,9 @@
 
 | 項目 | 現況 |
 |---|---|
-| 版本 | `V0.57.1-alpha｜正交手機構圖調整版` |
-| Build ID | `0571a` |
-| package version | `0.57.1-alpha` |
+| 版本 | `V0.57.2-alpha｜正交直立空間調整版` |
+| Build ID | `0572a` |
+| package version | `0.57.2-alpha` |
 | 引擎 | Phaser `3.90.0`，Canvas renderer |
 | 引擎來源 | `assets/vendor/phaser-3.90.0.min.js` |
 | 部署 | GitHub Pages 純靜態相對路徑，不依賴 CDN |
@@ -25,7 +25,8 @@
 - **預設仍為 iso**；Orthogonal 尚未成為正式預設，待產品視覺驗收。投影與 demoLayout **不寫入存檔**。家具 `x/y/r`、Occupancy、Placement、Pathfinding、存檔 key／schema 未因投影改變。
 - **Flat A／B／C 已被產品負責人拒絕**（見 [DEC-016 Superseded](./decisions.md)、[DEC-017](./decisions.md)）；正交房間幾何正確，但現有等角家具仍為 Placeholder，**正式家具重作尚未開始**（見 [V0570 家具重作計畫](./V0570_ORTHOGONAL_ASSET_REBUILD_PLAN.md)）。
 - real-browser 截圖見 `docs/evidence/v0570/`；細節見 [V0570 結果](./V0570_ORTHOGONAL_ROOM_RESULT.md)、[V0570 驗收](./V0570_ORTHOGONAL_ROOM_ACCEPTANCE.md)、[比較 HTML](./V0570_ORTHOGONAL_COMPARISON.html)；前版 Flat 紀錄見 [V0561 構圖比較結果](./V0561_FLAT_PRESET_COMPARISON_RESULT.md)。
-- **V0.57.1 手機取景修正（`ARCH-0571`）**：產品負責人 iPhone 驗收確認 Orthogonal 方向正確、但 V0.57.0 首屏過度放大。新增純模組 `core/scene-viewport.js`＋`core/camera-framing.js`＋DOM adapter `ui/viewport-metrics.js`；`CameraController` 對 **ortho** 改為「以房間內容 bounds＋DOM/visualViewport safe viewport 計算 fit zoom＋centerOn 置中＋內容 clamp」（iso/flat 分支不變）。手機直立首屏可見**整間咖啡廳 100% 寬度**、置中、無需左右拖曳、pan/zoom 夾在房間內（無外部空白）、無黑邊；初始無選取家具/情境列；情境列出現於底部保留帶不遮住房間、且不使 Camera 跳動。Demo 重排為 16 件緊湊分區。**未改投影數學/家具/存檔**。real-browser 證據 `docs/evidence/v0571/`；見 [V0571 結果](./V0571_ORTHOGONAL_MOBILE_RESULT.md)、[驗收](./V0571_ORTHOGONAL_MOBILE_ACCEPTANCE.md)、[比較 HTML](./V0571_ORTHOGONAL_MOBILE_COMPARISON.html)、[DEC-018](./decisions.md)。手機實機再驗收 pending。
+- **V0.57.1 手機取景修正（`ARCH-0571`）**：產品負責人 iPhone 驗收確認 Orthogonal 方向正確、但 V0.57.0 首屏過度放大。新增純模組 `core/scene-viewport.js`＋`core/camera-framing.js`＋DOM adapter `ui/viewport-metrics.js`；`CameraController` 對 **ortho** 改為「以房間內容 bounds＋DOM/visualViewport safe viewport 計算 fit zoom＋centerOn 置中＋內容 clamp」（iso/flat 分支不變）。首屏可見整間咖啡廳 100% 寬度、置中、pan/zoom 夾在房間內。見 [V0571 結果](./V0571_ORTHOGONAL_MOBILE_RESULT.md)、[DEC-018](./decisions.md)。
+- **V0.57.2 手機直立滿版化（`ARCH-0572`）**：iPhone 再驗收判定 V0.57.1「內容太小、上下留白過多」。本版**調整正交房間比例**（`OrthogonalProjection` cellWidth 104→88、cellHeight 88→120，origin 重推導，仍完全水平/垂直、cell 在世界 bounds 內）＋加**整面背牆**（`ORTHOGONAL_ROOM_RENDER.wallHeight`，含於 framing content bounds）使手機直立房間占比由 ~44% 提升至 **~78% canvas**、上下留白顯著減少。新增**右上角顧客入口門**（drawRoomOrtho 畫門＋入口地墊；Demo/prototype 視覺與路線，**logical 存檔入口 `(8,7)/(9,7)` 與存檔契約不變**）與上方**連續櫃檯/服務帶**（收銀/出餐/咖啡/甜點/員工工作區方向）。Demo 重排為 17 件（門→櫃檯→座位→貓咪區→清楚動線）。Camera framing 邏輯不變；**未重畫家具、未新增營運/角色系統、未改存檔 key/schema**。real-browser before/after 證據 `docs/evidence/v0572/`；見 [V0572 結果](./V0572_ORTHOGONAL_PORTRAIT_RESULT.md)、[驗收](./V0572_ORTHOGONAL_PORTRAIT_ACCEPTANCE.md)、[比較 HTML](./V0572_ORTHOGONAL_PORTRAIT_COMPARISON.html)、[DEC-019](./decisions.md)。手機實機再驗收 pending。
 
 ## B. 架構地圖
 
@@ -93,9 +94,9 @@
 ### 本次文件任務實際執行
 
 - `npm.cmd test`：通過。
-- `npm.cmd run check:deploy`：通過；檢查 Build `0571a`、35 DOM IDs、13 nested selectors、54 JavaScript modules。
+- `npm.cmd run check:deploy`：通過；檢查 Build `0572a`、35 DOM IDs、13 nested selectors、54 JavaScript modules。
 - `npm.cmd run check:dev`：通過（含真實 Chrome browser smoke，涵蓋 ortho 首屏 fit＝minZoom／整寬可見／無初始選取/情境列、ortho-demo boot 與 invalid 回退）。
-- `node tests/ortho-projection.test.js`、`node tests/ortho-demo-layout.test.js`、`node tests/camera-framing.test.js`：通過（正交數學／Demo 隔離可達性／safe viewport＋fit zoom＋centre clamp）。
+- `node tests/ortho-projection.test.js`（新 88×120 dims）、`node tests/ortho-demo-layout.test.js`（17 件、右上角門）、`node tests/camera-framing.test.js`：通過。
 
 ### Repository 內已有
 

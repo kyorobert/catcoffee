@@ -218,4 +218,20 @@
   - **核心家具重作延後至本手機構圖通過後：Accepted**（候選 `ART-0572-CORE-ORTHOGONAL-FURNITURE`）。
   - **iso 暫時仍為預設與 rollback**；Orthogonal 仍由 URL opt-in，待手機構圖實機驗收通過後再另議是否改為預設。
 - 實作（本任務 `ARCH-0571` 完成）：新增純模組 `core/scene-viewport.js`、`core/camera-framing.js` 與 DOM adapter `ui/viewport-metrics.js`；`CameraController` 新增 Orthogonal framing（fit＋centerOn＋內容 clamp），iso/flat 分支不變；`drawRoomOrtho` 底填擴大避免黑邊；`ortho-demo-layout` 重排為 16 件緊湊分區（仍 display-only、不入存檔）。未改投影數學、未重畫家具、未新增營運/角色系統、未改存檔 key/schema。real-browser 證據 `docs/evidence/v0571/`。細節見 [V0571 結果](./V0571_ORTHOGONAL_MOBILE_RESULT.md)、[驗收](./V0571_ORTHOGONAL_MOBILE_ACCEPTANCE.md)。
-- 後續（未核准前不執行）：`ART-0572-CORE-ORTHOGONAL-FURNITURE`（核心 10～12 件正交重作）；`ARCH-0572-ECONOMY-SYSTEM`；`ARCH-0572-STATION-REGISTRY`。
+- 後續（未核准前不執行）：`ART-0572-CORE-ORTHOGONAL-FURNITURE`（核心 10～12 件正交重作）；`ARCH-0572-ECONOMY-SYSTEM`；`ARCH-0572-STATION-REGISTRY`。→ **更新**：家具重作再延後至手機直立滿版化通過後（見 [DEC-019](#dec-019正交手機直立滿版化與咖啡廳分區accepted)），改編號 `ART-0573`。
+
+## DEC-019｜正交手機直立滿版化與咖啡廳分區（Accepted）
+
+- 日期：2026-07-25
+- 狀態：Accepted
+- 背景：`V0.57.1-alpha` 的 Camera framing 技術正常，但真實 iPhone 驗收判定「房間內容太小、上下留白太多、缺乏手機直立滿版感、Demo 仍像家具展示」。正式判定：Orthogonal 方向保留，但需先手機直立滿版化與咖啡廳空間分區，才能進入家具重畫。
+- 決策：
+  - **Orthogonal 正交方向：維持 Accepted**（延續 [DEC-017](#dec-017正交平面場景方向accepted停止斜投影微調)／[DEC-018](#dec-018orthogonal-手機初始取景與-camera-邊界accepted)）；地板保持完全水平／垂直，無 skew/shear/rotation。
+  - **V0.57.1 內容太小、上下留白過多：記錄**（未通過手機產品驗收）。
+  - **手機直立滿版化：Accepted**——顯著提高房間在 Canvas 的視覺占比、顯著減少上下留白，首屏不需縮放或大量拖曳；390/393/430 皆合理。**只有 Camera 無法達成時才調整 Projection 參數**（本次確認 Camera 無法單獨消除固有留白，故調整正交 cellWidth/cellHeight/origin 與房間比例）。
+  - **顧客入口位於上方角落：Accepted**——正交 prototype 入口門置於房間**上方角落**（本任務採**右上角**，理由：服務櫃檯連續帶置於上方左至中，入口置於相對的右上角，避免顧客動線穿過櫃檯後方；右側欄與前方 y1 走道形成門→櫃檯→座位的清楚路線）。本次僅修改 Demo/Orthogonal prototype 的入口視覺與路線；**logical 存檔入口（room-config `(8,7)/(9,7)`）與存檔契約不變**。
+  - **櫃檯／員工工作區為正式空間方向：Accepted**——上方連續服務帶表達收銀／出餐／咖啡飲品／甜點展示與員工工作區，為店長與未來店員的工作起始區；顧客側（前）與工作側（後）可辨識。
+  - **家具重畫再延後至本手機滿版化通過後：Accepted**（候選 `ART-0573-CORE-ORTHOGONAL-FURNITURE`）。
+  - **iso 暫時仍為預設與 rollback**；Orthogonal 仍由 URL opt-in。
+- 實作（本任務 `ARCH-0572` 完成）：`OrthogonalProjection` cellWidth 104→88、cellHeight 88→120（origin 重推導，仍完全水平／垂直、cell 在世界 bounds 內）；`ORTHOGONAL_ROOM_RENDER` 改為含背牆 `wallHeight` 與右上角 `entrance` 門；`drawRoomOrtho` 畫整面背牆＋右上角門＋入口地墊、移除底部 logical 入口高亮；`buildOrthoFraming` content bounds 含背牆使手機直立滿版；`ortho-demo-layout` 重排為 17 件（右上角門→上方服務帶→中央座位→前左貓咪區→清楚動線）。Camera framing 邏輯不變（fit-to-content＋centerOn＋內容 clamp）。未改投影軸向水平/垂直、未重畫家具、未新增營運/角色系統、未改存檔 key/schema。real-browser before/after 證據 `docs/evidence/v0572/`。細節見 [V0572 結果](./V0572_ORTHOGONAL_PORTRAIT_RESULT.md)、[驗收](./V0572_ORTHOGONAL_PORTRAIT_ACCEPTANCE.md)。
+- 後續（未核准前不執行）：`ART-0573-CORE-ORTHOGONAL-FURNITURE`；`ARCH-0573-ECONOMY-SYSTEM`；`ARCH-0573-STATION-REGISTRY`。

@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-// Import via the same `?v=0571a` specifier the runtime uses, so `instanceof`
+// Import via the same `?v=0572a` specifier the runtime uses, so `instanceof`
 // resolves against the same module instance GridSystem composes internally.
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0571a';
-import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0571a';
-import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0571a';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0572a';
+import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0572a';
+import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0572a';
 
 // Golden-master compatibility test for ARCH-0561-GRID-PROJECTION-SPLIT.
 // The expected values below were captured from the CURRENT (pre-split) GridSystem

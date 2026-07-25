@@ -2,6 +2,18 @@
 
 每筆紀錄包含版本、目標、完成內容、驗證、已知限制與下一步。歷史版本若 repository 沒有完整日期或測試輸出，會明確標示為回溯摘要，不補造證據。
 
+## 2026-07-25｜ARCH-0572-ORTHOGONAL-PORTRAIT-DENSITY-AND-ROOM-ZONING
+
+- 版本／Build：**V0.57.2-alpha｜正交直立空間調整版** / **0572a**（由 V0.57.1-alpha / 0571a 升版；存檔 key `catCafePhaserV0540`、schema 5401、migration 5401 皆不變）
+- iPhone 再驗收回饋：Orthogonal 方向保留，但 V0.57.1 房間內容太小、上下留白太多、缺乏手機直立滿版感、Demo 仍像家具展示。目標：手機直立滿版化 + 咖啡廳空間分區；不重畫家具、不做營運系統；iso 仍預設。
+- 滿版化（Projection 比例）：`OrthogonalProjection` cellWidth 104→88、cellHeight 88→120（origin {312,252}→{384,140}、det 9152→10560；仍 axisX.y=0/axisY.x=0，完全水平/垂直、cell 在世界 bounds 內）。fit-to-width 於直立仍 width-constrained，更高 cell 直接增加房間螢幕高度。加**整面背牆** `ORTHOGONAL_ROOM_RENDER.wallHeight=200` 並納入 framing content bounds。結果：手機直立房間占 canvas 高度 ~44%→~78%，上下留白顯著減少，fit zoom 0.356→~0.42（家具更大）。「先 Camera、Camera 無法達成才調 Projection」——V0571 已確認 Camera 無法單獨消除固有留白，故本版調整比例。
+- 入口/櫃檯：右上角顧客入口門（`ORTHOGONAL_ROOM_RENDER.entrance.cell=(9,0)`；drawRoomOrtho 畫門+入口地墊、移除底部 logical 入口高亮）；理由：服務帶置上方左至中、門置相對右上角避免穿越工作側，右欄+y1 形成門→櫃檯→座位路線。上方連續櫃檯/服務帶（收銀/出餐/咖啡/甜點/員工工作區方向）。**僅改 Demo/prototype 入口視覺與路線；logical 存檔入口 (8,7)/(9,7) 與存檔契約不變。**
+- Demo：`ortho-demo-layout.js` 重排 17 件（服務帶 y0、兩桌組+rug、右植栽、前左貓咪區），`ORTHO_DEMO_ENTRANCE=(9,0)`；display-only、不改 state/coins、不觸發 save、存檔無 projection/demoLayout；BFS 入口→櫃檯前/座位/貓咪皆可達（reach 59、非迷宮）。
+- 修改檔案：改 `OrthogonalProjection.js`、`CafeScene.js`（drawRoomOrtho 背牆+門、buildOrthoFraming content 含背牆）、`ortho-demo-layout.js`；更新 `ortho-projection.test.js`(新 dims pins)、`ortho-demo-layout.test.js`(17 件/入口/可達)、`camera-framing.test.js`(新 content)；版本機械升版 0571a→0572a、`check.js`（版本/Build/obsolete +`?v=0571a`/protected hash 更新 OrthogonalProjection/GridSystem/flat-presets/viewport-metrics）；docs decisions(DEC-019)/current-state/roadmap/handoff/README + V0572 三份 + evidence/v0572。Camera framing 純模組（scene-viewport/camera-framing）內容未變；`projection-mode`/`FlatProjection`/`IsoProjection`/`SpatialGrid`/`room-config`/`furniture-config` hash 未變。
+- 驗證：`npm test`、`ortho-projection`、`ortho-demo-layout`、`camera-framing`、`projection-mode`、`flat-*`、`grid-projection-compat`（iso/Flat C golden 未改）、`build-consistency` 皆通過；`check:deploy` 通過（0572a、54 modules）；`check:dev` 通過（**本機 Chrome 實際 browser smoke**，含 ortho 首屏 fit=minZoom/整寬/無初始選取/情境列/invalid 回退）；14 張 real-browser 證據 + before/after 零 page error（首屏 390/393/430、pan 四邊界貼齊無空白、minzoom/zoomin、art-debug、桌面）。
+- 已知限制／未完成：手機直立仍有少量房間基色邊距（已大幅減少、非黑）；家具仍 Placeholder（待 ART-0573）；桌面因房間改直立比例左右有邊距（手機優先）；手機實機再驗收 pending；未 commit/push/部署；本環境無 `.git`。
+- 下一步：產品負責人依 `docs/evidence/v0572/` 與 [V0572 驗收](./V0572_ORTHOGONAL_PORTRAIT_ACCEPTANCE.md) 實機判斷；通過後才啟動 `ART-0573-CORE-ORTHOGONAL-FURNITURE`。
+
 ## 2026-07-25｜ARCH-0571-ORTHOGONAL-MOBILE-FRAMING-AND-LAYOUT
 
 - 版本／Build：**V0.57.1-alpha｜正交手機構圖調整版** / **0571a**（由 V0.57.0-alpha / 0570a 升版；存檔 key `catCafePhaserV0540`、schema 5401、migration 5401 皆不變）

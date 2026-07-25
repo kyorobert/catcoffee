@@ -22,16 +22,27 @@
 export const ORTHOGONAL_PROJECTION_PARAMS = Object.freeze({
   id: 'ortho',
   displayName: '正交平面',
-  axisX: Object.freeze({x: 104, y: 0}),   // +1 gridX -> right 104px, no vertical drift
-  axisY: Object.freeze({x: 0, y: 88})     // +1 gridY -> down 88px, no horizontal drift
+  // ARCH-0572: portrait full-bleed. Narrower + much taller cells so the 10x8 room fills
+  // far more of a tall phone screen (fit-to-width stays width-constrained, so the taller
+  // cells add on-screen height without shrinking the room), while columns stay exactly
+  // vertical and rows exactly horizontal.
+  axisX: Object.freeze({x: 88, y: 0}),    // +1 gridX -> right 88px, no vertical drift
+  axisY: Object.freeze({x: 0, y: 120})    // +1 gridY -> down 120px, no horizontal drift
 });
 
+// Render-only framing metadata for CafeScene.drawRoomOrtho. `wallHeight` is a real back
+// wall standing above the floor (a service-counter backdrop + entry door); it is INCLUDED
+// in the framing content bounds so the room fills the portrait screen. `entrance.cell` is
+// the entry door corner (top-right) — a Demo/prototype visual + route only; the logical
+// save entrance in room-config is unchanged.
 export const ORTHOGONAL_ROOM_RENDER = Object.freeze({
-  topWallHeight: 160,
+  wallHeight: 200,
   topWallLineWidth: 6,
   floorOutlineWidth: 4,
   sideEdgeLineWidth: 4,
-  decoration: Object.freeze({windowFx: 0.3, boardFx: 0.7, heightFactor: 0.5, windowScale: 0.92, boardScale: 0.9})
+  bottomPad: 24,
+  entrance: Object.freeze({cell: Object.freeze({x: 9, y: 0}), doorFill: 0x6b4636, doorFrame: 0x8f4f49, matFill: 0x9f765a}),
+  decoration: Object.freeze({windowFx: 0.22, boardFx: 0.46, heightFactor: 0.5, windowScale: 0.8, boardScale: 0.78})
 });
 
 export class OrthogonalProjection {

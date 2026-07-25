@@ -1,8 +1,8 @@
 import {
   createCareSession, prepareCareSession, commitCareSession, cancelCareSession
-} from '../core/care-interaction-core.js?v=0571a';
-import {INPUT_MODE} from '../core/input-state.js?v=0571a';
-import {CatReactionBubble} from '../entities/CatReactionBubble.js?v=0571a';
+} from '../core/care-interaction-core.js?v=0572a';
+import {INPUT_MODE} from '../core/input-state.js?v=0572a';
+import {CatReactionBubble} from '../entities/CatReactionBubble.js?v=0572a';
 
 export class CareInteractionController {
   constructor(scene, {inputMode, cameraController, catBehaviorController, furnitureDragController, saveAdapter, profiles}) {

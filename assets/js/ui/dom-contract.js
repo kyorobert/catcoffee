@@ -1,4 +1,4 @@
-import {BUILD_ID} from '../config/build-info.js?v=0571a';
+import {BUILD_ID} from '../config/build-info.js?v=0572a';
 
 export const REQUIRED_DOM_IDS = Object.freeze([
   'gameApp', 'gameHud', 'gameViewport', 'phaserGame', 'domOverlay',
