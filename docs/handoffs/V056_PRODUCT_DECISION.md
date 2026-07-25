@@ -7,7 +7,9 @@
 
 > **更新（2026-07-24）：產品負責人已核准以下方向（§9 已勾選）。** 正式決策見 [decisions.md](../decisions.md) DEC-008、DEC-012、DEC-013、DEC-014。第一個實作任務 `ARCH-0561-GRID-PROJECTION-SPLIT`（僅第一階段骨架抽離）已完成，見 [V0561 實作結果](../V0561_IMPLEMENTATION_RESULT.md)。原稽核比較內容保留於下方作為決策脈絡。
 >
-> **更新（2026-07-25）：方向修正——Flat 全部拒絕、改採正交平面。** 產品負責人比較 Flat A（Near Iso）／B（Balanced）／C（Current）後**全部拒絕**（房間仍歪斜、水平垂直不清、非正向可讀）。停止斜投影微調，改採 **Orthogonal 正交平面**（水平／垂直矩形房間，可搭配 2.5D 正面／側面家具）。**iso 仍為暫時預設與 rollback**；Orthogonal 為 opt-in 原型（`?projection=ortho`），尚未設為正式預設。正式決策見 [DEC-017](../decisions.md)（Accepted）與 [DEC-016 Superseded](../decisions.md)。實作見 [V0570 結果](../V0570_ORTHOGONAL_ROOM_RESULT.md)。**下一個產品 Gate**：完成 [V0570 正交房間人工／實機驗收](../V0570_ORTHOGONAL_ROOM_ACCEPTANCE.md)，決定是否進入核心家具重作（`ART-0571`）。§2–§8 的三方案比較為 iso 基線下的歷史脈絡，保留不刪。
+> **更新（2026-07-25）：方向修正——Flat 全部拒絕、改採正交平面。** 產品負責人比較 Flat A（Near Iso）／B（Balanced）／C（Current）後**全部拒絕**（房間仍歪斜、水平垂直不清、非正向可讀）。停止斜投影微調，改採 **Orthogonal 正交平面**（水平／垂直矩形房間，可搭配 2.5D 正面／側面家具）。**iso 仍為暫時預設與 rollback**；Orthogonal 為 opt-in 原型（`?projection=ortho`），尚未設為正式預設。正式決策見 [DEC-017](../decisions.md)（Accepted）與 [DEC-016 Superseded](../decisions.md)。實作見 [V0570 結果](../V0570_ORTHOGONAL_ROOM_RESULT.md)。§2–§8 的三方案比較為 iso 基線下的歷史脈絡，保留不刪；**Flat 已不再是任何後續產品 Gate**。
+>
+> **更新（2026-07-25b）：iPhone 驗收——正交方向通過、手機取景已修正。** 產品負責人於**真實 iPhone 直立**確認 Orthogonal 正交方向正確，但 V0.57.0 手機首屏過度放大、需大量左右拖曳。`ARCH-0571` 已修正 Camera 取景（以房間內容＋safe viewport 計算 fit、centerOn 置中、pan/zoom 夾在房間內；iso/flat 不變）與 Demo 構圖（16 件緊湊分區）。正式決策見 [DEC-018](../decisions.md)。實作見 [V0571 結果](../V0571_ORTHOGONAL_MOBILE_RESULT.md)。**目前產品 Gate**：完成 [V0571 手機構圖實機驗收](../V0571_ORTHOGONAL_MOBILE_ACCEPTANCE.md)（真實 iPhone 首屏／pan/zoom/選取）；通過後才進入**核心家具重作 `ART-0572`**（非 Flat 校準）。iso 仍為暫時預設與 rollback。
 
 ---
 

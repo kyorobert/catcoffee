@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0570a';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0570a';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0570a';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0571a';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0571a';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0571a';
 import {ORTHO_DEMO_LAYOUT, buildOrthoDemoItems, isDemoLayoutRequested}
-  from '../assets/js/config/ortho-demo-layout.js?v=0570a';
+  from '../assets/js/config/ortho-demo-layout.js?v=0571a';
 
 const {cols, rows} = ROOM_CONFIG.floor;
 
@@ -20,8 +20,13 @@ for (const [s, e] of [
 // --- fixture shape: frozen data, deterministic display-only ids, existing furniture ---
 assert.ok(Object.isFrozen(ORTHO_DEMO_LAYOUT), 'ORTHO_DEMO_LAYOUT is frozen');
 const items = buildOrthoDemoItems();
-assert.ok(items.length >= 12, 'demo has a meaningful number of items');
+assert.ok(items.length >= 14 && items.length <= 20, 'demo is a compact 14-20 item cafe');
 assert.equal(items.length, ORTHO_DEMO_LAYOUT.length);
+// zone sanity: a service band along the back row; a cat cluster in the front rows.
+assert.ok(items.filter(i => ['counter', 'coffeeMachine', 'oven', 'smartOrder', 'washStation', 'dessert'].includes(i.type)).every(i => i.y === 0),
+  'service furniture sits on the back (service) row');
+const catItems = items.filter(i => ['catBed', 'doubleCatTree', 'scratchPost', 'catTent'].includes(i.type));
+assert.ok(catItems.length >= 2 && catItems.every(i => i.y >= 5), 'cat furniture forms a front/bottom cluster');
 const ids = new Set(items.map(i => i.id));
 assert.equal(ids.size, items.length, 'demo item ids are unique');
 for (const it of items) {
@@ -66,9 +71,9 @@ function reachFrom(sx, sy) {
 // a walkable cell adjacent to the (reserved) entrance
 assert.ok(walkable(7, 7) || walkable(8, 6) || walkable(9, 6), 'entrance has a walkable neighbour');
 const reach = reachFrom(7, 7);
-for (const k of ['3,1', '4,1']) assert.ok(reach.has(k), `counter front reachable from entrance: ${k}`);
-for (const k of ['2,4', '4,5', '5,4', '7,4']) assert.ok(reach.has(k), `seating approach reachable from entrance: ${k}`);
-assert.ok(reach.size >= 30, 'a large connected walkable area (aisles not choked)');
+for (const k of ['2,1', '3,1']) assert.ok(reach.has(k), `counter front reachable from entrance: ${k}`);
+for (const k of ['3,4', '4,3', '6,3', '4,5']) assert.ok(reach.has(k), `seating approach reachable from entrance: ${k}`);
+assert.ok(reach.size >= 40, 'a large connected walkable area (aisles not a one-cell maze)');
 
 // --- Purity: no engine/DOM/storage/save, no actor identity ---
 const source = readFileSync(new URL('../assets/js/config/ortho-demo-layout.js', import.meta.url), 'utf8');

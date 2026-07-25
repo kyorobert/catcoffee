@@ -1,28 +1,30 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0570a';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0570a';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0570a';
-import {GridSystem} from '../systems/GridSystem.js?v=0570a';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0570a';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0570a';
-import {CameraController} from '../systems/CameraController.js?v=0570a';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0570a';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0570a';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0570a';
-import {CatEntity} from '../entities/CatEntity.js?v=0570a';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0570a';
-import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0570a';
-import {AmbientEffects} from '../entities/AmbientEffects.js?v=0570a';
-import {INPUT_MODE} from '../core/input-state.js?v=0570a';
-import {InputModeController} from '../phaser/InputModeController.js?v=0570a';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0570a';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0570a';
-import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0570a';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0570a';
-import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0570a';
-import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0570a';
-import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0570a';
-import {ORTHOGONAL_ROOM_RENDER} from '../systems/OrthogonalProjection.js?v=0570a';
-import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0570a';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0571a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0571a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0571a';
+import {GridSystem} from '../systems/GridSystem.js?v=0571a';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0571a';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0571a';
+import {CameraController} from '../systems/CameraController.js?v=0571a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0571a';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0571a';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0571a';
+import {CatEntity} from '../entities/CatEntity.js?v=0571a';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0571a';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0571a';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0571a';
+import {INPUT_MODE} from '../core/input-state.js?v=0571a';
+import {InputModeController} from '../phaser/InputModeController.js?v=0571a';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0571a';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0571a';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0571a';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0571a';
+import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0571a';
+import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0571a';
+import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0571a';
+import {ORTHOGONAL_ROOM_RENDER} from '../systems/OrthogonalProjection.js?v=0571a';
+import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0571a';
+import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0571a';
+import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0571a';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -94,7 +96,8 @@ export class CafeScene extends Phaser.Scene{
     this.cameraController=new CameraController(this,ROOM_CONFIG,{
       inputMode:this.inputMode,
       isFurnitureDragging:()=>this.furnitureDragController?.isDragging()||false,
-      onPinchStart:()=>this.furnitureDragController?.cancelForPinch()
+      onPinchStart:()=>this.furnitureDragController?.cancelForPinch(),
+      framing:this.projectionMode===PROJECTION_MODE.ORTHO?this.buildOrthoFraming():null
     });
     this.furnitureDragController=new FurnitureDragController(this,{
       grid:this.grid,occupancy:this.occupancy,placement:this.placement,
@@ -230,9 +233,9 @@ export class CafeScene extends Phaser.Scene{
     const BR=this.grid.getCellDiamond(cols-1,rows-1)[2];
     const BL=this.grid.getCellDiamond(0,rows-1)[3];
     const floorW=TR.x-TL.x;
-    // Room base fills the whole world (side margins, ceiling, below-floor) so the
-    // rectangular room never sits on a black or oblique void.
-    graphics.fillStyle(walls.left.fill,1).fillRect(0,0,worldWidth,worldHeight);
+    // Room base fills well beyond the world (side margins, ceiling, below-floor and any
+    // fit-zoom overscan) so the rectangular room never sits on a black or oblique void.
+    graphics.fillStyle(walls.left.fill,1).fillRect(-worldWidth,-worldHeight,worldWidth*3,worldHeight*3);
     // Horizontal top wall band standing above the back edge.
     const wallTopY=Math.max(0,TL.y-R.topWallHeight);
     graphics.fillStyle(walls.right.fill,1).fillRect(TL.x,wallTopY,floorW,TL.y-wallTopY);
@@ -261,6 +264,27 @@ export class CafeScene extends Phaser.Scene{
       new WallDecorationEntity(this,{texture:'environment:wall-window',x:TL.x+floorW*deco.windowFx,y:decoY,scale:deco.windowScale}),
       new WallDecorationEntity(this,{texture:'environment:menu-board',x:TL.x+floorW*deco.boardFx,y:decoY,scale:deco.boardScale})
     ];
+  }
+  // Orthogonal-only camera framing policy (ARCH-0571): fit the whole room into the
+  // DOM-measured safe viewport and clamp panning to the room, so the phone first screen
+  // shows the whole cafe without zooming or side-panning. Content bounds are derived
+  // from the projected room frame (via the Facade); safe insets come from the
+  // ViewportMetrics DOM adapter (the single place these DOM rects are read).
+  buildOrthoFraming(){
+    const {floor}=ROOM_CONFIG,cols=floor.cols,rows=floor.rows;
+    const R=ORTHOGONAL_ROOM_RENDER;
+    const metrics=new ViewportMetrics();
+    return {
+      getContentBounds:()=>{
+        const TL=this.grid.getCellDiamond(0,0)[0];
+        const BR=this.grid.getCellDiamond(cols-1,rows-1)[2];
+        const top=Math.max(0,TL.y-R.topWallHeight);
+        const bottomPad=R.topWallHeight*0.2;
+        return {x:TL.x,y:top,width:BR.x-TL.x,height:(BR.y+bottomPad)-top};
+      },
+      getSafeInsets:()=>metrics.getInsets(this.game.canvas,{toolbarReserve:ORTHO_FRAMING.toolbarReserveCss}),
+      policy:{}
+    };
   }
   createFurniture(){
     this.entities.forEach(entity=>entity.destroy());

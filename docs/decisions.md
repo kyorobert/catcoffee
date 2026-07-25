@@ -203,4 +203,19 @@
   - **不再以「沿用全部等角家具」為房間方向前提：Accepted**——房間幾何先做正確，現有等角家具僅作 Placeholder，看起來不合角度即記錄為需重作，不得為遷就舊家具把地板做歪。
   - **Orthogonal Prototype 尚未成為正式預設**：`?projection=ortho`（別名 `orthogonal`）opt-in、非法值回退 iso、**預設與 rollback 仍為 iso**；投影與 demoLayout **不寫入存檔**。
 - 影響：本任務 `ARCH-0570-ORTHOGONAL-ROOM-PROTOTYPE` 完成 `OrthogonalProjection`（真正軸對齊、共用同一 `SpatialGrid`）、正交房間 rendering、非存檔 Demo Layout 與 Art Debug；未改 furniture ID／`x/y/r`／footprint／Occupancy／Placement／Pathfinding／存檔 key／schema；iso／Flat 程式與 golden 未動。real-browser 證據 `docs/evidence/v0570/`。細節見 [V0570 結果](./V0570_ORTHOGONAL_ROOM_RESULT.md)、[驗收](./V0570_ORTHOGONAL_ROOM_ACCEPTANCE.md)、[家具重作計畫](./V0570_ORTHOGONAL_ASSET_REBUILD_PLAN.md)。
-- 後續（未核准前不執行）：`ART-0571-CORE-ORTHOGONAL-FURNITURE`（核心 10～12 件正交重作）；`ARCH-0571-ECONOMY-SYSTEM`；`ARCH-0571-STATION-REGISTRY`（待正交房間與核心家具核准）。
+- 後續（未核准前不執行）：`ART-0571-CORE-ORTHOGONAL-FURNITURE`（核心 10～12 件正交重作）；`ARCH-0571-ECONOMY-SYSTEM`；`ARCH-0571-STATION-REGISTRY`（待正交房間與核心家具核准）。→ **更新**：核心家具重作延後至手機構圖通過後（見 [DEC-018](#dec-018orthogonal-手機初始取景與-camera-邊界accepted)），並改編號為 `ART-0572`。
+
+## DEC-018｜Orthogonal 手機初始取景與 Camera 邊界（Accepted）
+
+- 日期：2026-07-25
+- 狀態：Accepted
+- 背景：產品負責人於**真實 iPhone 直立**確認 Orthogonal 正交方向正確（地板水平/垂直、房間不歪斜、不回 Flat、不再微調斜投影），但 `V0.57.0-alpha` 手機首屏 Camera 過度放大（只見約 37% 房間寬）、需大量左右拖曳、拖到房間外露出大片背景、Demo 過於鬆散。正式判定：「**Orthogonal 方向通過，但 V0.57.0 尚未通過手機產品驗收；須先完成手機直立取景、Camera 邊界與 Demo Layout 修正，才能進入核心家具重作。**」
+- 決策：
+  - **Orthogonal 正交方向：維持 Accepted**（延續 [DEC-017](#dec-017正交平面場景方向accepted停止斜投影微調)）。**V0.57.0 手機初始取景：未通過**（記錄）。
+  - **手機首屏必須呈現主要營業區：Accepted**——手機直立初次進入不需先縮放或大量左右拖曳即可看懂服務／座位／貓咪分區與主要通道。
+  - **Camera bounds 應以房間內容與 safe viewport 計算：Accepted**——初始 zoom 由房間內容 bounds 與實際可用（DOM/visualViewport 量測、扣除 HUD/底部列/情境列/safe-area）的 safe viewport 推導；pan/zoom 夾在房間內容，minZoom＝fit；**不得硬編碼裝置專用 zoom/scroll、不得建立第二套 CameraController、不得放寬 bounds 掩蓋空白、不得用 CSS transform 假裝**。iso/flat 取景行為不變。
+  - **首屏不應依賴大量左右拖曳：Accepted**。
+  - **核心家具重作延後至本手機構圖通過後：Accepted**（候選 `ART-0572-CORE-ORTHOGONAL-FURNITURE`）。
+  - **iso 暫時仍為預設與 rollback**；Orthogonal 仍由 URL opt-in，待手機構圖實機驗收通過後再另議是否改為預設。
+- 實作（本任務 `ARCH-0571` 完成）：新增純模組 `core/scene-viewport.js`、`core/camera-framing.js` 與 DOM adapter `ui/viewport-metrics.js`；`CameraController` 新增 Orthogonal framing（fit＋centerOn＋內容 clamp），iso/flat 分支不變；`drawRoomOrtho` 底填擴大避免黑邊；`ortho-demo-layout` 重排為 16 件緊湊分區（仍 display-only、不入存檔）。未改投影數學、未重畫家具、未新增營運/角色系統、未改存檔 key/schema。real-browser 證據 `docs/evidence/v0571/`。細節見 [V0571 結果](./V0571_ORTHOGONAL_MOBILE_RESULT.md)、[驗收](./V0571_ORTHOGONAL_MOBILE_ACCEPTANCE.md)。
+- 後續（未核准前不執行）：`ART-0572-CORE-ORTHOGONAL-FURNITURE`（核心 10～12 件正交重作）；`ARCH-0572-ECONOMY-SYSTEM`；`ARCH-0572-STATION-REGISTRY`。

@@ -23,7 +23,7 @@
 
 ## Phase 2｜核准後的場景可讀性實作
 
-- **進度（2026-07-25）：Orthogonal Reboot 原型階段。** Stage 1（`ARCH-0561`：SpatialGrid + IsoProjection Facade）與 Stage 2（`ARCH-0562`：`FlatProjection` Prototype）已完成。Stage 3（`ARCH-0563`：Flat 構圖 Preset A/B/C 比較）已完成，但**產品負責人拒絕全部 Flat 方案**（見 [DEC-016 Superseded](./decisions.md)）。**Flat Preset 比較階段結束，不再安排 Flat Preset 校準。** Stage 4（`ARCH-0570`：正交平面 `OrthogonalProjection`、正交房間 rendering、非存檔 Demo Layout、Art Debug，`?projection=ortho`／`orthogonal` opt-in、預設仍 iso、不入存檔）已完成並有 real-browser 桌面＋手機截圖證據（`docs/evidence/v0570/`）。**尚未**設為正式預設；正交房間視覺人工／實機驗收與**核心家具 Orthogonal 重作（`ART-0571`，10～12 件）**待辦（見 [DEC-017](./decisions.md)、[V0570 結果](./V0570_ORTHOGONAL_ROOM_RESULT.md)、[V0570 驗收](./V0570_ORTHOGONAL_ROOM_ACCEPTANCE.md)、[家具重作計畫](./V0570_ORTHOGONAL_ASSET_REBUILD_PLAN.md)）。
+- **進度（2026-07-25）：Orthogonal Reboot 原型階段。** Stage 1（`ARCH-0561`：SpatialGrid + IsoProjection Facade）與 Stage 2（`ARCH-0562`：`FlatProjection` Prototype）已完成。Stage 3（`ARCH-0563`：Flat 構圖 Preset A/B/C 比較）已完成，但**產品負責人拒絕全部 Flat 方案**（見 [DEC-016 Superseded](./decisions.md)）。**Flat Preset 比較階段結束，不再安排 Flat Preset 校準。** Stage 4（`ARCH-0570`：正交平面 `OrthogonalProjection`、正交房間 rendering、非存檔 Demo Layout、Art Debug）已完成。產品負責人 iPhone 驗收**確認正交方向正確**，但 V0.57.0 手機首屏過度放大。Stage 5（`ARCH-0571`：Orthogonal 手機直立取景、Camera 邊界與 Demo 構圖修正——safe viewport + fit-to-content + centerOn + 內容 clamp，iso/flat 不變）已完成並有 real-browser before/after 證據（`docs/evidence/v0571/`）：手機首屏整間 100% 寬可見、無需拖曳、pan/zoom 夾在房間內。**尚未**設為正式預設；手機實機再驗收與**核心家具 Orthogonal 重作（`ART-0572`，10～12 件，延後至手機構圖通過後）**待辦（見 [DEC-018](./decisions.md)、[V0571 結果](./V0571_ORTHOGONAL_MOBILE_RESULT.md)、[V0571 驗收](./V0571_ORTHOGONAL_MOBILE_ACCEPTANCE.md)）。不再安排 Flat Preset 校準。
 - 目標：依 Phase 1 核准方案改善直立手機的場景平面感與資訊可讀性。
 - 前置：產品核准投影方案、存檔策略、資產策略與驗收畫面。
 - 非目標：同時新增店長、店員、顧客完整 AI 或經濟重做。

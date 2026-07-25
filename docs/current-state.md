@@ -1,4 +1,4 @@
-# V0.57.0-alpha 專案現況
+# V0.57.1-alpha 專案現況
 
 本文件描述 repository 目前可直接查證的狀態，不代表未來產品承諾。決策以 [decisions.md](./decisions.md) 為準。
 
@@ -6,9 +6,9 @@
 
 | 項目 | 現況 |
 |---|---|
-| 版本 | `V0.57.0-alpha｜正交平面咖啡廳原型版` |
-| Build ID | `0570a` |
-| package version | `0.57.0-alpha` |
+| 版本 | `V0.57.1-alpha｜正交手機構圖調整版` |
+| Build ID | `0571a` |
+| package version | `0.57.1-alpha` |
 | 引擎 | Phaser `3.90.0`，Canvas renderer |
 | 引擎來源 | `assets/vendor/phaser-3.90.0.min.js` |
 | 部署 | GitHub Pages 純靜態相對路徑，不依賴 CDN |
@@ -25,6 +25,7 @@
 - **預設仍為 iso**；Orthogonal 尚未成為正式預設，待產品視覺驗收。投影與 demoLayout **不寫入存檔**。家具 `x/y/r`、Occupancy、Placement、Pathfinding、存檔 key／schema 未因投影改變。
 - **Flat A／B／C 已被產品負責人拒絕**（見 [DEC-016 Superseded](./decisions.md)、[DEC-017](./decisions.md)）；正交房間幾何正確，但現有等角家具仍為 Placeholder，**正式家具重作尚未開始**（見 [V0570 家具重作計畫](./V0570_ORTHOGONAL_ASSET_REBUILD_PLAN.md)）。
 - real-browser 截圖見 `docs/evidence/v0570/`；細節見 [V0570 結果](./V0570_ORTHOGONAL_ROOM_RESULT.md)、[V0570 驗收](./V0570_ORTHOGONAL_ROOM_ACCEPTANCE.md)、[比較 HTML](./V0570_ORTHOGONAL_COMPARISON.html)；前版 Flat 紀錄見 [V0561 構圖比較結果](./V0561_FLAT_PRESET_COMPARISON_RESULT.md)。
+- **V0.57.1 手機取景修正（`ARCH-0571`）**：產品負責人 iPhone 驗收確認 Orthogonal 方向正確、但 V0.57.0 首屏過度放大。新增純模組 `core/scene-viewport.js`＋`core/camera-framing.js`＋DOM adapter `ui/viewport-metrics.js`；`CameraController` 對 **ortho** 改為「以房間內容 bounds＋DOM/visualViewport safe viewport 計算 fit zoom＋centerOn 置中＋內容 clamp」（iso/flat 分支不變）。手機直立首屏可見**整間咖啡廳 100% 寬度**、置中、無需左右拖曳、pan/zoom 夾在房間內（無外部空白）、無黑邊；初始無選取家具/情境列；情境列出現於底部保留帶不遮住房間、且不使 Camera 跳動。Demo 重排為 16 件緊湊分區。**未改投影數學/家具/存檔**。real-browser 證據 `docs/evidence/v0571/`；見 [V0571 結果](./V0571_ORTHOGONAL_MOBILE_RESULT.md)、[驗收](./V0571_ORTHOGONAL_MOBILE_ACCEPTANCE.md)、[比較 HTML](./V0571_ORTHOGONAL_MOBILE_COMPARISON.html)、[DEC-018](./decisions.md)。手機實機再驗收 pending。
 
 ## B. 架構地圖
 
@@ -92,9 +93,9 @@
 ### 本次文件任務實際執行
 
 - `npm.cmd test`：通過。
-- `npm.cmd run check:deploy`：通過；檢查 Build `0570a`、35 DOM IDs、13 nested selectors、51 JavaScript modules。
-- `npm.cmd run check:dev`：通過（含真實 Chrome browser smoke，涵蓋 ortho／ortho-demo boot 與 invalid 回退）。
-- `node tests/ortho-projection.test.js`、`node tests/ortho-demo-layout.test.js`：通過（正交數學／footprint／資料相容／Demo 隔離與可達性）。
+- `npm.cmd run check:deploy`：通過；檢查 Build `0571a`、35 DOM IDs、13 nested selectors、54 JavaScript modules。
+- `npm.cmd run check:dev`：通過（含真實 Chrome browser smoke，涵蓋 ortho 首屏 fit＝minZoom／整寬可見／無初始選取/情境列、ortho-demo boot 與 invalid 回退）。
+- `node tests/ortho-projection.test.js`、`node tests/ortho-demo-layout.test.js`、`node tests/camera-framing.test.js`：通過（正交數學／Demo 隔離可達性／safe viewport＋fit zoom＋centre clamp）。
 
 ### Repository 內已有
 

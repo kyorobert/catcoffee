@@ -1,11 +1,11 @@
-# 貓咪咖啡廳 V0.57.0-alpha
+# 貓咪咖啡廳 V0.57.1-alpha
 
-版本：`V0.57.0-alpha｜正交平面咖啡廳原型版`  
-Build ID：`0570a`
+版本：`V0.57.1-alpha｜正交手機構圖調整版`  
+Build ID：`0571a`
 
-V0.57.0-alpha 在既有 SpatialGrid／IsoProjection／FlatProjection 架構上新增 **`OrthogonalProjection`（正交平面）原型**：真正軸對齊（`axisX={104,0}`、`axisY={0,88}`，無 skew／shear／rotation），房間為水平／垂直矩形，符合手機直立、正向可讀的平面咖啡廳方向。**預設仍為 2:1 等角（iso）**；Orthogonal 為 opt-in 原型，尚未設為正式預設，等產品視覺驗收。**Flat A／B／C 已被產品負責人拒絕**（保留作歷史回歸）。投影**僅改變畫面呈現**：家具 `x/y/r`、Occupancy、Placement、Pathfinding 與存檔 key `catCafePhaserV0540` 完全不變，且**不寫入存檔**。現有等角家具在正交地板為 Placeholder（透視待重作）。
+V0.57.1-alpha 在 V0.57.0 的 **`OrthogonalProjection`（正交平面）** 上修正**手機直立取景**：`CameraController` 對 ortho 改以「房間內容 bounds＋（DOM/visualViewport 量測的）safe viewport 計算 fit zoom＋`centerOn` 置中＋pan/zoom 夾在房間內」（新增純模組 `core/scene-viewport.js`、`core/camera-framing.js` 與 DOM adapter `ui/viewport-metrics.js`；iso／flat 取景不變）。手機直立首屏即可見**整間咖啡廳（100% 寬度、置中、無需左右拖曳）**，pan/zoom 不會露出房間外空白、無黑邊；Demo 重排為 16 件緊湊分區。**預設仍為 2:1 等角（iso）**；Orthogonal 仍為 opt-in、尚未設為正式預設，等手機實機驗收。投影**僅改變畫面呈現**：家具 `x/y/r`、Occupancy、Placement、Pathfinding 與存檔 key `catCafePhaserV0540` 完全不變，且**投影/camera/demoLayout 皆不寫入存檔**。現有等角家具在正交地板為 Placeholder（透視待重作）。
 
-## 投影模式（V0.57.0）
+## 投影模式（V0.57.1）
 
 - 預設（iso）：`index.html` 或 `?projection=iso`
 - **Orthogonal 正交平面**：`?projection=ortho`（別名 `?projection=orthogonal`）
@@ -14,7 +14,8 @@ V0.57.0-alpha 在既有 SpatialGrid／IsoProjection／FlatProjection 架構上�
 - Flat（已拒絕，保留回歸）：`?projection=flat`（含 `flatPreset=near-iso/balanced/current`）
 - 非法 `projection`（如 `?projection=abc`）安全回退 iso。
 - 投影模式與 `demoLayout` 皆**不寫入存檔**；重整後由網址參數決定。
-- 詳見 [V0570 結果](./docs/V0570_ORTHOGONAL_ROOM_RESULT.md)、[V0570 人工驗收](./docs/V0570_ORTHOGONAL_ROOM_ACCEPTANCE.md)、[比較 HTML](./docs/V0570_ORTHOGONAL_COMPARISON.html)、[家具重作計畫](./docs/V0570_ORTHOGONAL_ASSET_REBUILD_PLAN.md)、截圖 `docs/evidence/v0570/`；前版 Flat 見 [V0561 構圖比較](./docs/V0561_FLAT_PRESET_COMPARISON_RESULT.md)。
+- 手機直立取景見 [V0571 結果](./docs/V0571_ORTHOGONAL_MOBILE_RESULT.md)、[V0571 人工驗收](./docs/V0571_ORTHOGONAL_MOBILE_ACCEPTANCE.md)、[before/after 比較 HTML](./docs/V0571_ORTHOGONAL_MOBILE_COMPARISON.html)、截圖 `docs/evidence/v0571/`。
+- 正交房間原型見 [V0570 結果](./docs/V0570_ORTHOGONAL_ROOM_RESULT.md)、[V0570 驗收](./docs/V0570_ORTHOGONAL_ROOM_ACCEPTANCE.md)、[家具重作計畫](./docs/V0570_ORTHOGONAL_ASSET_REBUILD_PLAN.md)、截圖 `docs/evidence/v0570/`；前版 Flat 見 [V0561 構圖比較](./docs/V0561_FLAT_PRESET_COMPARISON_RESULT.md)。
 
 ## V0.55.2 家具重繪內容（前版，保留）
 

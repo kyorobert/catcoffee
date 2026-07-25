@@ -1,13 +1,20 @@
-import {INPUT_MODE} from '../core/input-state.js?v=0570a';
+import {INPUT_MODE} from '../core/input-state.js?v=0571a';
+import {computeSafeViewport} from '../core/scene-viewport.js?v=0571a';
+import {computeInitialFraming, clampCenterToContent} from '../core/camera-framing.js?v=0571a';
 
 export class CameraController {
-  constructor(scene, roomConfig, {inputMode = null, isFurnitureDragging = () => false, onPinchStart = null} = {}) {
+  constructor(scene, roomConfig, {inputMode = null, isFurnitureDragging = () => false, onPinchStart = null, framing = null} = {}) {
     this.scene = scene;
     this.camera = scene.cameras.main;
     this.room = roomConfig;
     this.inputMode = inputMode;
     this.isFurnitureDragging = isFurnitureDragging;
     this.onPinchStart = onPinchStart;
+    // Optional projection-aware framing policy (Orthogonal only). When present the camera
+    // fits the room CONTENT into the safe viewport and clamps panning to the content,
+    // instead of the iso/flat cover-zoom over the whole world. iso/flat pass no framing
+    // and keep their existing behaviour untouched.
+    this.framing = framing;
     this.pointers = new Map();
     this.pan = null;
     this.pinch = null;
@@ -22,6 +29,7 @@ export class CameraController {
   }
 
   resize(size) {
+    if (this.framing) { this.applyFraming(size); return; }
     const center = this.initialized
       ? {x: this.camera.midPoint.x, y: this.camera.midPoint.y}
       : {x: this.room.worldWidth / 2, y: this.room.worldHeight / 2};
@@ -30,6 +38,43 @@ export class CameraController {
     this.camera.setZoom(Math.max(this.minZoom, Math.min(this.room.camera.maxZoom, this.camera.zoom || this.room.camera.defaultZoom)));
     this.camera.centerOn(center.x, center.y);
     this.initialized = true;
+  }
+
+  // Orthogonal framing: fit the room content into the safe viewport and centre it (boot /
+  // not yet framed), or preserve the player's zoom and only re-clamp the centre on later
+  // resizes. Positioning uses Phaser's centerOn (world midpoint), and Phaser world bounds
+  // are removed so only our content clamp applies.
+  applyFraming(size) {
+    const canvasWidth = size?.width || this.camera.width;
+    const canvasHeight = size?.height || this.camera.height;
+    if (canvasWidth <= 0 || canvasHeight <= 0) return;
+    const content = this.framing.getContentBounds();
+    const safe = computeSafeViewport({canvasWidth, canvasHeight, insets: this.framing.getSafeInsets()});
+    const framed = computeInitialFraming({
+      content, safe, canvasWidth, canvasHeight,
+      maxZoom: this.room.camera.maxZoom, policy: this.framing.policy
+    });
+    this.minZoom = framed.minZoom;
+    this.camera.removeBounds();
+    if (!this.initialized) {
+      this.camera.setZoom(framed.zoom);
+      this.camera.centerOn(framed.centerX, framed.centerY);
+      this.initialized = true;
+    } else {
+      this.camera.setZoom(Phaser.Math.Clamp(this.camera.zoom, this.minZoom, this.room.camera.maxZoom));
+      this.clampToContent();
+    }
+  }
+
+  clampToContent() {
+    if (!this.framing) return;
+    const zoom = this.camera.zoom || 1;
+    const centre = clampCenterToContent({
+      centerX: this.camera.midPoint.x, centerY: this.camera.midPoint.y,
+      viewWidth: this.camera.width / zoom, viewHeight: this.camera.height / zoom,
+      content: this.framing.getContentBounds()
+    });
+    this.camera.centerOn(centre.x, centre.y);
   }
 
   setEnabled(enabled) {
@@ -72,6 +117,7 @@ export class CameraController {
         this.camera.scrollY -= dy / this.camera.zoom;
         this.pan.x = pointer.x;
         this.pan.y = pointer.y;
+        if (this.framing) this.clampToContent();
       }
     };
     this.handlePointerFinish = (pointer) => {
@@ -128,6 +174,7 @@ export class CameraController {
     const after = this.camera.getWorldPoint(screenX, screenY);
     this.camera.scrollX += worldBefore.x - after.x;
     this.camera.scrollY += worldBefore.y - after.y;
+    if (this.framing) this.clampToContent();
   }
 
   destroy() {

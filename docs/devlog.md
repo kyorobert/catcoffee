@@ -2,6 +2,20 @@
 
 每筆紀錄包含版本、目標、完成內容、驗證、已知限制與下一步。歷史版本若 repository 沒有完整日期或測試輸出，會明確標示為回溯摘要，不補造證據。
 
+## 2026-07-25｜ARCH-0571-ORTHOGONAL-MOBILE-FRAMING-AND-LAYOUT
+
+- 版本／Build：**V0.57.1-alpha｜正交手機構圖調整版** / **0571a**（由 V0.57.0-alpha / 0570a 升版；存檔 key `catCafePhaserV0540`、schema 5401、migration 5401 皆不變）
+- iPhone 基線回饋：Orthogonal 正交方向正確，但 V0.57.0 手機首屏 Camera 過度放大（只見約 37% 房間寬）、需大量左右拖曳、拖到房間外露出大片背景、Demo 過鬆散。根因：CameraController 對 ortho 沿用 iso/flat 的 cover-zoom + world bounds。
+- 目標：只修 Camera framing／safe viewport／房間有效邊界／Demo 構圖；不動投影數學、不重畫家具、不做營運系統；iso 仍預設。
+- Safe viewport：新增純模組 `core/scene-viewport.js`（`deriveOverlayInsets` 只扣實際覆蓋 canvas 的浮動元件、依最近邊界歸位；`computeSafeViewport` 永不反轉）＋ DOM adapter `ui/viewport-metrics.js`（唯一讀 viewport DOM rect 處，`getBoundingClientRect`、不硬編碼裝置/工具列；情境列隱藏時保留底部 reserve 78）。canvas 尺寸沿用 Phaser RESIZE（已排除 HUD/底部列/上下 safe-area）＋ visualViewport（main.js 未改）。
+- Camera fit：新增純模組 `core/camera-framing.js`（`computeFitZoom`＝min(safeW/contentW, safeH/contentH)、上限 maxInitialZoom、下限 minZoomFloor；`clampCenterToContent` 以相機中心表達、view≥content 置中否則夾房間內；`computeInitialFraming` 回 {zoom,centerX,centerY,minZoom}）。**定位改用 centerOn（world midpoint），修正 V0.57.0 首版誤把 scrollX/scrollY 當 world 左上角導致房間偏移的 bug。** content bounds＝房間視覺矩形（demo 與既有布局都用房間 bounds，不因家具少過度放大）。所有數值集中於 `ORTHO_FRAMING`，無 390/393/430 硬編碼。
+- CameraController（非受保護）：新增 `applyFraming`/`clampToContent`；ortho 移除 world bounds、pan/pinch/wheel/resize 後 clamp 到房間；minZoom＝fit；iso/flat 分支完全不變。CafeScene 新增 `buildOrthoFraming`（content bounds＋getSafeInsets via ViewportMetrics），`drawRoomOrtho` 底填擴大到 world 3×3 避免黑邊。
+- Demo：`ortho-demo-layout.js` 由 23→**16 件**緊湊分區（服務帶 y0、兩桌組+rug y3-4、貓咪角 y6-7、入口淨空、BFS 可達），仍 display-only、不改 state/coins、不觸發 save、存檔無 projection/demoLayout。
+- 修改檔案：新增 `scene-viewport.js`、`camera-framing.js`、`viewport-metrics.js`、`tests/camera-framing.test.js`、`docs/V0571_*`（結果/驗收/比較 HTML）、`docs/evidence/v0571/`（17 新＋3 before）；改 `CameraController.js`、`CafeScene.js`、`ortho-demo-layout.js`、`ortho-demo-layout.test.js`、`browser-smoke.test.js`（+首屏 fit/整寬/無選取/情境列/invalid 斷言）；版本機械升版 0570a→0571a、`check.js`（版本/Build/obsolete +`?v=0570a`/protected hash 更新 GridSystem+flat-presets、**新增保護 scene-viewport/camera-framing/viewport-metrics**、required/tests）；docs decisions(DEC-018)/current-state/roadmap/handoff/README。`OrthogonalProjection`/`projection-mode`/`FlatProjection`/`IsoProjection`/`SpatialGrid`/`room-config`/`furniture-config` hash **未變**。
+- 驗證：`npm test`、`camera-framing`、`ortho-demo-layout`、`ortho-projection`、`projection-mode`、`flat-*`、`grid-projection-compat`（iso/Flat C golden 未改）、`build-consistency` 皆通過；`npm run check:deploy` 通過（Build 0571a、54 modules）；`npm run check:dev` 通過（**本機 Chrome 實際 browser smoke**，含 ortho 首屏 fit=minZoom/整寬可見/無初始選取/情境列/invalid 回退）；17＋3 張 real-browser 證據零 page error（初始/pan 四邊界貼齊無空白/zoom/選取情境列不遮房間且 Camera 不跳/桌面/before-after）。
+- 已知限制／未完成：手機直立房間上下有房間基色邊距（wide 房型於 tall 螢幕固有 letterbox，非黑、置中完整；依「camera 能解就不改投影」未動 cellHeight）；家具仍 Placeholder；手機實機再驗收 pending；未新增營運/角色系統；未 commit/push/部署；本環境無 `.git`。
+- 下一步：產品負責人依 `docs/evidence/v0571/` 與 [V0571 驗收](./V0571_ORTHOGONAL_MOBILE_ACCEPTANCE.md) 實機判斷；通過後才啟動 `ART-0572-CORE-ORTHOGONAL-FURNITURE`。
+
 ## 2026-07-25｜ARCH-0570-ORTHOGONAL-ROOM-PROTOTYPE
 
 - 版本／Build：**V0.57.0-alpha｜正交平面咖啡廳原型版** / **0570a**（由 V0.56.1-alpha / 0561a 升版；存檔 key `catCafePhaserV0540`、schema 5401、migration 5401 皆不變）
