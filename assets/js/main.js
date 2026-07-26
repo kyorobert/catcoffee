@@ -1,10 +1,10 @@
-import {createGameConfig} from './config/game-config.js?v=0575b';
-import {FURNITURE_CONFIG} from './config/furniture-config.js?v=0575b';
-import {APP_VERSION, BUILD_ID, assertBuildConsistency} from './config/build-info.js?v=0575b';
-import {resolveDomContract} from './ui/dom-contract.js?v=0575b';
-import {SaveAdapter} from './systems/SaveAdapter.js?v=0575b';
-import {StartupController} from './systems/StartupController.js?v=0575b';
-import {UiBridge} from './ui/UiBridge.js?v=0575b';
+import {createGameConfig} from './config/game-config.js?v=0576a';
+import {FURNITURE_CONFIG} from './config/furniture-config.js?v=0576a';
+import {APP_VERSION, BUILD_ID, assertBuildConsistency} from './config/build-info.js?v=0576a';
+import {resolveDomContract} from './ui/dom-contract.js?v=0576a';
+import {SaveAdapter} from './systems/SaveAdapter.js?v=0576a';
+import {StartupController} from './systems/StartupController.js?v=0576a';
+import {UiBridge} from './ui/UiBridge.js?v=0576a';
 
 window.__CAT_CAFE_JS_BUILD_ID__ = BUILD_ID;
 

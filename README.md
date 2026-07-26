@@ -1,7 +1,21 @@
-# 貓咪咖啡廳 V0.57.5-alpha
+# 貓咪咖啡廳 V0.57.6-alpha
 
-版本：`V0.57.5-alpha｜正交房間外殼與門比例修正版`  
-Build ID：`0575b`
+版本：`V0.57.6-alpha｜正交可玩區與房間 Skin 基礎版`  
+Build ID：`0576a`
+
+## V0.57.6-alpha：可玩區與 Room Skin
+
+`ARCH-0575C` 將正交房間的「可放置地板」與「不可放置的視覺外殼」正式分離。`placeableMask` 仍是唯一放置真相：78 個可放置 cell 使用明亮分區地板；兩個保留入口 cell 使用門檻材質；Grid 外的滿版區改為深木固定建築帶、嵌板與雙層收邊，不再偽裝成可放置地板。新 `assets/js/config/ortho-room-skin.js` 集中管理牆面、護牆板、收邊、地板 palette、門幾何／樣式與牆飾 anchor；`OrthogonalProjection` 回到純幾何職責。
+
+家具拖曳的紅綠預覽與 pointerup 提交現在共用 `FurnitureDragController.evaluateCandidate()` 的同一評估快照；候選座標或旋轉變更會使快照失效並重新驗證。新增 1×1、1×2、2×2 邊界案例、shell 外點、保留入口與「綠色 preview 不可在未變更時 commit fail」回歸測試。V0575/V0575B 的 Camera zoom/pan/clamp、88×120 cell、Grid、Occupancy、Placement、存檔 key `catCafePhaserV0540` 及 furniture `id/x/y/r/footprint` 均保持。
+
+- 結果：[V0576 正交可玩區與 Skin 結果](./docs/V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_RESULT.md)
+- 驗收：[V0576 驗收表](./docs/V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_ACCEPTANCE.md)
+- 比較：[V0576 before/after](./docs/V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_COMPARISON.html)
+- 證據：`docs/evidence/v0576/`
+- 新測試：`npm.cmd run test:ortho-area`
+
+## V0.57.5B 基線（歷史）
 
 V0.57.5-alpha（Build 0575b）在 Zoom/Pan 實機通過（**核心凍結**）後，修正 **`OrthogonalProjection`（正交平面）的房間外殼滿版與入口門比例**（**不重構 Camera、不重畫家具**）：留白根因是房間視覺外殼只畫到邏輯 10×8 Grid，改為把**牆面＋地板視覺外殼畫到超出 Grid**（`ORTHOGONAL_ROOM_RENDER.shell`）延伸至 safe viewport 邊緣，手機首屏外圈房外背景由 ~18px 降至 **~0px**（純視覺、**不新增 placeable cells**、不改 Grid/存檔；以細牆腳線取代粗矩形卡片外框）。**視覺門與邏輯入口分離**：`logicalEntranceZone` 維持兩格 x7-8，新增較小 `visualDoorBounds`（**~1.4 格、123×124 world px、置中 x7-8、x9 牆**），門改為分層繪製（門框＋玻璃格窗＋黃銅門把＋木門扇，非深色黑洞/倉庫門）。**CameraController 核心未改**（`viewCentre`/pan/clamp 凍結，real-browser 拖曳 pan 回歸通過）。**cell 88×120、`customerEntryPoint (8,0)`／staging／舊存檔入口 `(8,7)/(9,7)`／存檔 key `catCafePhaserV0540`（schema/migration 5401）／placeableMask／Grid／Occupancy／Placement／Pathfinding 皆不變。預設仍為 2:1 等角（iso）**；Orthogonal 仍 opt-in、等手機實機驗收。等角家具與門在正交地板仍為 Placeholder/Prototype（正式素材待 `ART-0576`）。
 

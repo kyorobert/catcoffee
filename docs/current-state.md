@@ -1,4 +1,16 @@
-# V0.57.5-alpha 專案現況
+# V0.57.6-alpha 專案現況
+
+## Build 0576a（ARCH-0575C）
+
+- 正交模式仍為 opt-in；iso 仍是預設／rollback。
+- 新 `ortho-room-skin.js` 是正交房間 visual tokens 的唯一來源；`OrthogonalProjection` 回到純幾何。
+- 10×8 logical grid／placeableMask 未變：78 格 playable、舊入口 `(8,7)/(9,7)` 兩格 reserved。
+- playable cell 使用 zone floor palette；reserved cell 使用 threshold；Grid 外滿版 shell 使用深木 `fixed-architecture` panel/trim，不再像可放置地板。
+- 門的 visual geometry/style 由 Skin 管理；logical entrance metadata 仍由 `ortho-room-zones.js` 管理。
+- `FurnitureDragController.evaluateCandidate()` 統一 preview/commit evaluation；candidate 變動以 signature 失效。
+- CameraController、Grid/Occupancy/Placement、save key/schema、furniture data contract 未改。
+- Chrome 390/393/430 與桌面 smoke 通過；iPhone Safari 真機仍 pending。
+- 結果與證據：[V0576 結果](./V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_RESULT.md)、[驗收](./V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_ACCEPTANCE.md)、`docs/evidence/v0576/`。
 
 本文件描述 repository 目前可直接查證的狀態，不代表未來產品承諾。決策以 [decisions.md](./decisions.md) 為準。
 

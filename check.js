@@ -2,13 +2,13 @@ import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {existsSync, readFileSync, readdirSync, statSync} from 'node:fs';
 import {join, relative} from 'node:path';
-import {APP_VERSION, BUILD_ID, SAVE_KEY} from './assets/js/config/build-info.js?v=0575b';
-import {REQUIRED_DOM_IDS, REQUIRED_NESTED_SELECTORS} from './assets/js/ui/dom-contract.js?v=0575b';
+import {APP_VERSION, BUILD_ID, SAVE_KEY} from './assets/js/config/build-info.js?v=0576a';
+import {REQUIRED_DOM_IDS, REQUIRED_NESTED_SELECTORS} from './assets/js/ui/dom-contract.js?v=0576a';
 import {FURNITURE_CONFIG} from './assets/js/config/furniture-config.js';
-import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS,V0552_REDRAW_FURNITURE_IDS} from './assets/js/config/furniture-visual-config.js?v=0575b';
-import {getPurchasableFurniture} from './assets/js/core/furniture-catalog-selector.js?v=0575b';
-import {validateFurnitureVisualConfig} from './assets/js/core/furniture-visual-validator.js?v=0575b';
-import {summarizeFurnitureAssetValidation,validateFurnitureAssetRecord} from './assets/js/core/furniture-asset-validator.js?v=0575b';
+import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS,V0552_REDRAW_FURNITURE_IDS} from './assets/js/config/furniture-visual-config.js?v=0576a';
+import {getPurchasableFurniture} from './assets/js/core/furniture-catalog-selector.js?v=0576a';
+import {validateFurnitureVisualConfig} from './assets/js/core/furniture-visual-validator.js?v=0576a';
+import {summarizeFurnitureAssetValidation,validateFurnitureAssetRecord} from './assets/js/core/furniture-asset-validator.js?v=0576a';
 import {CAT_CONFIG, CAT_PROFILES, FALLBACK_CAT} from './assets/js/config/cat-config.js';
 import {inspectRgbaPng} from './tests/helpers/png.js';
 
@@ -30,14 +30,26 @@ const required = [
   'docs/ART_BIBLE.md', 'docs/FURNITURE_AUDIT.md', 'docs/PROTOTYPE_REDRAW_PLAN.md',
   'docs/PROTOTYPE_REDRAW_RESULT.md', 'docs/PROTOTYPE_REDRAW_CONTACT_SHEET.html',
   'docs/V0552_MANUAL_BROWSER_ACCEPTANCE.md',
+  'docs/V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_RESULT.md',
+  'docs/V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_ACCEPTANCE.md',
+  'docs/V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_COMPARISON.html',
+  'docs/evidence/v0576/metrics.json',
+  'docs/evidence/v0576/after-390x844-ortho-demo.png',
+  'docs/evidence/v0576/after-393x852-ortho-demo.png',
+  'docs/evidence/v0576/after-430x932-ortho-demo.png',
+  'docs/evidence/v0576/after-390x844-zoomin-pan.png',
+  'docs/evidence/v0576/after-390x844-pan-left.png',
+  'docs/evidence/v0576/after-390x844-pan-right.png',
+  'docs/evidence/v0576/after-390x844-pan-top.png',
+  'docs/evidence/v0576/after-390x844-pan-bottom.png',
   'assets/js/systems/FlatProjection.js', 'assets/js/core/projection-mode.js',
   'assets/js/config/flat-projection-presets.js',
   'assets/js/systems/OrthogonalProjection.js', 'assets/js/config/ortho-demo-layout.js',
-  'assets/js/config/ortho-room-zones.js',
+  'assets/js/config/ortho-room-zones.js', 'assets/js/config/ortho-room-skin.js',
   'assets/js/core/scene-viewport.js', 'assets/js/core/camera-framing.js', 'assets/js/ui/viewport-metrics.js',
   'tests/projection-mode.test.js', 'tests/flat-projection.test.js', 'tests/flat-preset.test.js',
   'tests/ortho-projection.test.js', 'tests/ortho-demo-layout.test.js', 'tests/camera-framing.test.js',
-  'tests/ortho-room-zones.test.js',
+  'tests/ortho-room-zones.test.js', 'tests/ortho-playable-area-skin.test.js',
   'assets/js/config/furniture-visual-config.js', 'assets/js/core/furniture-direction.js',
   'assets/js/core/furniture-catalog-selector.js', 'assets/js/core/furniture-visual-validator.js',
   'assets/js/core/furniture-display-state.js', 'assets/js/core/furniture-asset-validator.js',
@@ -59,30 +71,32 @@ const required = [
 required.forEach(requireFile);
 
 const packageJson = JSON.parse(read('package.json'));
-if (packageJson.version !== '0.57.5-alpha') failures.push('package version must be 0.57.5-alpha');
+if (packageJson.version !== '0.57.6-alpha') failures.push('package version must be 0.57.6-alpha');
 if (packageJson.dependencies?.phaser !== '3.90.0') failures.push('Phaser must be locked to 3.90.0');
 if (packageJson.scripts?.['check:deploy'] !== 'node ./check.js --deploy') failures.push('check:deploy script is inconsistent');
 if (packageJson.scripts?.['check:dev'] !== 'node ./check.js --dev') failures.push('check:dev script is inconsistent');
 if (JSON.stringify(packageJson.scripts).includes('skip-browser')) failures.push('ambiguous --skip-browser remains in package scripts');
 
-if (APP_VERSION !== 'V0.57.5-alpha｜正交房間外殼與門比例修正版') failures.push('APP_VERSION is incorrect');
-if (BUILD_ID !== '0575b') failures.push('BUILD_ID is incorrect');
+if (APP_VERSION !== 'V0.57.6-alpha｜正交可玩區與房間 Skin 基礎版') failures.push('APP_VERSION is incorrect');
+if (BUILD_ID !== '0576a') failures.push('BUILD_ID is incorrect');
 if (SAVE_KEY !== 'catCafePhaserV0540') failures.push('SAVE_KEY changed');
 
 const protectedHashes = {
   'assets/js/config/furniture-config.js': '87a3bbcdf4cb9417c12f2eb4948b7e3ade15416e6c160475183aa51b3aab2de7',
   'assets/js/config/room-config.js': 'e201e45bb8f1b4576966ab6a484a8b19ef2767ddc0bd4bdba6df3807d884e368',
-  'assets/js/systems/GridSystem.js': '44840b3642b0b00a38f6ada256e4d842bd555e642d913667466f1f74d414ecb7',
+  'assets/js/systems/GridSystem.js': 'de9c1743c9b80c36682db25a32bc03006b83cae5f76b67ef513f9172361b59f4',
   'assets/js/systems/SpatialGrid.js': '548a9418a3d921a025a2d35bf8b38f130320dcc7980c7cbde999c2ab91f22583',
   'assets/js/systems/IsoProjection.js': '7b24bdc46630ae043d34bb5b5c3090f662407a512d8e14de0b3599c9545f3a9a',
   'assets/js/systems/FlatProjection.js': '6afcb2ee4a4e05fc9aaf7cb4cd89799465f17a9743e6ba69ae98bceb9e79ac94',
-  'assets/js/systems/OrthogonalProjection.js': '525dedd97c45dcfccfbeaa7d69bb329035b692db520c9c08c735cee4f335c736',
-  'assets/js/config/ortho-room-zones.js': 'd5e438481b34f09abb30881f0299c9bd149f3cf939b8ea6dec415fabbfb97d13',
+  'assets/js/systems/OrthogonalProjection.js': 'd24de09f55841b7f18ef29de1dd16c5c92a1cb8a89ca4b0ef2c73bff7eea41f6',
+  'assets/js/config/ortho-room-zones.js': 'a089b2f06ad7b69e90dfaa29e881f2292f883e0c32d56a364c4e1dd7c89c2e74',
   'assets/js/core/projection-mode.js': 'ec491ed4dd148942d7520b9b36dcc5c94dc07d69f2ec714d36f0f03499a2ad91',
-  'assets/js/config/flat-projection-presets.js': '8704a50839d5dcbcc4fb1e0d3e37321b928e31e159b282c31060f3fc45c1ee48',
+  'assets/js/config/flat-projection-presets.js': '4504dcefa434c684f3fb183ac8c19d9f59c431091d3adad8f25610ec0f0c090e',
   'assets/js/core/scene-viewport.js': '7835d2b5af146561bc5eabc0563df7d71a25e3c4d585b63f59fa672b8a6f6495',
   'assets/js/core/camera-framing.js': '01530af6e7db0c4234ae92076c4889837999c45e996ada08bcfa4561c6b7ea0c',
-  'assets/js/ui/viewport-metrics.js': 'c331ad2b0ea703b12cdbf3ec11f35b5873125d9dcc01e06906419150d048f29d',
+  'assets/js/ui/viewport-metrics.js': '1b16e7cae257ee1bf683502460cee10e15134b512b92d289dcfdbad7e12055c1',
+  'assets/js/systems/CameraController.js': '1eb53f41ac0fadc061f55b1a40e6db04bb58ceeb7081d96e92663559d9f8d070',
+  'assets/js/systems/SaveAdapter.js': 'ba5cafbc07ce56065bb226ecdbeb11914919f55c3534aa0dca93bdb7d0a6a09d',
   'assets/js/systems/OccupancySystem.js': 'c185588cbcba29ec46ec9d173c781faf0fe8bd69f56218ec9bee19992e25c511',
   'assets/js/systems/PlacementSystem.js': 'fecfccaa2178f7e88f6b044bc3e6964db8cda549137c42008ef18ffe6bae37f6',
   'assets/js/core/grid-pathfinder.js': '846a4e6685ae0065da57ce94eb16bfb85fde64700302b2630e55aa451f4b7416',
@@ -95,10 +109,10 @@ for (const [file, hash] of Object.entries(protectedHashes)) {
 }
 
 const html = read('index.html');
-if (!html.includes('data-build-id="0575b"')) failures.push('HTML Build ID is missing');
-if (!html.includes("window.__CAT_CAFE_HTML_BUILD_ID__ = '0575b'")) failures.push('early HTML Build ID is missing');
-if (!html.includes('./assets/vendor/phaser-3.90.0.min.js?v=0575b')) failures.push('versioned local Phaser path is missing');
-if (!html.includes('./assets/js/main.js?v=0575b')) failures.push('versioned entry module is missing');
+if (!html.includes('data-build-id="0576a"')) failures.push('HTML Build ID is missing');
+if (!html.includes("window.__CAT_CAFE_HTML_BUILD_ID__ = '0576a'")) failures.push('early HTML Build ID is missing');
+if (!html.includes('./assets/vendor/phaser-3.90.0.min.js?v=0576a')) failures.push('versioned local Phaser path is missing');
+if (!html.includes('./assets/js/main.js?v=0576a')) failures.push('versioned entry module is missing');
 if (!html.includes('window.addEventListener(\'error\'')) failures.push('early window error handler is missing');
 if (!html.includes('window.addEventListener(\'unhandledrejection\'')) failures.push('early unhandledrejection handler is missing');
 if (!html.includes('data-boot-refresh')) failures.push('cache refresh button is missing');
@@ -129,8 +143,9 @@ for (const file of formalJs) {
   if (source.includes('?v=0573a')) failures.push(`${relative(root, file)} contains obsolete module query v=0573a`);
   if (source.includes('?v=0574a')) failures.push(`${relative(root, file)} contains obsolete module query v=0574a`);
   if (source.includes('?v=0575a')) failures.push(`${relative(root, file)} contains obsolete module query v=0575a`);
+  if (source.includes('?v=0575b')) failures.push(`${relative(root, file)} contains obsolete module query v=0575b`);
   for (const match of source.matchAll(/(?:from\s*|import\s*)["'](\.{1,2}\/[^"']+\.js)(\?v=[^"']+)?["']/g)) {
-    if (match[2] !== '?v=0575b') failures.push(`${relative(root, file)} has inconsistent module query: ${match[0]}`);
+    if (match[2] !== '?v=0576a') failures.push(`${relative(root, file)} has inconsistent module query: ${match[0]}`);
   }
 }
 
@@ -138,6 +153,28 @@ const joined = formalJs.map(file => readFileSync(file, 'utf8')).join('\n');
 for (const token of ['resizeWorld', 'world.style.left', 'world.style.top', 'world.style.transform']) if (joined.includes(token)) failures.push(`legacy scene control remains: ${token}`);
 if (joined.includes('https://unpkg') || joined.includes('https://cdn.jsdelivr')) failures.push('runtime code depends on a CDN');
 if (/node_modules[\\/]+phaser/i.test(joined)) failures.push('runtime code loads Phaser from node_modules');
+
+const roomSkinSource = read('assets/js/config/ortho-room-skin.js');
+for (const token of [
+  'DEFAULT_ORTHOGONAL_ROOM_SKIN','getOrthogonalCellAppearance','fixed-architecture',
+  'zoneFill','playableBoundary','gridBounds','decorAnchors'
+]) if (!roomSkinSource.includes(token)) failures.push(`Room Skin foundation missing ${token}`);
+for (const banned of ['Phaser','document','localStorage','SaveAdapter']) {
+  if (new RegExp(`\\b${banned}\\b`).test(roomSkinSource)) failures.push(`Room Skin uses banned token ${banned}`);
+}
+if (/\bwindow\s*[.\[]/.test(roomSkinSource)) failures.push('Room Skin accesses browser window');
+const orthoProjectionSource = read('assets/js/systems/OrthogonalProjection.js');
+for (const token of ['zoneFill','decorAnchors','cafeSign','panelInset']) {
+  if (orthoProjectionSource.includes(token)) failures.push(`OrthogonalProjection still owns Room Skin token ${token}`);
+}
+const cafeSceneSource = read('assets/js/scenes/CafeScene.js');
+for (const token of ['DEFAULT_ORTHOGONAL_ROOM_SKIN','getOrthogonalCellAppearance','this.grid.isPlaceableCell']) {
+  if (!cafeSceneSource.includes(token)) failures.push(`CafeScene Room Skin integration missing ${token}`);
+}
+const dragSource = read('assets/js/phaser/FurnitureDragController.js');
+for (const token of ['evaluateCandidate(','lastPlacementEvaluation','candidateSignature(']) {
+  if (!dragSource.includes(token)) failures.push(`placement preview/commit unification missing ${token}`);
+}
 
 const uiBridge = read('assets/js/ui/UiBridge.js');
 if (!uiBridge.includes('this.dom = dom')) failures.push('UiBridge does not receive the DOM contract');
@@ -268,7 +305,7 @@ for (const profile of [...CAT_PROFILES, FALLBACK_CAT]) {
   }
 }
 if (Object.keys(CAT_CONFIG).join(',') !== 'bean,coal,snow,latte,hana') failures.push('cat IDs changed');
-if (!read('assets/js/config/cat-config.js').includes("CAT_ASSET_VERSION = '0575b'")) failures.push('cat asset version is not 0575b');
+if (!read('assets/js/config/cat-config.js').includes("CAT_ASSET_VERSION = '0576a'")) failures.push('cat asset version is not 0576a');
 for (const definition of Object.values(FURNITURE_CONFIG)) requireFile(definition.texture.split('?')[0].replace(/^\.\//, ''));
 
 const gitignore = read('.gitignore');
@@ -283,6 +320,7 @@ const tests = [
   ['flat projection presets', './tests/flat-preset.test.js'],
   ['orthogonal projection', './tests/ortho-projection.test.js'],
   ['orthogonal room zones', './tests/ortho-room-zones.test.js'],
+  ['orthogonal playable area / Room Skin', './tests/ortho-playable-area-skin.test.js'],
   ['orthogonal demo layout', './tests/ortho-demo-layout.test.js'],
   ['camera framing', './tests/camera-framing.test.js'],
   ['cat AI simulation', './tests/cat-ai-simulation.test.js'], ['furniture drag', './tests/furniture-drag.test.js'],
@@ -339,7 +377,15 @@ if (zipFlag >= 0) {
     for (const file of ['index.html', 'manifest.webmanifest', '.nojekyll', '.gitattributes', 'README.md', 'CREDITS.md', 'THIRD_PARTY_NOTICES.md', 'check.js', 'package.json', 'package-lock.json']) if (!names.includes(file)) failures.push(`ZIP root missing ${file}`);
     if (names.some(name => /(^|\/)(node_modules|legacy|tools)(\/|$)/.test(name))) failures.push('ZIP contains node_modules, legacy or tools');
     if (names.some(name => /(^|\/)(\.git)(\/|$)|\.zip$/i.test(name))) failures.push('ZIP contains .git or another ZIP');
-    for (const file of ['docs/ART_BIBLE.md','docs/FURNITURE_AUDIT.md','docs/PROTOTYPE_REDRAW_PLAN.md','docs/PROTOTYPE_REDRAW_RESULT.md','docs/PROTOTYPE_REDRAW_CONTACT_SHEET.html','docs/V0552_MANUAL_BROWSER_ACCEPTANCE.md']) if (!names.includes(file)) failures.push(`ZIP missing ${file}`);
+    for (const file of [
+      'docs/ART_BIBLE.md','docs/FURNITURE_AUDIT.md','docs/PROTOTYPE_REDRAW_PLAN.md',
+      'docs/PROTOTYPE_REDRAW_RESULT.md','docs/PROTOTYPE_REDRAW_CONTACT_SHEET.html',
+      'docs/V0552_MANUAL_BROWSER_ACCEPTANCE.md',
+      'docs/V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_RESULT.md',
+      'docs/V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_ACCEPTANCE.md',
+      'docs/V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_COMPARISON.html',
+      'docs/evidence/v0576/metrics.json'
+    ]) if (!names.includes(file)) failures.push(`ZIP missing ${file}`);
     for (const id of PROTOTYPE_FURNITURE_IDS) {
       for (const path of Object.values(FURNITURE_VISUAL_CONFIG[id].texturePathByDirection || {})) {
         const asset=path.split('?')[0].replace(/^\.\//,'');

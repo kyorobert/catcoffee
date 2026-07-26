@@ -1,0 +1,81 @@
+{
+  "build": "0576a",
+  "version": "V0.57.6-alpha",
+  "capturedAt": "2026-07-26T14:40:28.401Z",
+  "browser": "Chrome",
+  "screenshots": [
+    "docs/evidence/v0576/after-390x844-ortho-demo.png",
+    "docs/evidence/v0576/after-390x844-zoomin-pan.png",
+    "docs/evidence/v0576/after-390x844-pan-left.png",
+    "docs/evidence/v0576/after-390x844-pan-right.png",
+    "docs/evidence/v0576/after-390x844-pan-top.png",
+    "docs/evidence/v0576/after-390x844-pan-bottom.png",
+    "docs/evidence/v0576/after-393x852-ortho-demo.png",
+    "docs/evidence/v0576/after-430x932-ortho-demo.png",
+    "docs/evidence/v0576/after-1366x768-ortho-demo-artdebug.png"
+  ],
+  "viewports": {
+    "390x844": {
+      "canvas": [
+        390,
+        696
+      ],
+      "zoom": 0.53125,
+      "scroll": [
+        585,
+        94
+      ],
+      "skin": "warm-cafe-foundation",
+      "shellRole": "fixed-architecture",
+      "placeableCells": 78,
+      "entities": 23,
+      "pan": {
+        "before": [
+          585,
+          94
+        ],
+        "after": [
+          689,
+          192
+        ],
+        "delta": [
+          104,
+          98
+        ]
+      },
+      "errors": []
+    },
+    "393x852": {
+      "canvas": [
+        393,
+        704
+      ],
+      "zoom": 0.5355113636363636,
+      "scroll": [
+        583,
+        90
+      ],
+      "skin": "warm-cafe-foundation",
+      "shellRole": "fixed-architecture",
+      "placeableCells": 78,
+      "entities": 23,
+      "errors": []
+    },
+    "430x932": {
+      "canvas": [
+        430,
+        784
+      ],
+      "zoom": 0.5880681818181818,
+      "scroll": [
+        565,
+        50
+      ],
+      "skin": "warm-cafe-foundation",
+      "shellRole": "fixed-architecture",
+      "placeableCells": 78,
+      "entities": 23,
+      "errors": []
+    }
+  }
+}

@@ -1,5 +1,18 @@
 # 開發日誌
 
+## 2026-07-26：V0.57.6-alpha / ARCH-0575C
+
+- 修改前 gate：`npm test`、`check:deploy`、`check:dev`（含 Chrome smoke）全數通過。
+- 根因：V0575B shell 的淺色 `floorFill` 與 playable zone floor 太接近，造成「看起來是地板、實際 out-of-bounds」；不是第二套 Placement 規則。
+- 新增 `ortho-room-skin.js`：wall/wainscot/trim/floor/reserved/shell/door/decor anchors 集中設定；Projection 移除 render metadata。
+- `drawRoomOrtho()` 改由 Skin + live `isPlaceableCell()` 畫面：78 格 playable、2 格 reserved threshold、Grid 外 deep-wood fixed shell。
+- 門改 Skin-owned geometry，新增 casing/lintel/cafe sign/窄 threshold；logical entrance metadata 與 save entrance 未改。
+- `FurnitureDragController` 增加 candidate signature + shared evaluation；preview 與 unchanged commit 共用結果。
+- 新增 `ortho-playable-area-skin.test.js`；擴充 drag preview/commit regression；browser smoke 讀 live skin tokens。
+- Chrome 自動化：390/393/430、desktop、ortho/demo/artDebug/invalid fallback 通過；390 zoom1.3 real pan delta X104/Y98，pageerror/request failure 0。
+- 證據：`docs/evidence/v0576/`；結果／驗收／比較文件已建立。
+- 受保護契約：Camera 行為、ROOM_CONFIG/placeableMask、Grid/Occupancy/Placement、save key/schema、furniture ID/x/y/r/footprint、iso/Flat 不變。
+
 每筆紀錄包含版本、目標、完成內容、驗證、已知限制與下一步。歷史版本若 repository 沒有完整日期或測試輸出，會明確標示為回溯摘要，不補造證據。
 
 ## 2026-07-26｜ARCH-0575A-ORTHOGONAL-ROOM-SHELL-FULLBLEED-AND-DOOR-SCALE

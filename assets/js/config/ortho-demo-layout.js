@@ -16,7 +16,7 @@
 // never crosses the work side. The prototype entry cell is ortho-room-zones'
 // customerEntryPoint; this is a Demo/prototype visual + route only and does NOT change the
 // logical save entrance.
-import {ORTHO_ROOM_ZONES} from './ortho-room-zones.js?v=0575b';
+import {ORTHO_ROOM_ZONES} from './ortho-room-zones.js?v=0576a';
 
 export const ORTHO_DEMO_ENTRANCE = Object.freeze({...ORTHO_ROOM_ZONES.customerEntryPoint});
 

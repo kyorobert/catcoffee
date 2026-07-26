@@ -7,9 +7,9 @@
 // logical save entrance in room-config ((8,7)/(9,7)) is unchanged.
 //
 // Rectangles are {x, y, w, h} in grid cells (x/y top-left inclusive, w/h in cells). The
-// customer door is a 2-cell VISUAL door on the top wall at the right; x9 stays wall so the
-// door never sits flush against the room edge. Visual door width (2 cells) is separate from
-// the single logical entry point and staging cell (Pathfinding needs only one entry).
+// customer entrance occupies a 2-cell logical zone on the top wall at the right; x9 stays
+// wall so the entrance never sits flush against the room edge. Visual door geometry belongs
+// to ortho-room-skin.js and is separate from this logical entry/staging metadata.
 export const ORTHO_ROOM_ZONES = Object.freeze({
   grid: Object.freeze({cols: 10, rows: 8}),
 
@@ -19,12 +19,6 @@ export const ORTHO_ROOM_ZONES = Object.freeze({
   customerEntranceZone: Object.freeze({x: 7, y: 0, w: 2, h: 2}),
   customerEntryPoint: Object.freeze({x: 8, y: 0}),             // single logical entry cell
   customerEntryStaging: Object.freeze({x: 8, y: 1}),           // where a customer stands after entering
-  // visualDoorBounds is the SMALLER visual door LEAF (ARCH-0575A), NOT the whole 2-cell slot:
-  // it is ~1.4 cellWidths wide, centred inside the 2-cell entrance. Its x/w are in GRID-COORD
-  // space (cell centres at integers; cells 7-8 span gridX 6.5..8.5, centre 7.5), so the renderer
-  // projects its x and x+w columns to the world. x9 (gridX 8.5..9.5) stays wall.
-  visualDoorBounds: Object.freeze({x: 6.8, y: 0, w: 1.4, h: 1}),
-
   // --- functional bands occupy the LEFT/CENTRE columns x1-6; the right columns x7-8 are the
   //     aisle. ARCH-0574 makes the bands a clean, non-overlapping partition of x1-6 (one zone
   //     per cell) so each area reads as a distinct floor region and the demo groups tightly. ---

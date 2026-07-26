@@ -11,12 +11,17 @@ function harness({valid=true}={}){
   Object.assign(controller,{
     scene:{
       state:{items:[item],inventory:{},coins:1000,placementHelper:false},
-      placementGraphics:{clear(){}},entities:new Map([[item.id,entity]]),selectedId:item.id,
+      placementGraphics:{
+        clear(){return this},fillStyle(){return this},fillPoints(){return this},
+        lineStyle(){return this},strokePoints(){return this}
+      },entities:new Map([[item.id,entity]]),selectedId:item.id,
       game:{events:{emit:(name,payload)=>events.push({name,payload})}},
       emitState(){},addFurnitureEntity(){},selectItem(){}
     },
     grid:{
-      lastSnap:null,getFootprintCells:()=>[{x:2,y:1}],
+      lastSnap:null,getFootprintCells:(_type,x,y)=>[{x,y}],
+      getFootprintPolygon:(_type,x,y)=>[{x,y},{x:x+1,y},{x:x+1,y:y+1},{x,y:y+1}],
+      isPlaceableCell:()=>true,getCellDiamond:(x,y)=>[{x,y},{x:x+1,y},{x:x+1,y:y+1},{x,y:y+1}],
       getCellCenter:()=>({x:0,y:0}),getAnchor:()=>({x:0,y:10}),
       snapWorldToGrid(x,y){this.lastSnap={x,y};return {x:2,y:1}}
     },
@@ -24,7 +29,7 @@ function harness({valid=true}={}){
     furniture:{chair:{price:1,layer:'floorObject'}},
     inputMode:{releaseToStable(){this.released=true}},cameraController:{setEnabled(value){this.enabled=value}},
     catBehaviorController:{resume(){this.resumed=true},onFurnitureLayoutChanged(){this.changed=true},isAnyCatInCells(){return false}},
-    ghost:null,armed:null,lastValidation:null,
+    ghost:null,armed:null,lastValidation:null,lastPlacementEvaluation:null,
     drag:{pointerId:1,isNew:false,movingItemId:item.id,item,original:{...item},candidate:{...item,x:2},entity},
     validate:()=>valid?{valid:true,blockingReason:null,warnings:[]}:{valid:false,blockingReason:'overlap',message:'occupied',warnings:[]}
   });
@@ -62,6 +67,23 @@ test.controller.updateCandidateFromPointer({id:1});
 assert.equal(test.controller.saveAdapter.count,0,'pointermove candidate update never saves');
 assert.equal(test.events.length,0,'pointermove candidate update never emits a toast');
 assert.deepEqual(test.controller.grid.lastSnap,{x:200,y:100},'foot anchor offset is removed before worldToGrid snapping');
+
+// Preview and commit share one evaluation for an unchanged candidate. This prevents a
+// green preview from taking a second, divergent validation path on pointerup.
+test=harness();
+test.controller.renderPlacementVisuals();
+assert.equal(test.controller.lastPlacementEvaluation.result.valid,true,'preview caches a valid evaluation');
+test.controller.validate=()=>({valid:false,blockingReason:'overlap',message:'divergent second path',warnings:[]});
+assert.equal(test.controller.finish(),true,'unchanged green preview commits from the same evaluation');
+assert.equal(test.controller.saveAdapter.count,1,'preview-consistent commit saves once');
+
+// Changing the candidate invalidates the cache and forces a fresh evaluation.
+test=harness();
+test.controller.renderPlacementVisuals();
+test.controller.drag.candidate.x=3;
+test.controller.validate=()=>({valid:false,blockingReason:'overlap',message:'occupied',warnings:[]});
+assert.equal(test.controller.finish(),false,'changed candidate cannot reuse an earlier green preview');
+assert.equal(test.controller.saveAdapter.count,0);
 
 const source=readFileSync(new URL('../assets/js/phaser/FurnitureDragController.js',import.meta.url),'utf8');
 assert.match(source,/input\.on\('dragstart'/);

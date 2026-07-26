@@ -1,5 +1,7 @@
 # V0.56 產品決策交接（給產品負責人）
 
+> **更新（2026-07-26e，V0.57.6-alpha / Build 0576a）**：`ARCH-0575C` 已完成。V0575B 的非可玩 shell 不再使用類地板淺色，改為明確 `fixed-architecture` 木作帶；playable cell 視覺直接由既有 placeableMask 驅動。新增 Room Skin foundation，牆／護牆板／收邊／floor palette／door geometry+style／decor anchors 與 Projection 幾何分離。家具 preview/commit 共用 candidate evaluation，1×1/1×2/2×2 邊界測試通過。V0575 zoom/pan/clamp、Grid/Occupancy/Placement、存檔契約未改。Chrome 390/393/430 與 desktop smoke 通過；iPhone 真機仍 pending。請先完成真機 Gate，再決定是否批准 `ART-0576-CORE-ORTHOGONAL-FURNITURE`。
+
 - 任務 ID：`ARCH-0560-FLAT-CAFE-AUDIT`
 - 基線：`V0.55.2-alpha` / Build `0552a` / 存檔 key `catCafePhaserV0540`
 - 完整依據：[架構稽核](../V056_ARCHITECTURE_AUDIT.md)｜[實作計畫](../V056_IMPLEMENTATION_PLAN.md)

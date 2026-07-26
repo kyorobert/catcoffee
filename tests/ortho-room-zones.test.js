@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ORTHO_ROOM_ZONES as Z, zoneCells, rectContainsCell, rectContainsRect, rectsOverlap, rectInsideGrid,
   zoneAt, ORTHO_ZONE_KEYS}
-  from '../assets/js/config/ortho-room-zones.js?v=0575b';
+  from '../assets/js/config/ortho-room-zones.js?v=0576a';
+import {DEFAULT_ORTHOGONAL_ROOM_SKIN as ROOM_SKIN}
+  from '../assets/js/config/ortho-room-skin.js?v=0576a';
 
 // --- pure helpers behave ---
 assert.deepEqual(zoneCells({x: 2, y: 3, w: 2, h: 2}), [
@@ -32,7 +34,7 @@ for (const key of rectKeys) assert.ok(rectInsideGrid(Z[key]), `${key} fits insid
 assert.deepEqual(Z.logicalEntranceZone, {x: 7, y: 0, w: 2, h: 1}, 'logical entrance is the 2 cells x7-8 on the wall row');
 assert.ok(Z.logicalEntranceZone.x + Z.logicalEntranceZone.w <= 9, 'entrance never reaches x9 (x9 stays wall)');
 // visualDoorBounds is the drawn door leaf, in GRID-COORD space (cells 7-8 span 6.5..8.5, centre 7.5).
-const vd = Z.visualDoorBounds;
+const vd = ROOM_SKIN.door.gridBounds;
 assert.equal(vd.y, 0, 'visual door is on the back wall row');
 assert.ok(vd.w < 2, `visual door leaf is NARROWER than the 2-cell slot (w=${vd.w})`);
 assert.ok(vd.w >= 1.3 && vd.w <= 1.5, `visual door leaf is ~1.3-1.5 cells wide (w=${vd.w})`);
@@ -59,9 +61,10 @@ assert.ok(Z.mainAisle.w >= 2, 'main aisle is at least 2 cells wide');
 assert.ok(Z.mainAisle.y <= 1 && Z.mainAisle.y + Z.mainAisle.h >= 6, 'main aisle spans door row down to the seating rows');
 
 // --- the first-screen core contains every key zone but excludes the outer x0/x9 margins ---
-for (const key of ['visualDoorBounds', 'serviceCounterLine', 'customerServiceZone', 'seatingZone', 'catZone', 'mainAisle']) {
+for (const key of ['serviceCounterLine', 'customerServiceZone', 'seatingZone', 'catZone', 'mainAisle']) {
   assert.ok(rectContainsRect(Z.coreGameplayBounds, Z[key]), `coreGameplayBounds contains ${key}`);
 }
+assert.ok(rectContainsRect(Z.coreGameplayBounds, vd), 'coreGameplayBounds contains the skin-owned visual door');
 assert.ok(!rectContainsCell(Z.coreGameplayBounds, 0, 0), 'core excludes the outer x0 margin');
 assert.ok(!rectContainsCell(Z.coreGameplayBounds, 9, 0), 'core excludes the outer x9 margin/wall');
 assert.ok(Z.coreGameplayBounds.w < Z.grid.cols, 'core is narrower than the full room (outer columns crop)');
@@ -106,4 +109,4 @@ for (const [key, rectName] of [['work', 'staffWorkZone'], ['counter', 'serviceCo
 assert.deepEqual(counts, {work: 12, counter: 6, service: 6, seating: 12, cat: 12, aisle: 16, outer: 16},
   'clean partition: 64 core cells across work/counter/service/seating/cat/aisle, 16 outer');
 
-console.log('Ortho room zones: 2-cell LOGICAL entrance x7-8 (x9 wall) with a SMALLER ~1.4-cell visual door leaf centred in it, single entry x8 + staging, three non-overlapping service layers, >=2-cell main aisle, core contains all key zones; zoneAt partitions the x1-6 bands + x7-8 aisle cleanly; pure Node-testable grid data.');
+console.log('Ortho room zones: 2-cell logical entrance x7-8 (x9 wall), Skin-owned ~1.4-cell visual door centred in it, single entry x8 + staging, three non-overlapping service layers, >=2-cell main aisle, clean zoneAt partition; pure Node-testable grid data.');

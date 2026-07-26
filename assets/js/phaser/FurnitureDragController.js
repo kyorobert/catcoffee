@@ -1,6 +1,6 @@
-import {INPUT_MODE} from '../core/input-state.js?v=0575b';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0575b';
-import {getFurnitureDisplayState} from '../core/furniture-display-state.js?v=0575b';
+import {INPUT_MODE} from '../core/input-state.js?v=0576a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0576a';
+import {getFurnitureDisplayState} from '../core/furniture-display-state.js?v=0576a';
 
 const DRAG_THRESHOLD_PX = 8;
 
@@ -20,6 +20,7 @@ export class FurnitureDragController {
     this.ghost = null;
     this.lastPointer = null;
     this.lastValidation = null;
+    this.lastPlacementEvaluation = null;
     this.scene.input.dragDistanceThreshold = DRAG_THRESHOLD_PX;
     this.bind();
   }
@@ -203,6 +204,33 @@ export class FurnitureDragController {
     return base;
   }
 
+  candidateSignature(item = this.drag?.candidate) {
+    if (!item) return '';
+    return `${item.type}:${item.x}:${item.y}:${item.r || 0}:${this.drag?.movingItemId || ''}`;
+  }
+
+  // Preview and commit both consume this exact evaluation shape. Under the drag
+  // input lock occupancy/cats are stable, so a candidate shown green is committed
+  // from the same cached evaluation instead of silently running a second rule path.
+  evaluateCandidate(item = this.drag?.candidate) {
+    if (!item) {
+      return {
+        signature: '',
+        item: null,
+        cells: [],
+        polygon: [],
+        result: this.validate(item)
+      };
+    }
+    return {
+      signature: this.candidateSignature(item),
+      item: {type:item.type,x:item.x,y:item.y,r:item.r || 0},
+      cells: this.grid.getFootprintCells(item.type,item.x,item.y,item.r || 0),
+      polygon: this.grid.getFootprintPolygon(item.type,item.x,item.y,item.r || 0),
+      result: this.validate(item)
+    };
+  }
+
   renderPlacementVisuals() {
     const graphics = this.scene.placementGraphics;
     graphics.clear();
@@ -216,9 +244,11 @@ export class FurnitureDragController {
         graphics.lineStyle(1, 0xfff2c8, .28).strokePoints([...diamond, diamond[0]], false);
       }
     }
-    const result = this.validate();
+    const evaluation = this.evaluateCandidate();
+    const result = evaluation.result;
+    this.lastPlacementEvaluation = evaluation;
     this.lastValidation = result;
-    const polygon = this.grid.getFootprintPolygon(item.type, item.x, item.y, item.r || 0);
+    const polygon = evaluation.polygon;
     const color = result.valid ? 0x60be73 : 0xda5252;
     graphics.fillStyle(color, .25).fillPoints(polygon, true);
     graphics.lineStyle(2, color, .9).strokePoints([...polygon, polygon[0]], false);
@@ -228,7 +258,11 @@ export class FurnitureDragController {
   finish() {
     if (!this.drag) return false;
     const drag = this.drag;
-    const result = this.validate();
+    const signature = this.candidateSignature(drag.candidate);
+    const evaluation = this.lastPlacementEvaluation?.signature === signature
+      ? this.lastPlacementEvaluation
+      : this.evaluateCandidate(drag.candidate);
+    const result = evaluation.result;
     let layoutChanged = false;
     try {
       if (!result.valid) {
@@ -293,6 +327,7 @@ export class FurnitureDragController {
     drag?.entity?.setDragVisual('normal');
     this.drag = null;
     this.armed = null;
+    this.lastPlacementEvaluation = null;
     this.ghost?.destroy();
     this.ghost = null;
     this.scene.placementGraphics.clear();

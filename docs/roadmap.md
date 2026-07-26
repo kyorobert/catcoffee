@@ -1,5 +1,16 @@
 # 暫定產品與技術路線圖
 
+## 目前 Gate（V0.57.6-alpha / 0576a）
+
+- [x] ARCH-0575C：playable area 與 visual shell 正式分離。
+- [x] Room Skin foundation：wall/trim/floor/door/decor anchors 集中設定。
+- [x] 1×1、1×2、2×2 邊界放置與 preview/commit 一致性回歸。
+- [x] V0575 zoom/pan/clamp 回歸與 invalid projection fallback。
+- [ ] iPhone Safari 真機 pan/pinch/地址列與邊界拖曳驗收。
+- [ ] 產品負責人確認 V0576A/B/C Gate 後，才可開始 `ART-0576-CORE-ORTHOGONAL-FURNITURE`。
+
+下一步不得把 ART-0576 家具重畫與本架構修正混在同一變更；Room Skin 已提供穩定視覺底座。
+
 > 本路線圖為暫定方向，必須逐階段核准。它不承諾版本號、完成日期或未經評估的實作方案。
 
 開始排期前先讀 [決策紀錄](./decisions.md)、[目前狀態](./current-state.md) 與 [V0552 交接](./handoffs/V0552_TO_CLAUDE.md)。

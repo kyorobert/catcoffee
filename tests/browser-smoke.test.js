@@ -5,7 +5,7 @@ import {existsSync,readFileSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0575b';
+import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0576a';
 import {CAT_PROFILES,CAT_ANIMATION_LAYOUT,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const root=process.cwd();
@@ -44,7 +44,7 @@ const server=createServer((request,response)=>{
     response.end(readFileSync(file,'utf8').replace('id="careBtn"','id="careBtn-missing"'));return;
   }
   if(relativePath==='index.html'&&requestUrl.searchParams.get('fixture')==='build-mismatch'){
-    response.end(readFileSync(file,'utf8').replace('data-build-id="0575b"','data-build-id="0550-old"'));return;
+    response.end(readFileSync(file,'utf8').replace('data-build-id="0576a"','data-build-id="0550-old"'));return;
   }
   response.end(readFileSync(file));
 });
@@ -145,7 +145,7 @@ try{
     });
     const problems=[];
     if(!state.phaser||!state.game)problems.push('Phaser global or game missing');
-    if(state.htmlBuildId!=='0575b'||state.jsBuildId!=='0575b')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
+    if(state.htmlBuildId!=='0576a'||state.jsBuildId!=='0576a')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
     if(state.gameReady!=='1')problems.push(`gameReady is ${state.gameReady}`);
     if(loadedUrls.some(url=>/\?v=0550a(?:$|[&#])/.test(url)||url.includes('?v=0542a')))problems.push('obsolete runtime cache query loaded');
     if(state.canvasCount!==1||state.canvasWidth<=0||state.canvasHeight<=0)problems.push(`invalid canvas ${state.canvasCount} ${state.canvasWidth}x${state.canvasHeight}`);
@@ -175,7 +175,7 @@ try{
        if(storeIds.length!==47)problems.push(`normal store contains ${storeIds.length} items instead of 47`);
        if(PROTOTYPE_FURNITURE_IDS.some(id=>!storeIds.includes(id)))problems.push('a V0.55.2 redraw is missing from the store');
        const redrawThumbnails=await page.locator(PROTOTYPE_FURNITURE_IDS.map(id=>`.store-card[data-id="${id}"] img`).join(',')).evaluateAll(images=>images.map(image=>({src:image.getAttribute('src'),width:image.naturalWidth,height:image.naturalHeight})));
-       if(redrawThumbnails.length!==25||redrawThumbnails.some(image=>!image.src?.includes('/redrawn/')||!image.src.endsWith('.png?v=0575b')||image.width<=0||image.height<=0))problems.push(`invalid redraw store thumbnails: ${JSON.stringify(redrawThumbnails)}`);
+       if(redrawThumbnails.length!==25||redrawThumbnails.some(image=>!image.src?.includes('/redrawn/')||!image.src.endsWith('.png?v=0576a')||image.width<=0||image.height<=0))problems.push(`invalid redraw store thumbnails: ${JSON.stringify(redrawThumbnails)}`);
        const redrawBefore=await page.evaluate(()=>({coins:window.gameController.getState().coins,count:window.gameController.getState().items.length}));
        await page.click('.store-card[data-id="squareCafeTable"]');
        await page.waitForTimeout(100);
@@ -344,6 +344,8 @@ try{
         savedLeak:saved?('projection' in saved||'demoLayout' in saved):false,
         catsFinite:cats.length>0&&cats.every(cat=>Number.isFinite(cat.x)&&Number.isFinite(cat.y)),
         artDebug:scene.artDebug?.enabled||false,
+        roomSkinId:scene.orthoRoomSkin?.id||null,
+        shellRole:scene.orthoRoomSkin?.shell?.role||null,
         canvasRenderer:window.__CAT_CAFE_GAME__.renderer.type===Phaser.CANVAS,
         // ARCH-0573 mobile framing: full-bleed the CORE gameplay region (no crop), while the
         // whole ROOM is the zoom-out/pan range so the outer columns crop on the first screen.
@@ -361,13 +363,14 @@ try{
     const shellDoor=await page.evaluate(()=>{
       const s=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene'),cam=s.cameras.main;
       const TL=s.grid.getCellDiamond(0,0)[0],TR=s.grid.getCellDiamond(9,0)[1],BR=s.grid.getCellDiamond(9,7)[2];
-      const floorTop=TL.y,wallTop=floorTop-260;               // ORTHOGONAL_ROOM_RENDER.wallHeight
-      const shTop=wallTop-120,shBot=BR.y+132,shLeft=TL.x-84,shRight=TR.x+84; // shell {top,bottom,side}
+      const skin=s.orthoRoomSkin,sh=skin.shell;
+      const floorTop=TL.y,wallTop=floorTop-skin.layout.wallHeight;
+      const shTop=wallTop-sh.top,shBot=BR.y+sh.bottom,shLeft=TL.x-sh.side,shRight=TR.x+sh.side;
       const wv=cam.worldView,z=cam.zoom;
       const ext={top:Math.round(Math.max(0,(shTop-wv.y)*z)),bottom:Math.round(Math.max(0,(wv.y+wv.height-shBot)*z)),
         left:Math.round(Math.max(0,(shLeft-wv.x)*z)),right:Math.round(Math.max(0,(wv.x+wv.width-shRight)*z))};
       // door centre pixel (gridX 7.5, mid door height) via live worldView → screen
-      const dc=s.grid.gridToWorld(7.5,0), dy=floorTop-62;
+      const door=skin.door,dc=s.grid.gridToWorld(door.gridBounds.x+door.gridBounds.w/2,0),dy=floorTop-door.height/2;
       const cv=window.__CAT_CAFE_GAME__.canvas,ctx=cv.getContext('2d',{willReadFrequently:true});
       const sx=Math.round((dc.x-wv.x)/wv.width*cv.width),sy=Math.round((dy-wv.y)/wv.height*cv.height);
       const d=ctx.getImageData(Math.min(cv.width-1,Math.max(0,sx)),Math.min(cv.height-1,Math.max(0,sy)),1,1).data;
@@ -421,6 +424,8 @@ try{
     if(state.savedLeak)problems.push('projection/demoLayout leaked into the save');
     if(!state.catsFinite)problems.push('a cat has a non-finite position');
     if(!state.canvasRenderer)problems.push('renderer is not Canvas');
+    if(state.roomSkinId!=='warm-cafe-foundation')problems.push(`Room Skin is ${state.roomSkinId}`);
+    if(state.shellRole!=='fixed-architecture')problems.push(`shell role is ${state.shellRole}`);
     if(ortho.demo&&!state.artDebug)problems.push('Art Debug did not enable');
     if(!state.coreFullyVisible)problems.push('core gameplay region not fully visible at initial framing');
     if(!state.roomWidthCrops)problems.push('outer room columns did not crop (first screen is not full-bleed)');

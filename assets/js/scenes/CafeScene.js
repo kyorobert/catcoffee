@@ -1,31 +1,32 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0575b';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0575b';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0575b';
-import {GridSystem} from '../systems/GridSystem.js?v=0575b';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0575b';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0575b';
-import {CameraController} from '../systems/CameraController.js?v=0575b';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0575b';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0575b';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0575b';
-import {CatEntity} from '../entities/CatEntity.js?v=0575b';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0575b';
-import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0575b';
-import {AmbientEffects} from '../entities/AmbientEffects.js?v=0575b';
-import {INPUT_MODE} from '../core/input-state.js?v=0575b';
-import {InputModeController} from '../phaser/InputModeController.js?v=0575b';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0575b';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0575b';
-import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0575b';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0575b';
-import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0575b';
-import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0575b';
-import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0575b';
-import {ORTHOGONAL_ROOM_RENDER} from '../systems/OrthogonalProjection.js?v=0575b';
-import {ORTHO_ROOM_ZONES,zoneAt} from '../config/ortho-room-zones.js?v=0575b';
-import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0575b';
-import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0575b';
-import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0575b';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0576a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0576a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0576a';
+import {GridSystem} from '../systems/GridSystem.js?v=0576a';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0576a';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0576a';
+import {CameraController} from '../systems/CameraController.js?v=0576a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0576a';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0576a';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0576a';
+import {CatEntity} from '../entities/CatEntity.js?v=0576a';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0576a';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0576a';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0576a';
+import {INPUT_MODE} from '../core/input-state.js?v=0576a';
+import {InputModeController} from '../phaser/InputModeController.js?v=0576a';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0576a';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0576a';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0576a';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0576a';
+import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0576a';
+import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0576a';
+import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0576a';
+import {ORTHO_ROOM_ZONES,zoneAt} from '../config/ortho-room-zones.js?v=0576a';
+import {DEFAULT_ORTHOGONAL_ROOM_SKIN,getOrthogonalCellAppearance}
+  from '../config/ortho-room-skin.js?v=0576a';
+import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0576a';
+import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0576a';
+import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0576a';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -221,8 +222,8 @@ export class CafeScene extends Phaser.Scene{
   // Orthogonal room rendering: a true front-facing rectangle. Every point is derived
   // from the projected outer frame and per-cell rectangles (via the GridSystem Facade),
   // never from fixed screen coordinates, and nothing here is skewed, sheared or rotated.
-  // Framing constants live in ORTHOGONAL_ROOM_RENDER; the palette comes from ROOM_CONFIG.
-  // Walls are purely visual (depth -1000) and change no grid/occupancy/pathfinding data.
+  // Room presentation comes from ortho-room-skin.js. Walls and fixed shell are purely
+  // visual (depth -1000) and change no grid/occupancy/pathfinding/save data.
   // The iso and flat branches above are left untouched.
   // Lighten (factor>0) or darken (factor<0) a 0xRRGGBB colour by a fraction. Pure helper for
   // the subtle per-cell zone-floor 2-tone; no engine state.
@@ -232,48 +233,94 @@ export class CafeScene extends Phaser.Scene{
   }
   drawRoomOrtho(){
     const graphics=this.add.graphics();
-    const {floor,walls,worldWidth,worldHeight}=ROOM_CONFIG;
+    const {floor,worldWidth,worldHeight}=ROOM_CONFIG;
     const cols=floor.cols,rows=floor.rows;
-    const R=ORTHOGONAL_ROOM_RENDER;
+    const skin=DEFAULT_ORTHOGONAL_ROOM_SKIN;
+    this.orthoRoomSkin=skin;
     const TL=this.grid.getCellDiamond(0,0)[0];
     const TR=this.grid.getCellDiamond(cols-1,0)[1];
     const BR=this.grid.getCellDiamond(cols-1,rows-1)[2];
     const BL=this.grid.getCellDiamond(0,rows-1)[3];
-    const floorW=TR.x-TL.x,floorTop=TL.y,wallTop=floorTop-R.wallHeight;
-    const Z=ORTHO_ROOM_ZONES,sh=R.shell;
+    const floorW=TR.x-TL.x,floorTop=TL.y,wallTop=floorTop-skin.layout.wallHeight;
+    const sh=skin.shell;
     // VISUAL SHELL (ARCH-0575A): the wall + floor are drawn BEYOND the logical 10x8 grid so the
     // room material reaches the safe-viewport edges — the cafe fills the screen instead of sitting
     // as a card in a backdrop. Display-only; adds NO placeable cells and does not touch the grid.
     const shLeft=TL.x-sh.side,shRight=TR.x+sh.side,shWallTop=wallTop-sh.top,shFloorBottom=BR.y+sh.bottom;
     // far ambient (only seen when fully zoomed out past the shell), then floor shell, then wall shell.
-    graphics.fillStyle(R.backdropFill,1).fillRect(-worldWidth,-worldHeight,worldWidth*3,worldHeight*3);
-    graphics.fillStyle(sh.floorFill,1).fillRect(shLeft,floorTop,shRight-shLeft,shFloorBottom-floorTop);
-    graphics.fillStyle(walls.right.fill,1).fillRect(shLeft,shWallTop,shRight-shLeft,floorTop-shWallTop);
+    graphics.fillStyle(skin.backdrop.fill,1).fillRect(-worldWidth,-worldHeight,worldWidth*3,worldHeight*3);
+    graphics.fillStyle(sh.fill,1).fillRect(shLeft,floorTop,shRight-shLeft,shFloorBottom-floorTop);
     // Wainscot panelling + molding across the shell width — the taller wall reads as a furnished
     // cafe back wall, not an empty band.
-    const wain=R.wainscot,wainH=R.wallHeight*wain.heightFactor,wainTop=floorTop-wainH;
-    graphics.fillStyle(wain.fill,1).fillRect(shLeft,wainTop,shRight-shLeft,wainH);
-    graphics.lineStyle(wain.moldingWidth,wain.molding,1).strokePoints([{x:shLeft,y:wainTop},{x:shRight,y:wainTop}],false);
+    // Fixed shell architecture outside the grid: darker wood + inset panels.
+    const inset=sh.panelInset;
+    graphics.fillStyle(sh.insetFill,.78)
+      .fillRect(shLeft+inset,floorTop+inset,Math.max(1,sh.side-inset*2),shFloorBottom-floorTop-inset*2)
+      .fillRect(TR.x+inset,floorTop+inset,Math.max(1,sh.side-inset*2),shFloorBottom-floorTop-inset*2)
+      .fillRect(TL.x+inset,BR.y+inset,Math.max(1,floorW-inset*2),Math.max(1,sh.bottom-inset*2));
+    graphics.lineStyle(2,sh.panelLine,sh.panelLineAlpha);
+    for(let y=floorTop+sh.panelStep;y<shFloorBottom;y+=sh.panelStep){
+      graphics.strokePoints([{x:shLeft+inset,y},{x:TL.x-inset,y}],false);
+      graphics.strokePoints([{x:TR.x+inset,y},{x:shRight-inset,y}],false);
+    }
+    for(let x=TL.x+sh.panelStep;x<TR.x;x+=sh.panelStep){
+      graphics.strokePoints([{x,y:BR.y+inset},{x,y:shFloorBottom-inset}],false);
+    }
+    // Structured cafe wall: upper wall, lower wainscot, molding and panel divisions.
+    const wall=skin.wall,lower=wall.lower;
+    graphics.fillStyle(wall.upperFill,1).fillRect(shLeft,shWallTop,shRight-shLeft,floorTop-shWallTop);
+    const lowerH=skin.layout.wallHeight*lower.heightFactor,lowerTop=floorTop-lowerH;
+    graphics.fillStyle(lower.fill,1).fillRect(shLeft,lowerTop,shRight-shLeft,lowerH);
+    graphics.lineStyle(lower.moldingWidth,lower.molding,1)
+      .strokePoints([{x:shLeft,y:lowerTop},{x:shRight,y:lowerTop}],false);
+    graphics.lineStyle(2,lower.panelLine,.4);
+    for(let x=shLeft+lower.panelWidth;x<shRight;x+=lower.panelWidth){
+      graphics.strokePoints([{x,y:lowerTop+lower.moldingWidth},{x,y:floorTop}],false);
+    }
     // Logical floor cells (the PLAYABLE area) tinted BY ZONE, drawn OVER the floor shell; a subtle
     // 2-tone by parity keeps the floor from looking flat.
     for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
       const rect=this.grid.getCellDiamond(x,y);
-      const base=R.zoneFloor[zoneAt(x,y)]??R.zoneFloor.outer;
-      graphics.fillStyle(this.shadeColor(base,((x+y)&1)?-0.06:0.04),1).fillPoints(rect,true);
-      graphics.lineStyle(1,floor.lineColor,.22).strokePoints([...rect,rect[0]],false);
+      const appearance=getOrthogonalCellAppearance({
+        placeable:this.grid.isPlaceableCell(x,y),
+        zoneKey:zoneAt(x,y),
+        parity:(x+y)&1,
+        skin
+      });
+      const fill=appearance.kind==='playable'
+        ?this.shadeColor(appearance.fill,appearance.shadeFactor)
+        :appearance.fill;
+      graphics.fillStyle(fill,appearance.alpha).fillPoints(rect,true);
+      graphics.lineStyle(1,appearance.line,appearance.kind==='playable'?skin.floor.cellLineAlpha:.7)
+        .strokePoints([...rect,rect[0]],false);
+      if(appearance.kind==='reserved'){
+        const cellPad=9;
+        graphics.fillStyle(skin.floor.reserved.insetFill,.48)
+          .fillRect(rect[0].x+cellPad,rect[0].y+cellPad,rect[1].x-rect[0].x-cellPad*2,rect[3].y-rect[0].y-cellPad*2);
+      }
     }
     // Wall/floor seam + a SUBTLE playable-grid edge (a thin收邊, not a bold "card" frame) so the
     // player can tell the 10x8 placeable area from the surrounding visual shell.
-    graphics.lineStyle(R.topWallLineWidth,walls.right.accent,1).strokePoints([TL,TR],false);
-    graphics.lineStyle(R.playAreaLineWidth,walls.left.accent,.45).strokePoints([TL,TR,BR,BL,TL],false);
+    const boundary=skin.floor.playableBoundary;
+    graphics.lineStyle(wall.topLineWidth,wall.upperAccent,1).strokePoints([TL,TR],false);
+    graphics.lineStyle(boundary.width,boundary.color,boundary.alpha).strokePoints([TL,TR,BR,BL,TL],false);
+    graphics.lineStyle(boundary.innerWidth,boundary.innerColor,boundary.innerAlpha)
+      .strokePoints([{x:TL.x+3,y:TL.y+3},{x:TR.x-3,y:TR.y+3},{x:BR.x-3,y:BR.y-3},{x:BL.x+3,y:BL.y-3},{x:TL.x+3,y:TL.y+3}],false);
+    graphics.lineStyle(sh.trimWidth,sh.trimColor,1)
+      .strokePoints([{x:shLeft,y:floorTop},{x:shLeft,y:shFloorBottom},{x:shRight,y:shFloorBottom},{x:shRight,y:floorTop}],false);
+    graphics.lineStyle(sh.highlightWidth,sh.highlightColor,.75)
+      .strokePoints([{x:shLeft+sh.trimWidth,y:shFloorBottom-sh.trimWidth},{x:shRight-sh.trimWidth,y:shFloorBottom-sh.trimWidth}],false);
     // Visual door LEAF: smaller than the 2-cell slot, centred in x7-8; a warm wood door with a
     // glass panel, muntins, a brass handle and a frame (not a dark slab). x9 stays wall.
-    const vd=Z.visualDoorBounds,D=R.door;
+    const D=skin.door,vd=D.gridBounds;
     const doorL=this.grid.gridToWorld(vd.x,0).x,doorR=this.grid.gridToWorld(vd.x+vd.w,0).x;
-    const doorW=doorR-doorL,doorH=R.doorHeight,doorT=floorTop-doorH;
-    graphics.fillStyle(D.frame,1).fillRect(doorL-4,doorT-4,doorW+8,doorH+4);
+    const doorW=doorR-doorL,doorH=D.height,doorT=floorTop-doorH,pad=D.framePad;
+    graphics.fillStyle(D.casing,1)
+      .fillRect(doorL-pad,doorT-pad,doorW+pad*2,doorH+pad)
+      .fillRect(doorL-D.lintelExtension,doorT-D.lintelHeight,doorW+D.lintelExtension*2,D.lintelHeight);
+    graphics.fillStyle(D.frame,1).fillRect(doorL-pad/2,doorT-pad/2,doorW+pad,doorH+pad/2);
     graphics.fillStyle(D.leaf,1).fillRect(doorL,doorT,doorW,doorH);
-    const gp=7,gH=doorH*0.42,gW=doorW-2*gp;
+    const gp=D.glassPad,gH=doorH*D.glassHeightFactor,gW=doorW-2*gp;
     graphics.fillStyle(D.glass,1).fillRect(doorL+gp,doorT+gp,gW,gH);
     graphics.lineStyle(2,D.glassEdge,1).strokeRect(doorL+gp,doorT+gp,gW,gH);
     graphics.lineStyle(2,D.frame,.85);
@@ -282,17 +329,23 @@ export class CafeScene extends Phaser.Scene{
     graphics.lineStyle(2,D.panel,.9).strokeRect(doorL+gp,doorT+gp*2+gH,gW,doorH-gH-gp*3);
     graphics.fillStyle(D.handle,1).fillRect(doorL+doorW-gp-6,doorT+doorH*0.56,5,15);
     graphics.lineStyle(3,D.frame,1).strokeRect(doorL,doorT,doorW,doorH);
-    // Entry mat on the single logical entry cell (customerEntryPoint).
-    const entryCell=this.grid.getCellDiamond(Z.customerEntryPoint.x,Z.customerEntryPoint.y);
-    graphics.fillStyle(D.matFill,.5).fillPoints(entryCell,true);
+    const sign=D.cafeSign,signW=doorW*sign.widthFactor,signX=doorL+(doorW-signW)/2;
+    const signY=doorT-D.lintelHeight-sign.height-4;
+    graphics.fillStyle(sign.fill,1).fillRect(signX,signY,signW,sign.height);
+    graphics.lineStyle(2,sign.accent,.9).strokeRect(signX,signY,signW,sign.height);
+    for(let i=1;i<=sign.lineCount;i++){
+      const yy=signY+(sign.height/(sign.lineCount+1))*i;
+      graphics.lineStyle(2,sign.accent,.75).strokePoints([{x:signX+8,y:yy},{x:signX+signW-8,y:yy}],false);
+    }
+    // A narrow threshold avoids implying that the full top cell has separate rules.
+    graphics.fillStyle(D.matFill,.65).fillRect(doorL+5,floorTop+3,doorW-10,14);
     graphics.setDepth(-1000);
-    // Wall decorations on the left/centre of the back wall, away from the top-corner door.
-    const deco=R.decoration;
-    const decoY=wallTop+R.wallHeight*deco.heightFactor;
-    this.wallDecorations=[
-      new WallDecorationEntity(this,{texture:'environment:wall-window',x:TL.x+floorW*deco.windowFx,y:decoY,scale:deco.windowScale}),
-      new WallDecorationEntity(this,{texture:'environment:menu-board',x:TL.x+floorW*deco.boardFx,y:decoY,scale:deco.boardScale})
-    ];
+    this.wallDecorations=skin.decorAnchors.map(anchor=>new WallDecorationEntity(this,{
+      texture:anchor.texture,
+      x:TL.x+floorW*anchor.fx,
+      y:wallTop+skin.layout.wallHeight*anchor.heightFactor,
+      scale:anchor.scale
+    }));
   }
   // Orthogonal-only camera framing policy (ARCH-0573). The first screen full-bleeds the
   // CORE gameplay region (getCoreBounds) into the DOM-measured safe viewport, so a portrait
@@ -302,7 +355,7 @@ export class CafeScene extends Phaser.Scene{
   // the ViewportMetrics DOM adapter (the single place these DOM rects are read).
   buildOrthoFraming(){
     const {floor}=ROOM_CONFIG,cols=floor.cols,rows=floor.rows;
-    const R=ORTHOGONAL_ROOM_RENDER,Z=ORTHO_ROOM_ZONES;
+    const skin=DEFAULT_ORTHOGONAL_ROOM_SKIN,Z=ORTHO_ROOM_ZONES;
     const metrics=new ViewportMetrics();
     const floorTop=()=>this.grid.getCellDiamond(0,0)[0].y;
     const floorBottom=()=>this.grid.getCellDiamond(cols-1,rows-1)[2].y;
@@ -312,8 +365,8 @@ export class CafeScene extends Phaser.Scene{
       getRoomBounds:()=>{
         const TL=this.grid.getCellDiamond(0,0)[0];
         const BR=this.grid.getCellDiamond(cols-1,rows-1)[2];
-        const top=TL.y-R.wallHeight;
-        return {x:TL.x,y:top,width:BR.x-TL.x,height:(BR.y+R.bottomPad)-top};
+        const top=TL.y-skin.layout.wallHeight;
+        return {x:TL.x,y:top,width:BR.x-TL.x,height:(BR.y+skin.layout.bottomPad)-top};
       },
       // First-screen full-bleed target: the gameplay columns (coreGameplayBounds) plus a
       // short wall strip (coreTopStrip) that shows the door. It excludes the outer x0/x9
@@ -323,8 +376,8 @@ export class CafeScene extends Phaser.Scene{
         const cg=Z.coreGameplayBounds;
         const left=this.grid.getCellDiamond(cg.x,0)[0].x;
         const right=this.grid.getCellDiamond(cg.x+cg.w-1,rows-1)[2].x;
-        const top=floorTop()-R.coreTopStrip;
-        return {x:left,y:top,width:right-left,height:(floorBottom()+R.bottomPad)-top};
+        const top=floorTop()-skin.layout.coreTopStrip;
+        return {x:left,y:top,width:right-left,height:(floorBottom()+skin.layout.bottomPad)-top};
       },
       getSafeInsets:()=>metrics.getInsets(this.game.canvas,{toolbarReserve:ORTHO_FRAMING.toolbarReserveCss}),
       policy:{}

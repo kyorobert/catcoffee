@@ -1,5 +1,22 @@
 # 專案決策紀錄
 
+## DEC-024：正交可玩區以 placeableMask 為唯一視覺與放置真相；Room Skin 與 Projection 分離
+
+- 日期：2026-07-26
+- 狀態：Accepted
+- Task：`ARCH-0575C-ORTHOGONAL-PLAYABLE-AREA-AND-ROOM-SKIN-FOUNDATION`
+- 背景：V0575B 的滿版 shell 使用接近地板的淺色，玩家會把 Grid 外視覺區讀成可放置地板；牆／地板／門／裝飾 metadata 又與 `OrthogonalProjection` 耦合。
+- 決策：
+  - `ROOM_CONFIG.floor.placeableMask` 與既有 GridSystem 是可玩／可放置 cell 的唯一真相。
+  - 只有 `GridSystem.isPlaceableCell()` 為 true 的 cell 可使用 playable zone floor palette。
+  - logical reserved cell 使用 threshold treatment；Grid 外 shell 使用 `fixed-architecture` 木作帶，均不得偽裝成一般地板。
+  - `ortho-room-skin.js` 統一管理 wall、wainscot、trim、floor palette、reserved treatment、shell、door geometry/style、decor anchors。
+  - `OrthogonalProjection.js` 只保留 axis/origin/轉換/polygon/anchor 幾何。
+  - 家具 preview 與 commit 必須共用同一 candidate evaluation；candidate type/x/y/r 變動後才重新驗證。
+- 不變：CameraController zoom/pan/clamp、88×120 cell、ROOM_CONFIG、placeableMask、Grid/Occupancy/Placement、save key/schema、furniture `id/x/y/r/footprint`、iso/Flat golden。
+- 後果：後續可替換 Room Skin 而不建立第二套 Projection；ART-0576 仍需等產品確認後再開始。
+- 證據：[V0576 結果](./V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_RESULT.md)、[驗收](./V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_ACCEPTANCE.md)、`docs/evidence/v0576/`。
+
 相關治理文件：[代理協作規範](../AGENTS.md)｜[目前狀態](./current-state.md)｜[V0552 交接](./handoffs/V0552_TO_CLAUDE.md)
 
 狀態定義：
