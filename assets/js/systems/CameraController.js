@@ -1,6 +1,6 @@
-import {INPUT_MODE} from '../core/input-state.js?v=0572a';
-import {computeSafeViewport} from '../core/scene-viewport.js?v=0572a';
-import {computeInitialFraming, clampCenterToContent} from '../core/camera-framing.js?v=0572a';
+import {INPUT_MODE} from '../core/input-state.js?v=0573a';
+import {computeSafeViewport} from '../core/scene-viewport.js?v=0573a';
+import {computeInitialFraming, clampCenterToContent} from '../core/camera-framing.js?v=0573a';
 
 export class CameraController {
   constructor(scene, roomConfig, {inputMode = null, isFurnitureDragging = () => false, onPinchStart = null, framing = null} = {}) {
@@ -48,10 +48,11 @@ export class CameraController {
     const canvasWidth = size?.width || this.camera.width;
     const canvasHeight = size?.height || this.camera.height;
     if (canvasWidth <= 0 || canvasHeight <= 0) return;
-    const content = this.framing.getContentBounds();
+    const room = this.getRoomBounds();
+    const core = this.getCoreBounds();
     const safe = computeSafeViewport({canvasWidth, canvasHeight, insets: this.framing.getSafeInsets()});
     const framed = computeInitialFraming({
-      content, safe, canvasWidth, canvasHeight,
+      core, room, safe, canvasWidth, canvasHeight,
       maxZoom: this.room.camera.maxZoom, policy: this.framing.policy
     });
     this.minZoom = framed.minZoom;
@@ -66,13 +67,23 @@ export class CameraController {
     }
   }
 
+  // The full-bleed target for the first screen (core gameplay region). Panning/zoom-out is
+  // clamped to the whole room instead (getRoomBounds), so the outer columns stay reachable.
+  getCoreBounds() {
+    return this.framing.getCoreBounds ? this.framing.getCoreBounds() : this.getRoomBounds();
+  }
+
+  getRoomBounds() {
+    return this.framing.getRoomBounds ? this.framing.getRoomBounds() : this.framing.getContentBounds();
+  }
+
   clampToContent() {
     if (!this.framing) return;
     const zoom = this.camera.zoom || 1;
     const centre = clampCenterToContent({
       centerX: this.camera.midPoint.x, centerY: this.camera.midPoint.y,
       viewWidth: this.camera.width / zoom, viewHeight: this.camera.height / zoom,
-      content: this.framing.getContentBounds()
+      content: this.getRoomBounds()
     });
     this.camera.centerOn(centre.x, centre.y);
   }

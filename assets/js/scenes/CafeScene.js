@@ -1,30 +1,31 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0572a';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0572a';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0572a';
-import {GridSystem} from '../systems/GridSystem.js?v=0572a';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0572a';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0572a';
-import {CameraController} from '../systems/CameraController.js?v=0572a';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0572a';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0572a';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0572a';
-import {CatEntity} from '../entities/CatEntity.js?v=0572a';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0572a';
-import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0572a';
-import {AmbientEffects} from '../entities/AmbientEffects.js?v=0572a';
-import {INPUT_MODE} from '../core/input-state.js?v=0572a';
-import {InputModeController} from '../phaser/InputModeController.js?v=0572a';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0572a';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0572a';
-import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0572a';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0572a';
-import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0572a';
-import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0572a';
-import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0572a';
-import {ORTHOGONAL_ROOM_RENDER} from '../systems/OrthogonalProjection.js?v=0572a';
-import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0572a';
-import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0572a';
-import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0572a';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0573a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0573a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0573a';
+import {GridSystem} from '../systems/GridSystem.js?v=0573a';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0573a';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0573a';
+import {CameraController} from '../systems/CameraController.js?v=0573a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0573a';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0573a';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0573a';
+import {CatEntity} from '../entities/CatEntity.js?v=0573a';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0573a';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0573a';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0573a';
+import {INPUT_MODE} from '../core/input-state.js?v=0573a';
+import {InputModeController} from '../phaser/InputModeController.js?v=0573a';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0573a';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0573a';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0573a';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0573a';
+import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0573a';
+import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0573a';
+import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0573a';
+import {ORTHOGONAL_ROOM_RENDER} from '../systems/OrthogonalProjection.js?v=0573a';
+import {ORTHO_ROOM_ZONES} from '../config/ortho-room-zones.js?v=0573a';
+import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0573a';
+import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0573a';
+import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0573a';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -236,14 +237,18 @@ export class CafeScene extends Phaser.Scene{
     // Room base fills well beyond the world (side margins, ceiling, below-floor and any
     // fit-zoom overscan) so the rectangular room never sits on a black or oblique void.
     graphics.fillStyle(walls.left.fill,1).fillRect(-worldWidth,-worldHeight,worldWidth*3,worldHeight*3);
-    // Back wall standing above the floor: the service/counter backdrop and door surface.
+    // Back wall standing above the floor: the equipment backdrop and door surface.
     graphics.fillStyle(walls.right.fill,1).fillRect(TL.x,wallTop,floorW,R.wallHeight);
-    // Customer entrance door at the top corner (visual + prototype route; the logical save
-    // entrance in room-config is unchanged).
-    const doorCell=this.grid.getCellDiamond(R.entrance.cell.x,R.entrance.cell.y);
-    const doorX=doorCell[0].x+5,doorW=(doorCell[1].x-doorCell[0].x)-10;
-    graphics.fillStyle(R.entrance.doorFill,1).fillRect(doorX,wallTop,doorW,R.wallHeight);
-    graphics.lineStyle(5,R.entrance.doorFrame,1).strokeRect(doorX,wallTop,doorW,R.wallHeight);
+    // 2-cell customer entrance door on the LOWER back wall (visual + prototype route). Cells
+    // come from ortho-room-zones (visualDoorBounds spans x7-8; x9 stays wall so the door is
+    // not flush to the edge). The door is shorter than the full wall (doorHeight) so it sits
+    // inside the full-bleed core strip. The logical save entrance in room-config is unchanged.
+    const Z=ORTHO_ROOM_ZONES,vd=Z.visualDoorBounds;
+    const doorLeftCell=this.grid.getCellDiamond(vd.x,vd.y);
+    const doorRightCell=this.grid.getCellDiamond(vd.x+vd.w-1,vd.y);
+    const doorX=doorLeftCell[0].x+6,doorW=(doorRightCell[1].x-6)-(doorLeftCell[0].x+6),doorTop=floorTop-R.doorHeight;
+    graphics.fillStyle(R.door.fill,1).fillRect(doorX,doorTop,doorW,R.doorHeight);
+    graphics.lineStyle(5,R.door.frame,1).strokeRect(doorX,doorTop,doorW,R.doorHeight);
     // Floor cells: axis-aligned rectangles with faint, Placement-aligned grid lines.
     for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
       const rect=this.grid.getCellDiamond(x,y);
@@ -251,8 +256,10 @@ export class CafeScene extends Phaser.Scene{
       graphics.fillStyle(color,1).fillPoints(rect,true);
       graphics.lineStyle(1,floor.lineColor,.28).strokePoints([...rect,rect[0]],false);
     }
-    // Entry mat on the door cell, then wall/floor seam, floor outline and side edges.
-    graphics.fillStyle(R.entrance.matFill,.55).fillPoints(doorCell,true);
+    // Entry mat on the single logical entry cell (customerEntryPoint), then wall/floor seam,
+    // floor outline and side edges.
+    const entryCell=this.grid.getCellDiamond(Z.customerEntryPoint.x,Z.customerEntryPoint.y);
+    graphics.fillStyle(R.door.matFill,.55).fillPoints(entryCell,true);
     graphics.lineStyle(R.topWallLineWidth,walls.right.accent,1).strokePoints([TL,TR],false);
     graphics.lineStyle(R.floorOutlineWidth,walls.left.accent,1).strokePoints([TL,TR,BR,BL,TL],false);
     graphics.lineStyle(R.sideEdgeLineWidth,walls.left.accent,1).strokePoints([TL,BL],false);
@@ -266,21 +273,37 @@ export class CafeScene extends Phaser.Scene{
       new WallDecorationEntity(this,{texture:'environment:menu-board',x:TL.x+floorW*deco.boardFx,y:decoY,scale:deco.boardScale})
     ];
   }
-  // Orthogonal-only camera framing policy: fit the whole room (floor + back wall) into the
-  // DOM-measured safe viewport and clamp panning to the room, so the phone first screen
-  // shows a full-bleed cafe without zooming or side-panning. Content bounds are derived
-  // from the projected room frame (via the Facade); safe insets come from the
-  // ViewportMetrics DOM adapter (the single place these DOM rects are read).
+  // Orthogonal-only camera framing policy (ARCH-0573). The first screen full-bleeds the
+  // CORE gameplay region (getCoreBounds) into the DOM-measured safe viewport, so a portrait
+  // phone fills its height with the cafe (no big top/bottom margins); the outer columns crop
+  // and the whole ROOM (getRoomBounds) is the pan / zoom-out range. Bounds are derived from
+  // the projected room frame (via the Facade) and ortho-room-zones; safe insets come from
+  // the ViewportMetrics DOM adapter (the single place these DOM rects are read).
   buildOrthoFraming(){
     const {floor}=ROOM_CONFIG,cols=floor.cols,rows=floor.rows;
-    const R=ORTHOGONAL_ROOM_RENDER;
+    const R=ORTHOGONAL_ROOM_RENDER,Z=ORTHO_ROOM_ZONES;
     const metrics=new ViewportMetrics();
+    const floorTop=()=>this.grid.getCellDiamond(0,0)[0].y;
+    const floorBottom=()=>this.grid.getCellDiamond(cols-1,rows-1)[2].y;
     return {
-      getContentBounds:()=>{
+      // Whole room (floor + full back wall + outer x0/x9 margins): the Camera pan and
+      // zoom-out range, so the player can reach every column and see the entire room.
+      getRoomBounds:()=>{
         const TL=this.grid.getCellDiamond(0,0)[0];
         const BR=this.grid.getCellDiamond(cols-1,rows-1)[2];
         const top=TL.y-R.wallHeight;
         return {x:TL.x,y:top,width:BR.x-TL.x,height:(BR.y+R.bottomPad)-top};
+      },
+      // First-screen full-bleed target: the gameplay columns (coreGameplayBounds) plus a
+      // short wall strip (coreTopStrip) that shows the door. It excludes the outer x0/x9
+      // margins and the tall decorative upper wall, so a CONTAIN fit fills the portrait
+      // height (~90%+) while the outer columns crop and stay reachable by panning.
+      getCoreBounds:()=>{
+        const cg=Z.coreGameplayBounds;
+        const left=this.grid.getCellDiamond(cg.x,0)[0].x;
+        const right=this.grid.getCellDiamond(cg.x+cg.w-1,rows-1)[2].x;
+        const top=floorTop()-R.coreTopStrip;
+        return {x:left,y:top,width:right-left,height:(floorBottom()+R.bottomPad)-top};
       },
       getSafeInsets:()=>metrics.getInsets(this.game.canvas,{toolbarReserve:ORTHO_FRAMING.toolbarReserveCss}),
       policy:{}

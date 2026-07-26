@@ -2,16 +2,16 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-// Import via the same `?v=0572a` specifier the runtime uses so `instanceof` resolves
+// Import via the same `?v=0573a` specifier the runtime uses so `instanceof` resolves
 // against the same module instance GridSystem composes internally.
-import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0572a';
-import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0572a';
+import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0573a';
+import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0573a';
 import {OrthogonalProjection, ORTHOGONAL_PROJECTION_PARAMS, ORTHOGONAL_ROOM_RENDER}
-  from '../assets/js/systems/OrthogonalProjection.js?v=0572a';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0572a';
-import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0572a';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0572a';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0572a';
+  from '../assets/js/systems/OrthogonalProjection.js?v=0573a';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0573a';
+import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0573a';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0573a';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0573a';
 
 const approx = (a, b, eps = 1e-9) => Math.abs(a - b) <= eps;
 const {cols, rows} = ROOM_CONFIG.floor;
@@ -76,7 +76,12 @@ for (const [x, y] of [[0, 0], [3, 5], [8, 6]]) {
 assert.deepStrictEqual(ortho.getCellDiamond(0, 0)[0], {x: 340, y: 80});
 assert.deepStrictEqual(ortho.getCellDiamond(cols - 1, rows - 1)[2], {x: 1220, y: 1040});
 assert.ok(minX >= 0 || true); // (bounds already asserted per-cell)
-assert.ok(ORTHOGONAL_ROOM_RENDER.wallHeight > 0 && ORTHOGONAL_ROOM_RENDER.entrance?.cell, 'render metadata present (wall + entrance door)');
+assert.ok(ORTHOGONAL_ROOM_RENDER.wallHeight > 0 && ORTHOGONAL_ROOM_RENDER.door?.fill, 'render metadata present (wall + door surface)');
+// ARCH-0573: the door sits on the LOWER wall and fits inside the full-bleed core strip.
+assert.ok(ORTHOGONAL_ROOM_RENDER.doorHeight > 0 && ORTHOGONAL_ROOM_RENDER.doorHeight <= ORTHOGONAL_ROOM_RENDER.coreTopStrip,
+  'door height fits within the core top strip');
+assert.ok(ORTHOGONAL_ROOM_RENDER.coreTopStrip > 0 && ORTHOGONAL_ROOM_RENDER.coreTopStrip < ORTHOGONAL_ROOM_RENDER.wallHeight,
+  'core top strip is a partial slice of the full wall (outer wall crops on the first screen)');
 
 // --- C. Footprint: logical cells identical to iso; polygon is an axis-aligned rect ---
 const footCases = [

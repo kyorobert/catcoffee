@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V0.57.3 正交核心營業區滿版 before/after 比較</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; font-family: system-ui, "Segoe UI", "Microsoft JhengHei", sans-serif; line-height: 1.6; background: #1c1714; color: #f2e9e2; }
+  header { padding: 20px 24px; background: #2a211c; border-bottom: 1px solid #4a3a30; }
+  h1 { margin: 0 0 6px; font-size: 20px; }
+  header p { margin: 4px 0; color: #d8c7ba; font-size: 14px; }
+  main { max-width: 1200px; margin: 0 auto; padding: 20px 16px 60px; }
+  section { margin: 28px 0; }
+  h2 { font-size: 17px; border-left: 4px solid #c98b5f; padding-left: 10px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .pair.solo { grid-template-columns: 1fr; max-width: 420px; }
+  figure { margin: 0; background: #241d19; border: 1px solid #45362c; border-radius: 10px; overflow: hidden; }
+  figcaption { padding: 8px 12px; font-size: 13px; color: #e7d7c9; background: #2f251f; }
+  figcaption b { color: #ffd9b0; }
+  img { display: block; width: 100%; height: auto; background: #000; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 10px; }
+  th, td { border: 1px solid #4a3a30; padding: 6px 9px; text-align: center; }
+  th { background: #2f251f; }
+  .note { color: #cbb9ab; font-size: 13px; }
+  @media (max-width: 720px) { .pair, .grid3 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>V0.57.3-alpha｜正交核心營業區滿版與分區（ARCH-0573）</h1>
+  <p>Build <b>0573a</b>｜存檔 key <code>catCafePhaserV0540</code> 不變｜依 DEC-020</p>
+  <p>首屏由「整房 contain（仍留上下白）」改為「<b>核心營業區滿版</b>」：分離 roomBounds（pan/zoom-out 範圍）與 coreGameplayBounds（首屏取景目標）。截圖為自動化 real-browser（Chrome），非實機驗收。</p>
+</header>
+<main>
+
+  <section>
+    <h2>1. 手機直立首屏 before / after（390×844）</h2>
+    <div class="pair">
+      <figure>
+        <img src="evidence/v0573/mobile-390-v0572-before.png" alt="V0572 before">
+        <figcaption><b>Before — V0.57.2</b>：整房 contain，上下留白，滿版感不足。</figcaption>
+      </figure>
+      <figure>
+        <img src="evidence/v0573/mobile-390-v0573-after.png" alt="V0573 after">
+        <figcaption><b>After — V0.57.3</b>：核心營業區縱向占 safe viewport ~96%，外圈約 8% 裁切（可 pan 補看）。</figcaption>
+      </figure>
+    </div>
+    <table>
+      <tr><th>視窗</th><th>首屏 zoom</th><th>minZoom（整房）</th><th>核心縱向占 safe</th><th>左右每側裁切</th></tr>
+      <tr><td>390×844</td><td>0.526</td><td>0.420</td><td><b>96%</b></td><td>~8%</td></tr>
+      <tr><td>393×852</td><td>0.530</td><td>0.424</td><td><b>95%</b></td><td>~8%</td></tr>
+      <tr><td>430×932</td><td>0.582</td><td>0.466</td><td><b>93%</b></td><td>~8%</td></tr>
+      <tr><td>1440×812（桌面）</td><td>0.491</td><td>0.466</td><td>97%</td><td>0%</td></tr>
+    </table>
+    <p class="note">safe gameplay viewport＝canvas 高度 − 78px 情境列保留。皆達 ≥ 90% 目標；裁切每側 ≤ 10%（皆外圈欄，關鍵分區 0 裁切）。</p>
+  </section>
+
+  <section>
+    <h2>2. 三種手機寬度首屏滿版</h2>
+    <div class="grid3">
+      <figure><img src="evidence/v0573/mobile-390-ortho-demo-initial.png" alt="390"><figcaption>390×844</figcaption></figure>
+      <figure><img src="evidence/v0573/mobile-393-ortho-demo-initial.png" alt="393"><figcaption>393×852</figcaption></figure>
+      <figure><img src="evidence/v0573/mobile-430-ortho-demo-initial.png" alt="430"><figcaption>430×932</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. Camera 範圍：整房 zoom-out 與放大</h2>
+    <div class="pair">
+      <figure><img src="evidence/v0573/mobile-390-demo-minzoom.png" alt="minzoom"><figcaption><b>minZoom</b>：縮到底可見整間房（含外圈與整面牆），0% 裁切、無空白背景。</figcaption></figure>
+      <figure><img src="evidence/v0573/mobile-390-demo-zoomin.png" alt="zoomin"><figcaption><b>放大</b>：放大檢視，clamp 於房間內。</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>4. Pan 四邊界（貼齊房間、無空白）</h2>
+    <div class="grid3">
+      <figure><img src="evidence/v0573/mobile-390-demo-pan-top-limit.png" alt="pan top"><figcaption>上邊界</figcaption></figure>
+      <figure><img src="evidence/v0573/mobile-390-demo-pan-bottom-limit.png" alt="pan bottom"><figcaption>下邊界</figcaption></figure>
+      <figure><img src="evidence/v0573/mobile-390-demo-pan-left-limit.png" alt="pan left"><figcaption>左邊界（外圈 x0 補看）</figcaption></figure>
+      <figure><img src="evidence/v0573/mobile-390-demo-pan-right-limit.png" alt="pan right"><figcaption>右邊界（外圈 x9 牆補看）</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>5. 真實存檔 / Art Debug / 桌面</h2>
+    <div class="grid3">
+      <figure><img src="evidence/v0573/mobile-390-ortho-existing-initial.png" alt="existing"><figcaption>真實存檔（非 Demo）首屏</figcaption></figure>
+      <figure><img src="evidence/v0573/mobile-390-ortho-demo-artdebug.png" alt="artdebug"><figcaption>Art Debug 疊圖</figcaption></figure>
+      <figure><img src="evidence/v0573/desktop-1440-ortho-demo.png" alt="desktop"><figcaption>桌面 1440（手機優先，左右有邊距）</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>6. 空間分區（ortho-room-zones，純格資料）</h2>
+    <p class="note">兩格門 x7–8（x9 留牆）｜三層服務：背牆設備帶 + 員工工作區(後) / 顧客服務區(前)｜主走道 x7–8 兩格全通｜coreGameplayBounds x1–8 為首屏取景。18 件 Demo 全部合法、入口→服務/座位/貓咪可達、顧客動線不穿員工工作區、員工工作區內部連續。詳見 <a href="V0573_ORTHOGONAL_CORE_FULLBLEED_RESULT.md" style="color:#ffd9b0">V0573 結果</a>。</p>
+  </section>
+
+</main>
+</body>
+</html>

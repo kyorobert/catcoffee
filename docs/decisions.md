@@ -234,4 +234,21 @@
   - **家具重畫再延後至本手機滿版化通過後：Accepted**（候選 `ART-0573-CORE-ORTHOGONAL-FURNITURE`）。
   - **iso 暫時仍為預設與 rollback**；Orthogonal 仍由 URL opt-in。
 - 實作（本任務 `ARCH-0572` 完成）：`OrthogonalProjection` cellWidth 104→88、cellHeight 88→120（origin 重推導，仍完全水平／垂直、cell 在世界 bounds 內）；`ORTHOGONAL_ROOM_RENDER` 改為含背牆 `wallHeight` 與右上角 `entrance` 門；`drawRoomOrtho` 畫整面背牆＋右上角門＋入口地墊、移除底部 logical 入口高亮；`buildOrthoFraming` content bounds 含背牆使手機直立滿版；`ortho-demo-layout` 重排為 17 件（右上角門→上方服務帶→中央座位→前左貓咪區→清楚動線）。Camera framing 邏輯不變（fit-to-content＋centerOn＋內容 clamp）。未改投影軸向水平/垂直、未重畫家具、未新增營運/角色系統、未改存檔 key/schema。real-browser before/after 證據 `docs/evidence/v0572/`。細節見 [V0572 結果](./V0572_ORTHOGONAL_PORTRAIT_RESULT.md)、[驗收](./V0572_ORTHOGONAL_PORTRAIT_ACCEPTANCE.md)。
-- 後續（未核准前不執行）：`ART-0573-CORE-ORTHOGONAL-FURNITURE`；`ARCH-0573-ECONOMY-SYSTEM`；`ARCH-0573-STATION-REGISTRY`。
+- 後續（未核准前不執行）：`ART-0573-CORE-ORTHOGONAL-FURNITURE`；`ARCH-0573-ECONOMY-SYSTEM`；`ARCH-0573-STATION-REGISTRY`。→ **更新**：家具重作再延後至「核心營業區滿版與分區」通過後（見 [DEC-020](#dec-020正交核心營業區滿版與分區metadataaccepted)），改編號 `ART-0574`。
+
+## DEC-020｜正交核心營業區滿版與分區 Metadata（Accepted）
+
+- 日期：2026-07-26
+- 狀態：Accepted
+- 背景：`V0.57.2-alpha` 的比例調整與整面背牆改善了占比，但真實 iPhone 驗收判定「**手機滿版感仍不足、上下仍有留白**」。根因：首屏 framing 仍嘗試把**整個房間**（含外圈裝飾欄與整面高牆）以 contain 完整塞入，寬受限下高度方向自然留白。正式判定：Orthogonal 方向與 V0.57.2 比例保留，但首屏取景要改為「**核心營業區滿版**」，並把空間分區從臨時 Demo 資料升級為正式 metadata，才能進入家具重畫。
+- 決策：
+  - **Orthogonal 正交方向與 V0.57.2 比例：維持 Accepted**（延續 [DEC-017](#dec-017正交平面場景方向accepted停止斜投影微調)～[DEC-019](#dec-019正交手機直立滿版化與咖啡廳分區accepted)）；`cellWidth=88`／`cellHeight=120`、`axisX.y=0`／`axisY.x=0`、完全水平／垂直不變。
+  - **首屏改為核心營業區滿版（cover 優先）：Accepted**——分離兩個矩形：**roomBounds**（整房：地板＋整面背牆＋外圈邊距，作為 Camera pan／zoom-out 範圍）與 **coreGameplayBounds**（首屏取景目標，較小，含入口／櫃檯／主要座位／主走道／貓咪區，排除非必要外牆與外圈空格）。手機核心區在 **safe gameplay viewport 縱向占比 ≥ 90%**（390×844／393×852／430×932 實測 **96%／95%／93%**）；允許左右少量裁切（每側 ≤ 10%，實測 ~8%，皆為外圈欄；關鍵分區 0 裁切）。zoom-out 下限＝整房 fit，可縮到看見整間房、無空背景。
+  - **顧客入口改為兩格視覺門：Accepted**——`visualDoorBounds` 為上牆右側 **x7–8 兩格**視覺門（**x9 保持牆面**、門不貼房間邊）；單一 logical 進入點 `customerEntryPoint=(8,0)`、`customerEntryStaging=(8,1)` 分離。**僅 Demo/prototype 視覺與路線；logical 存檔入口 room-config `(8,7)/(9,7)` 與存檔契約不變。**
+  - **正式 Zone metadata 模組：Accepted**——新增 `assets/js/config/ortho-room-zones.js`，以純格座標矩形描述 `customerEntranceZone`／`visualDoorBounds`／`customerEntryPoint`／`customerEntryStaging`／`staffWorkZone`／`serviceCounterLine`／`customerServiceZone`／`seatingZone`／`catZone`／`mainAisle`／`coreGameplayBounds`。**純資料、無 world pixel、可投影、無 Phaser／DOM、無 actor 身份、可 Node 測試**；**不是 StationRegistry、不是 CustomerFlowSystem**，不含收銀／製作／送餐／AI 邏輯。
+  - **櫃檯／服務三層空間方向：Accepted**——A 背牆設備帶、B 員工工作區（櫃檯後方連續可走、非零散縫隙）、C 顧客服務區（櫃檯前方：點餐／收銀／取餐／排隊）。本次僅空間 prototype 與 metadata，**不含任何行為邏輯**。
+  - **Demo 依分區重排、display-only：Accepted**——18 件（略多於 V0572 的 17）、主走道 2 格全通；驗證入口→服務／座位／貓咪皆可達、員工工作區內部連續、顧客動線不穿越員工工作區、入口不被擋。仍不入存檔、不改 `state.items`／coins。
+  - **只在 framing 無法達成時才調 cell 尺寸：Accepted**——本次以 coreGameplayBounds 取景（非把 cell 由 120 硬拉到 140/160）達標，故不改 cell 尺寸。
+  - **iso 暫時仍為預設與 rollback**；Orthogonal 仍由 URL opt-in。
+- 實作（本任務 `ARCH-0573` 完成）：新增 `ortho-room-zones.js`（zone metadata＋純 helper）；`OrthogonalProjection.ORTHOGONAL_ROOM_RENDER` 改為 `doorHeight`／`coreTopStrip`／`door` 顏色（移除舊 `entrance` 角落單格門）；`camera-framing.computeInitialFraming` 改收 `core`（滿版取景）＋`room`（clamp／minZoom），保留單一 `content` 舊路徑；`CameraController` 以 `getCoreBounds`（fit）＋`getRoomBounds`（pan/zoom-out）取代單一 content；`CafeScene.buildOrthoFraming` 提供 core/room bounds、`drawRoomOrtho` 由 zones 畫 x7–8 兩格門＋`customerEntryPoint` 地墊；`ortho-demo-layout` 依 zones 重排 18 件、`ORTHO_DEMO_ENTRANCE` 取自 `customerEntryPoint`。新增 `tests/ortho-room-zones.test.js`；更新 `ortho-demo-layout`／`camera-framing`／`ortho-projection`／`browser-smoke` 測試。版本機械升版 0572a→0573a、`check.js`（版本／Build／obsolete `?v=0572a`／protected hash 更新 OrthogonalProjection/camera-framing/GridSystem/flat-presets/viewport-metrics＋新增 ortho-room-zones／required＋test／`.gitattributes` 納入 root 與 ZIP root）。未改投影軸向、未重畫家具、未新增營運/角色/訂單/店員系統、未改存檔 key／schema（`catCafePhaserV0540`／5401／5401）。real-browser before/after 證據 `docs/evidence/v0573/`。細節見 [V0573 結果](./V0573_ORTHOGONAL_CORE_FULLBLEED_RESULT.md)、[驗收](./V0573_ORTHOGONAL_CORE_FULLBLEED_ACCEPTANCE.md)、[比較 HTML](./V0573_ORTHOGONAL_CORE_FULLBLEED_COMPARISON.html)。
+- 後續（未核准前不執行）：`ART-0574-CORE-ORTHOGONAL-FURNITURE`（核心 10～12 件正交重作，延後至本核心滿版與分區實機通過後）；`ARCH-0574-ECONOMY-SYSTEM`；`ARCH-0574-STATION-REGISTRY`（可用 `ortho-room-zones` 為空間依據，但工作站／顧客流程邏輯本次不做）。

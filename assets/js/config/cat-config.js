@@ -1,4 +1,4 @@
-export const CAT_ASSET_VERSION = '0572a';
+export const CAT_ASSET_VERSION = '0573a';
 export const CAT_FRAME_WIDTH = 64;
 export const CAT_FRAME_HEIGHT = 64;
 

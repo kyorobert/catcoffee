@@ -11,7 +11,9 @@
 >
 > **更新（2026-07-25b）：iPhone 驗收——正交方向通過、手機取景已修正。** 產品負責人於**真實 iPhone 直立**確認 Orthogonal 正交方向正確，但 V0.57.0 手機首屏過度放大、需大量左右拖曳。`ARCH-0571` 已修正 Camera 取景（以房間內容＋safe viewport 計算 fit、centerOn 置中、pan/zoom 夾在房間內；iso/flat 不變）與 Demo 構圖（16 件緊湊分區）。正式決策見 [DEC-018](../decisions.md)。實作見 [V0571 結果](../V0571_ORTHOGONAL_MOBILE_RESULT.md)。
 >
-> **更新（2026-07-25c）：iPhone 再驗收——手機直立滿版化與分區已完成。** V0.57.1 Camera 技術正常但「內容太小、上下留白過多、Demo 像展示」。`ARCH-0572` 已**手機直立滿版化**（正交房間比例 cellWidth 104→88/cellHeight 88→120＋整面背牆，房間占 canvas 高度 ~44%→~78%）並**分區**（右上角顧客入口門、上方連續櫃檯/服務帶、中央座位、前左貓咪區、清楚動線；Demo 17 件）。**僅改 Demo/prototype 入口視覺與路線，logical 存檔入口與存檔契約不變；未重畫家具。** 正式決策見 [DEC-019](../decisions.md)。實作見 [V0572 結果](../V0572_ORTHOGONAL_PORTRAIT_RESULT.md)、before/after `docs/evidence/v0572/`。**目前產品 Gate**：完成 [V0572 手機滿版化實機驗收](../V0572_ORTHOGONAL_PORTRAIT_ACCEPTANCE.md)；通過後才進入**核心家具重作 `ART-0573`**。iso 仍為暫時預設與 rollback。
+> **更新（2026-07-25c）：iPhone 再驗收——手機直立滿版化與分區已完成。** V0.57.1 Camera 技術正常但「內容太小、上下留白過多、Demo 像展示」。`ARCH-0572` 已**手機直立滿版化**（正交房間比例 cellWidth 104→88/cellHeight 88→120＋整面背牆，房間占 canvas 高度 ~44%→~78%）並**分區**（右上角顧客入口門、上方連續櫃檯/服務帶、中央座位、前左貓咪區、清楚動線；Demo 17 件）。**僅改 Demo/prototype 入口視覺與路線，logical 存檔入口與存檔契約不變；未重畫家具。** 正式決策見 [DEC-019](../decisions.md)。實作見 [V0572 結果](../V0572_ORTHOGONAL_PORTRAIT_RESULT.md)、before/after `docs/evidence/v0572/`。通過後才進入核心家具重作。iso 仍為暫時預設與 rollback。
+>
+> **更新（2026-07-26）：核心營業區滿版與正式分區已完成。** V0.57.2 滿版化後實機仍判定「手機滿版感不足、上下留白」；根因是首屏仍以**整個房間** contain。`ARCH-0573` 已把首屏改為「**核心營業區滿版**」（分離 roomBounds 作 pan/zoom-out、coreGameplayBounds 作首屏取景；核心區占 safe viewport 96%/95%/93%、外圈 ~8% 裁切、可 zoom-out 至整房），入口改為 **x7–8 兩格門**（x9 留牆），並新增正式空間分區 metadata `ortho-room-zones.js`（門/員工工作區/櫃檯/顧客服務區/座位/貓咪/主走道/核心區；**純資料、無行為邏輯**），Demo 重排 18 件。**僅改 Demo/prototype 視覺與路線；logical 存檔入口與存檔契約不變；未重畫家具、未做營運/店員/訂單/工作站行為。** 正式決策見 [DEC-020](../decisions.md)。實作見 [V0573 結果](../V0573_ORTHOGONAL_CORE_FULLBLEED_RESULT.md)、before/after `docs/evidence/v0573/`。**Flat A/B/C 早已全部拒絕，僅保留程式回歸，不再是任何後續產品 Gate。目前產品 Gate**：完成 [V0573 核心滿版與分區實機驗收](../V0573_ORTHOGONAL_CORE_FULLBLEED_ACCEPTANCE.md)；通過後才進入**核心家具重作 `ART-0574`**。iso 仍為暫時預設與 rollback。
 
 ---
 

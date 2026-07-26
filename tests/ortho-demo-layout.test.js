@@ -2,11 +2,13 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0572a';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0572a';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0572a';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0573a';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0573a';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0573a';
 import {ORTHO_DEMO_LAYOUT, ORTHO_DEMO_ENTRANCE, buildOrthoDemoItems, isDemoLayoutRequested}
-  from '../assets/js/config/ortho-demo-layout.js?v=0572a';
+  from '../assets/js/config/ortho-demo-layout.js?v=0573a';
+import {ORTHO_ROOM_ZONES as Z, rectContainsCell, zoneCells}
+  from '../assets/js/config/ortho-room-zones.js?v=0573a';
 
 const {cols, rows} = ROOM_CONFIG.floor;
 
@@ -20,13 +22,9 @@ for (const [s, e] of [
 // --- fixture shape: frozen data, deterministic display-only ids, existing furniture ---
 assert.ok(Object.isFrozen(ORTHO_DEMO_LAYOUT), 'ORTHO_DEMO_LAYOUT is frozen');
 const items = buildOrthoDemoItems();
-assert.ok(items.length >= 14 && items.length <= 20, 'demo is a compact 14-20 item cafe');
+assert.ok(items.length >= 14 && items.length <= 18, 'demo is a compact 14-18 item cafe (ARCH-0573)');
+assert.ok(items.length > 17, 'demo is slightly denser than V0572 (17 items)');
 assert.equal(items.length, ORTHO_DEMO_LAYOUT.length);
-// zone sanity: a service band along the back row; a cat cluster in the front rows.
-assert.ok(items.filter(i => ['counter', 'coffeeMachine', 'oven', 'smartOrder', 'washStation', 'dessert'].includes(i.type)).every(i => i.y === 0),
-  'service furniture sits on the back (service) row');
-const catItems = items.filter(i => ['catBed', 'doubleCatTree', 'scratchPost', 'catTent'].includes(i.type));
-assert.ok(catItems.length >= 2 && catItems.every(i => i.y >= 5), 'cat furniture forms a front/bottom cluster');
 const ids = new Set(items.map(i => i.id));
 assert.equal(ids.size, items.length, 'demo item ids are unique');
 for (const it of items) {
@@ -40,6 +38,23 @@ assert.notEqual(again, items);
 assert.notEqual(again[0], items[0]);
 assert.deepStrictEqual(again, items);
 
+// --- zone membership: each item's origin cell sits in its intended zone ---
+const equipment = ['coffeeMachine', 'oven', 'dessert', 'smartOrder', 'washStation'];
+const counters = ['counter', 'console'];
+const cats = ['catBed', 'doubleCatTree', 'scratchPost', 'catTent'];
+for (const it of items) {
+  if (equipment.includes(it.type)) assert.ok(rectContainsCell(Z.staffWorkZone, it.x, it.y), `${it.type} in staffWorkZone`);
+  if (counters.includes(it.type)) assert.ok(rectContainsCell(Z.serviceCounterLine, it.x, it.y), `${it.type} on serviceCounterLine`);
+  if (cats.includes(it.type)) assert.ok(rectContainsCell(Z.catZone, it.x, it.y), `${it.type} in catZone`);
+}
+assert.ok(items.some(i => counters.includes(i.type)), 'a counter bar exists (serviceCounterLine)');
+assert.ok(items.filter(i => cats.includes(i.type)).length >= 2, 'a front cat cluster exists');
+// No furniture inside the main aisle spine (kept clear for circulation).
+for (const it of items) {
+  const cells = new GridSystem(ROOM_CONFIG, FURNITURE_CONFIG, {mode: 'ortho'}).getFootprintCells(it.type, it.x, it.y, it.r);
+  assert.ok(cells.every(c => !rectContainsCell(Z.mainAisle, c.x, c.y)), `${it.type} does not sit in the main aisle`);
+}
+
 // --- placement validity: every item places, nothing overlaps, entrance stays clear ---
 const grid = new GridSystem(ROOM_CONFIG, FURNITURE_CONFIG, {mode: 'ortho'});
 const occ = new OccupancySystem(grid, FURNITURE_CONFIG);
@@ -52,30 +67,48 @@ for (const it of items) {
   assert.ok(cells.every(c => grid.isInsideGrid(c.x, c.y)), `${it.type} inside grid`);
 }
 for (const cell of ROOM_CONFIG.entrance.cells) {
-  assert.equal(occ.getOccupant(cell.x, cell.y, 'floorObject'), null, `entrance (${cell.x},${cell.y}) clear of furniture`);
+  assert.equal(occ.getOccupant(cell.x, cell.y, 'floorObject'), null, `logical save entrance (${cell.x},${cell.y}) clear of furniture`);
 }
 
-// --- reachability: entrance connects to counter-front and seating; aisles not blocked ---
+// --- reachability + zoning integrity ---
 const blocked = occ.getWalkabilitySnapshot(); // floorObject + reserved cells
 const walkable = (x, y) => x >= 0 && x < cols && y >= 0 && y < rows && !blocked.has(`${x},${y}`);
-function reachFrom(sx, sy) {
+function reachFrom(sx, sy, wall = () => false) {
   const seen = new Set([`${sx},${sy}`]); const q = [[sx, sy]];
   while (q.length) {
     const [x, y] = q.shift();
     for (const [nx, ny] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) {
-      if (walkable(nx, ny) && !seen.has(`${nx},${ny}`)) { seen.add(`${nx},${ny}`); q.push([nx, ny]); }
+      if (walkable(nx, ny) && !wall(nx, ny) && !seen.has(`${nx},${ny}`)) { seen.add(`${nx},${ny}`); q.push([nx, ny]); }
     }
   }
   return seen;
 }
-// The demo customer entrance is the top-corner door; it must be walkable and connect the cafe.
-assert.deepEqual(ORTHO_DEMO_ENTRANCE, {x: 9, y: 0}, 'demo entrance is the top-right door corner');
-assert.ok(walkable(ORTHO_DEMO_ENTRANCE.x, ORTHO_DEMO_ENTRANCE.y), 'demo entrance cell is walkable');
-const reach = reachFrom(ORTHO_DEMO_ENTRANCE.x, ORTHO_DEMO_ENTRANCE.y);
-for (const k of ['1,1', '2,1', '3,1', '4,1', '5,1', '6,1']) assert.ok(reach.has(k), `counter front reachable from door: ${k}`);
-for (const k of ['3,4', '4,4', '5,4', '4,5']) assert.ok(reach.has(k), `seating approach reachable from door: ${k}`);
-for (const k of ['4,6', '5,6']) assert.ok(reach.has(k), `cat area reachable from door: ${k}`);
+// The demo prototype entry is ortho-room-zones' single logical entry point (2-cell door at x7-8).
+assert.deepEqual(ORTHO_DEMO_ENTRANCE, {x: 8, y: 0}, 'demo entry point matches customerEntryPoint (x8)');
+assert.ok(walkable(ORTHO_DEMO_ENTRANCE.x, ORTHO_DEMO_ENTRANCE.y), 'entry point cell is walkable');
+assert.ok(walkable(Z.customerEntryStaging.x, Z.customerEntryStaging.y), 'entry staging cell is walkable');
+const reach = reachFrom(Z.customerEntryStaging.x, Z.customerEntryStaging.y);
+for (const k of ['4,3', '5,3', '7,3']) assert.ok(reach.has(k), `service frontage reachable from entry: ${k}`);
+for (const k of ['3,4', '3,5', '4,5']) assert.ok(reach.has(k), `seating approach reachable from entry: ${k}`);
+for (const k of ['4,6', '4,7']) assert.ok(reach.has(k), `cat area reachable from entry: ${k}`);
 assert.ok(reach.size >= 40, 'a large connected walkable area (aisles not a one-cell maze)');
+
+// Main aisle (door -> service spine) is fully walkable and ~2 cells wide.
+const aisleCells = zoneCells(Z.mainAisle);
+assert.ok(aisleCells.every(c => walkable(c.x, c.y)), 'the entire main aisle stays walkable (2 cells wide)');
+assert.equal(Z.mainAisle.w, 2, 'main aisle is 2 cells wide');
+
+// Circulation stays out of the work side: a customer route that never enters staffWorkZone
+// can still reach the service frontage, seating and cats.
+const inStaff = (x, y) => rectContainsCell(Z.staffWorkZone, x, y);
+const custReach = reachFrom(Z.customerEntryStaging.x, Z.customerEntryStaging.y, inStaff);
+for (const k of ['4,3', '3,5', '4,6']) assert.ok(custReach.has(k), `service route avoids the work side yet reaches: ${k}`);
+
+// The work side is internally continuous (a connected walk-behind, not accidental gaps).
+const workCells = zoneCells(Z.staffWorkZone).filter(c => walkable(c.x, c.y));
+assert.ok(workCells.length >= 4, 'the work side has room to move');
+const workReach = reachFrom(workCells[0].x, workCells[0].y, (x, y) => !inStaff(x, y));
+assert.equal(workReach.size, workCells.length, 'the work side is one connected walkable region');
 
 // --- Purity: no engine/DOM/storage/save, no actor identity ---
 const source = readFileSync(new URL('../assets/js/config/ortho-demo-layout.js', import.meta.url), 'utf8');
@@ -84,4 +117,4 @@ for (const banned of ['Phaser', 'document', 'window', 'localStorage', 'SaveAdapt
 }
 assert.ok(!/\b(manager|staff|employee|worker)\b/i.test(source), 'demo layout must not encode actor identity');
 
-console.log(`Ortho demo layout: ${items.length} valid non-overlapping items from existing furniture ids, entrance clear & reachable to counter/seating, pure display-only fixture (never saved).`);
+console.log(`Ortho demo layout: ${items.length} valid non-overlapping items zoned by ortho-room-zones (equipment/counter/seating/cats), 2-cell main aisle clear, entry -> service/seating/cats reachable without crossing the work side, work side continuous, pure display-only fixture (never saved).`);

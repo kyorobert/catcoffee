@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {deriveOverlayInsets, computeSafeViewport} from '../assets/js/core/scene-viewport.js?v=0572a';
+import {deriveOverlayInsets, computeSafeViewport} from '../assets/js/core/scene-viewport.js?v=0573a';
 import {computeFitZoom, clampCenterToContent, computeInitialFraming, ORTHO_FRAMING}
-  from '../assets/js/core/camera-framing.js?v=0572a';
+  from '../assets/js/core/camera-framing.js?v=0573a';
 
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
 // The orthogonal room content used at runtime (floor + full back wall), world px (ARCH-0572).
@@ -74,6 +74,39 @@ assert.deepEqual(clampCenterToContent({centerX: 9999, centerY: -9999, viewWidth:
   // an interior centre is left unchanged (free panning inside the room).
   const inside = clampCenterToContent({centerX: 780, centerY: 496, viewWidth: vw, viewHeight: vh, content});
   assert.deepEqual(inside, {x: 780, y: 496}, 'interior centre unchanged');
+}
+
+// --- D. Core full-bleed vs whole-room pan range (ARCH-0573) ---
+// room = floor + full back wall + outer x0/x9 margins; core = gameplay columns + short wall
+// strip (projected values from the 10x8 room at cellWidth 88 / cellHeight 120).
+const room = {x: 340, y: -120, width: 880, height: 1184};
+const core = {x: 428, y: -60, width: 704, height: 1124};
+for (const [cw, ch] of [[390, 696], [393, 704], [430, 784]]) {
+  const s = computeSafeViewport({canvasWidth: cw, canvasHeight: ch, insets: {bottom: 78}});
+  const f = computeInitialFraming({core, room, safe: s, canvasWidth: cw, canvasHeight: ch, maxZoom: 1.65, policy: {}});
+  const roomFit = computeFitZoom({contentWidth: room.width, contentHeight: room.height, safeWidth: s.width, safeHeight: s.height,
+    marginCss: ORTHO_FRAMING.marginCss, maxZoom: ORTHO_FRAMING.maxInitialZoom, minZoom: ORTHO_FRAMING.minZoomFloor});
+  // the first screen full-bleeds the CORE: it fills >= 90% of the safe viewport height.
+  const coreFillH = core.height * f.zoom / s.height;
+  assert.ok(coreFillH >= 0.9, `core fills >=90% of safe height (${cw}x${ch}: ${(coreFillH * 100).toFixed(0)}%)`);
+  // core full-bleed uses a larger zoom than a whole-room contain-fit → far less vertical
+  // margin than V0572 (which fit the entire room).
+  assert.ok(f.zoom > roomFit, `core zoom beats whole-room fit → less margin than V0572 (${cw})`);
+  // the outer room columns crop a little (<=10% per side) and stay reachable by panning.
+  const roomOnScreenW = room.width * f.zoom;
+  const crop = Math.max(0, (roomOnScreenW - cw) / 2 / roomOnScreenW);
+  assert.ok(crop > 0 && crop <= 0.10, `room side crop within (0, 10%] (${cw}: ${(crop * 100).toFixed(1)}%)`);
+  // the zoom-out floor reveals the WHOLE room (minZoom = room fit, below the core-fit start).
+  assert.ok(approx(f.minZoom, roomFit), `minZoom == whole-room fit (${cw})`);
+  assert.ok(f.minZoom < f.zoom, `player can zoom out below the core-fit initial (${cw})`);
+  // the initial centre is the CORE centre on X (clamped within the room), so the core is centred.
+  assert.ok(approx(f.centerX, core.x + core.width / 2, 1), `initial framing centres on the core (${cw})`);
+}
+// with only a single `content` (no core/room split) behaviour is unchanged: minZoom == fit zoom.
+{
+  const s = computeSafeViewport({canvasWidth: 390, canvasHeight: 696, insets: {bottom: 78}});
+  const f = computeInitialFraming({content: room, safe: s, canvasWidth: 390, canvasHeight: 696, maxZoom: 1.65});
+  assert.equal(f.minZoom, f.zoom, 'single-content path keeps minZoom == fit zoom (back-compat)');
 }
 
 // --- Purity: the framing/viewport helpers carry no engine/DOM/storage/actor identity ---

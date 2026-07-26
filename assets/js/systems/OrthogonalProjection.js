@@ -30,19 +30,24 @@ export const ORTHOGONAL_PROJECTION_PARAMS = Object.freeze({
   axisY: Object.freeze({x: 0, y: 120})    // +1 gridY -> down 120px, no horizontal drift
 });
 
-// Render-only framing metadata for CafeScene.drawRoomOrtho. `wallHeight` is a real back
-// wall standing above the floor (a service-counter backdrop + entry door); it is INCLUDED
-// in the framing content bounds so the room fills the portrait screen. `entrance.cell` is
-// the entry door corner (top-right) — a Demo/prototype visual + route only; the logical
-// save entrance in room-config is unchanged.
+// Render-only framing metadata for CafeScene.drawRoomOrtho. `wallHeight` is the full back
+// wall standing above the floor (equipment backdrop + entry door). ARCH-0573 separates two
+// framing rectangles: the whole ROOM (floor + full wall, used for the Camera pan/zoom-out
+// range) versus the first-screen CORE (gameplay columns + only a `coreTopStrip` of wall,
+// used for the full-bleed initial fit). `doorHeight` is a shorter door that sits on the
+// lower wall so it fits inside the core strip; the door CELLS come from ortho-room-zones
+// (`visualDoorBounds` = 2 cells at x7-8, entry mat at `customerEntryPoint`) — a
+// Demo/prototype visual + route only, the logical save entrance in room-config is unchanged.
 export const ORTHOGONAL_ROOM_RENDER = Object.freeze({
-  wallHeight: 200,
+  wallHeight: 200,       // full back wall (whole-room framing + pan range)
+  doorHeight: 130,       // door height on the lower wall (fits inside coreTopStrip)
+  coreTopStrip: 140,     // wall strip above the floor kept in the full-bleed core framing
   topWallLineWidth: 6,
   floorOutlineWidth: 4,
   sideEdgeLineWidth: 4,
   bottomPad: 24,
-  entrance: Object.freeze({cell: Object.freeze({x: 9, y: 0}), doorFill: 0x6b4636, doorFrame: 0x8f4f49, matFill: 0x9f765a}),
-  decoration: Object.freeze({windowFx: 0.22, boardFx: 0.46, heightFactor: 0.5, windowScale: 0.8, boardScale: 0.78})
+  door: Object.freeze({fill: 0x6b4636, frame: 0x8f4f49, matFill: 0x9f765a}),
+  decoration: Object.freeze({windowFx: 0.2, boardFx: 0.42, heightFactor: 0.4, windowScale: 0.8, boardScale: 0.78})
 });
 
 export class OrthogonalProjection {

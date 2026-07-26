@@ -46,20 +46,31 @@ export function clampCenterToContent({centerX, centerY, viewWidth, viewHeight, c
   };
 }
 
-// Complete initial framing: the fit zoom plus the (content-clamped) camera centre that
-// shows the whole room. `policy` overrides ORTHO_FRAMING fields.
-export function computeInitialFraming({content, safe, canvasWidth, canvasHeight, maxZoom, policy = {}}) {
+// Complete initial framing (ARCH-0573). The first screen full-bleeds the CORE region
+// (`core` = gameplay columns + a short wall strip) with a CONTAIN fit, so the core fills
+// the safe viewport height on a portrait phone; the outer ROOM columns may crop and are
+// reachable by panning. `room` is the whole room (full wall + outer margins) and defines
+// BOTH the pan clamp and how far the player may zoom OUT (minZoom = room fit), so zooming
+// out reveals the entire room with no empty background. Passing only `content` keeps the
+// old single-rect behaviour (core = room = content). `policy` overrides ORTHO_FRAMING.
+export function computeInitialFraming({content, core, room, safe, canvasWidth, canvasHeight, maxZoom, policy = {}}) {
   const cfg = {...ORTHO_FRAMING, ...policy};
+  const fitTarget = core || content;                     // full-bleed target for the first screen
+  const panBounds = room || content || fitTarget;        // whole-room pan + zoom-out range
+  const capMax = Number.isFinite(maxZoom) ? Math.min(maxZoom, cfg.maxInitialZoom) : cfg.maxInitialZoom;
   const zoom = computeFitZoom({
-    contentWidth: content.width, contentHeight: content.height,
+    contentWidth: fitTarget.width, contentHeight: fitTarget.height,
     safeWidth: safe.width, safeHeight: safe.height,
-    marginCss: cfg.marginCss,
-    maxZoom: Number.isFinite(maxZoom) ? Math.min(maxZoom, cfg.maxInitialZoom) : cfg.maxInitialZoom,
-    minZoom: cfg.minZoomFloor
+    marginCss: cfg.marginCss, maxZoom: capMax, minZoom: cfg.minZoomFloor
+  });
+  const roomFit = computeFitZoom({
+    contentWidth: panBounds.width, contentHeight: panBounds.height,
+    safeWidth: safe.width, safeHeight: safe.height,
+    marginCss: cfg.marginCss, maxZoom: capMax, minZoom: cfg.minZoomFloor
   });
   const centre = clampCenterToContent({
-    centerX: content.x + content.width / 2, centerY: content.y + content.height / 2,
-    viewWidth: canvasWidth / zoom, viewHeight: canvasHeight / zoom, content
+    centerX: fitTarget.x + fitTarget.width / 2, centerY: fitTarget.y + fitTarget.height / 2,
+    viewWidth: canvasWidth / zoom, viewHeight: canvasHeight / zoom, content: panBounds
   });
-  return {zoom, centerX: centre.x, centerY: centre.y, minZoom: zoom};
+  return {zoom, centerX: centre.x, centerY: centre.y, minZoom: Math.min(zoom, roomFit)};
 }

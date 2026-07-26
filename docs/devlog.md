@@ -2,6 +2,18 @@
 
 每筆紀錄包含版本、目標、完成內容、驗證、已知限制與下一步。歷史版本若 repository 沒有完整日期或測試輸出，會明確標示為回溯摘要，不補造證據。
 
+## 2026-07-26｜ARCH-0573-ORTHOGONAL-FULL-BLEED-AND-CORE-ZONING
+
+- 版本／Build：**V0.57.3-alpha｜正交滿版營業區原型版** / **0573a**（由 0572a 升版；存檔 key `catCafePhaserV0540`、schema 5401、migration 5401 皆不變）
+- iPhone 再驗收回饋：V0.57.2 比例＋背牆已改善占比，但仍「滿版感不足、上下留白」。根因：首屏 framing 仍以**整個房間**（含外圈 x0/x9 與整面高牆）contain，寬受限下高度必留白。目標：首屏改「核心營業區滿版」＋把分區升級為正式 metadata；不重畫家具、不做營運/角色系統、不改存檔。
+- 取景（core/room 分離）：新增 roomBounds（整房＝地板＋整面背牆＋外圈，作 pan/zoom-out）與 coreGameplayBounds（首屏取景＝遊戲欄 x1–8＋短牆條 coreTopStrip 140）。`camera-framing.computeInitialFraming` 改收 `core`(fit)＋`room`(clamp/minZoom)，保留單一 `content` 舊路徑；`CameraController` 以 `getCoreBounds`(fit)＋`getRoomBounds`(pan/zoom-out) 取代單一 content，minZoom＝整房 fit。結果（safe viewport＝canvas−78）：核心縱向占 **96%/95%/93%**（390/393/430），左右每側裁切 ~8%（皆外圈欄，關鍵分區 0 裁切）；zoom-out 可見整房、0 裁切。**未改 cell 尺寸**（以取景達標，非把 120 硬拉大）。
+- 兩格門：`ORTHOGONAL_ROOM_RENDER` 改為 `doorHeight=130`/`coreTopStrip=140`/`door` 顏色（移除舊角落單格 `entrance`）；`drawRoomOrtho` 由 `ortho-room-zones.visualDoorBounds` 畫 **x7–8 兩格**下牆門（x9 留牆、門不貼邊、落在 core 條內首屏完整可見）＋`customerEntryPoint(8,0)` 地墊。**logical 存檔入口 (8,7)/(9,7) 不變。**
+- Zone metadata：新增 `assets/js/config/ortho-room-zones.js`（純格矩形＋純 helper：visualDoorBounds/customerEntryPoint/customerEntryStaging/staffWorkZone/serviceCounterLine/customerServiceZone/seatingZone/catZone/mainAisle/coreGameplayBounds；無 world pixel/Phaser/DOM/actor 身份、可 Node 測試；**非 StationRegistry、非 CustomerFlowSystem、無邏輯**）。三層服務：A 背牆設備帶＋B 員工工作區(後、連續)＋C 顧客服務區(前)，中隔櫃檯。
+- Demo：`ortho-demo-layout.js` 依 zones 重排 **18 件**（設備 y0／櫃檯 y2／植栽 y3／兩桌組 y4–5／貓咪 y6–7；主走道 x7–8 全清），`ORTHO_DEMO_ENTRANCE` 取自 `customerEntryPoint`；display-only、不入存檔。Node 驗證：18 件合法無重疊、入口→服務/座位/貓咪可達、**主走道 12/12 全通**、顧客動線不穿員工工作區、員工工作區內部連續(8 格)。
+- 修改檔案：新增 `ortho-room-zones.js`＋`tests/ortho-room-zones.test.js`；改 `OrthogonalProjection.js`/`camera-framing.js`/`CameraController.js`/`CafeScene.js`/`ortho-demo-layout.js`；更新 `ortho-demo-layout`/`camera-framing`/`ortho-projection`/`browser-smoke` 測試（browser-smoke 由「整房 fit＝minZoom/整寬可見」改為「核心滿版可見/外圈裁切/可 zoom-out 至整房」）。版本機械升版 0572a→0573a＋`check.js`（版本/Build/obsolete `?v=0572a`/protected hash 更新 OrthogonalProjection/camera-framing/GridSystem/flat-presets/viewport-metrics＋新增 ortho-room-zones／required＋test／`.gitattributes` 納入 root 與 ZIP root）；docs decisions(DEC-020)/current-state/roadmap/handoff/README ＋ V0573 三份 ＋ evidence/v0573。`SpatialGrid`/`room-config`/`furniture-config`/`projection-mode`/`scene-viewport` hash 未變。
+- 驗證：`check:deploy` 通過（0573a、55 modules）；`check:dev` 通過（**本機真實 Chrome** browser smoke，含 ortho 核心滿版/外圈裁切/可 zoom-out 整房/demo boot/invalid 回退）；`ortho-room-zones`/`ortho-demo-layout`(18)/`camera-framing`(96-93% fill、8% crop)/`ortho-projection`/`build-consistency`/`grid-projection-compat`(iso/Flat golden 未改) 皆通過；15 張 real-browser 證據＋before/after 零 page error。
+- 已知限制／未完成：家具仍 Placeholder（待 ART-0574）；三層服務僅空間 metadata、無行為邏輯（待 ARCH-0574-STATION-REGISTRY）；桌面左右有邊距（手機優先）；手機實機再驗收 pending；未 commit/push/部署；本環境無 `.git`。
+
 ## 2026-07-25｜ARCH-0572-ORTHOGONAL-PORTRAIT-DENSITY-AND-ROOM-ZONING
 
 - 版本／Build：**V0.57.2-alpha｜正交直立空間調整版** / **0572a**（由 V0.57.1-alpha / 0571a 升版；存檔 key `catCafePhaserV0540`、schema 5401、migration 5401 皆不變）

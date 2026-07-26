@@ -1,6 +1,6 @@
 {
   "name": "cat-cafe-phaser",
-  "version": "0.57.2-alpha",
+  "version": "0.57.3-alpha",
   "private": true,
   "type": "module",
   "scripts": {
