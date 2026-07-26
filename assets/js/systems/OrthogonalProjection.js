@@ -30,24 +30,32 @@ export const ORTHOGONAL_PROJECTION_PARAMS = Object.freeze({
   axisY: Object.freeze({x: 0, y: 120})    // +1 gridY -> down 120px, no horizontal drift
 });
 
-// Render-only framing metadata for CafeScene.drawRoomOrtho. `wallHeight` is the full back
-// wall standing above the floor (equipment backdrop + entry door). ARCH-0573 separates two
-// framing rectangles: the whole ROOM (floor + full wall, used for the Camera pan/zoom-out
-// range) versus the first-screen CORE (gameplay columns + only a `coreTopStrip` of wall,
-// used for the full-bleed initial fit). `doorHeight` is a shorter door that sits on the
-// lower wall so it fits inside the core strip; the door CELLS come from ortho-room-zones
-// (`visualDoorBounds` = 2 cells at x7-8, entry mat at `customerEntryPoint`) — a
-// Demo/prototype visual + route only, the logical save entrance in room-config is unchanged.
+// Render-only framing metadata for CafeScene.drawRoomOrtho. `wallHeight` is the back wall
+// standing above the floor (a service backdrop + entry door). ARCH-0573 separates two framing
+// rectangles: the whole ROOM (floor + full wall, used for the Camera pan/zoom-out range) versus
+// the first-screen CORE (gameplay columns + only a `coreTopStrip` of wall). ARCH-0574 SHORTENS
+// the wall so the top reads as a tidy service backdrop rather than a big empty band, and adds
+// `zoneFloor` tints so the business areas (counter / work side / service front / seating / cats
+// / aisle) read at a glance. `doorHeight` is a shorter door that sits on the lower wall so it fits inside
+// the core strip; the door CELLS come from ortho-room-zones (`visualDoorBounds` = 2 cells at
+// x7-8, mat at `customerEntryPoint`) — a Demo/prototype visual + route only, the logical save
+// entrance in room-config is unchanged.
 export const ORTHOGONAL_ROOM_RENDER = Object.freeze({
-  wallHeight: 200,       // full back wall (whole-room framing + pan range)
-  doorHeight: 130,       // door height on the lower wall (fits inside coreTopStrip)
-  coreTopStrip: 140,     // wall strip above the floor kept in the full-bleed core framing
+  wallHeight: 155,       // back wall (whole-room framing + pan range) — shortened in ARCH-0574
+  doorHeight: 112,       // door height on the lower wall (fits inside coreTopStrip)
+  coreTopStrip: 118,     // wall strip above the floor kept in the first-screen core framing
   topWallLineWidth: 6,
   floorOutlineWidth: 4,
   sideEdgeLineWidth: 4,
   bottomPad: 24,
   door: Object.freeze({fill: 0x6b4636, frame: 0x8f4f49, matFill: 0x9f765a}),
-  decoration: Object.freeze({windowFx: 0.2, boardFx: 0.42, heightFactor: 0.4, windowScale: 0.8, boardScale: 0.78})
+  decoration: Object.freeze({windowFx: 0.22, boardFx: 0.5, heightFactor: 0.36, windowScale: 0.78, boardScale: 0.76}),
+  // Per-zone floor tints (warm, cohesive; distinct enough to read the zoning). Keyed by
+  // ortho-room-zones.zoneAt(); each cell also gets a subtle 2-tone by parity for texture.
+  zoneFloor: Object.freeze({
+    work: 0x9a7d61, counter: 0xb08c66, service: 0xe7d4b3, seating: 0xd8bd93,
+    cat: 0xe0c1b1, aisle: 0xd6c4a8, outer: 0x7f6549
+  })
 });
 
 export class OrthogonalProjection {

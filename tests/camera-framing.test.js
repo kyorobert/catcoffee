@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {deriveOverlayInsets, computeSafeViewport} from '../assets/js/core/scene-viewport.js?v=0573a';
+import {deriveOverlayInsets, computeSafeViewport} from '../assets/js/core/scene-viewport.js?v=0574a';
 import {computeFitZoom, clampCenterToContent, computeInitialFraming, ORTHO_FRAMING}
-  from '../assets/js/core/camera-framing.js?v=0573a';
+  from '../assets/js/core/camera-framing.js?v=0574a';
 
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
-// The orthogonal room content used at runtime (floor + full back wall), world px (ARCH-0572).
-const content = {x: 340, y: -120, width: 880, height: 1184};
+// The orthogonal room content used at runtime (floor + back wall), world px (ARCH-0574 wall 155).
+const content = {x: 340, y: -75, width: 880, height: 1139};
 
 // --- A. Safe viewport: overlay insets + clamped usable rect (Node-testable, no DOM) ---
 const canvas = {left: 0, top: 86, right: 390, bottom: 782}; // 390x696 canvas below the HUD
@@ -76,11 +76,11 @@ assert.deepEqual(clampCenterToContent({centerX: 9999, centerY: -9999, viewWidth:
   assert.deepEqual(inside, {x: 780, y: 496}, 'interior centre unchanged');
 }
 
-// --- D. Core full-bleed vs whole-room pan range (ARCH-0573) ---
-// room = floor + full back wall + outer x0/x9 margins; core = gameplay columns + short wall
-// strip (projected values from the 10x8 room at cellWidth 88 / cellHeight 120).
-const room = {x: 340, y: -120, width: 880, height: 1184};
-const core = {x: 428, y: -60, width: 704, height: 1124};
+// --- D. Core full-bleed vs whole-room pan range (ARCH-0573, wall shortened in ARCH-0574) ---
+// room = floor + back wall (155) + outer x0/x9 margins; core = gameplay columns x1-8 + a short
+// wall strip (118). Projected values from the 10x8 room at cellWidth 88 / cellHeight 120.
+const room = {x: 340, y: -75, width: 880, height: 1139};
+const core = {x: 428, y: -38, width: 704, height: 1102};
 for (const [cw, ch] of [[390, 696], [393, 704], [430, 784]]) {
   const s = computeSafeViewport({canvasWidth: cw, canvasHeight: ch, insets: {bottom: 78}});
   const f = computeInitialFraming({core, room, safe: s, canvasWidth: cw, canvasHeight: ch, maxZoom: 1.65, policy: {}});

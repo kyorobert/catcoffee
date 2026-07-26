@@ -1,7 +1,7 @@
 export const APP_VERSION =
-  'V0.57.3-alpha｜正交滿版營業區原型版';
+  'V0.57.4-alpha｜正交營業區聚焦分區版';
 
-export const BUILD_ID = '0573a';
+export const BUILD_ID = '0574a';
 
 // This key is part of the public save contract. Never change it for cache recovery.
 export const SAVE_KEY = 'catCafePhaserV0540';

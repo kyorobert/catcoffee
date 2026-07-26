@@ -1,5 +1,5 @@
-import {DepthSystem} from '../systems/DepthSystem.js?v=0573a';
-import {catAnimationKey, resolveCatTextureKey} from '../systems/CatAnimationSystem.js?v=0573a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0574a';
+import {catAnimationKey, resolveCatTextureKey} from '../systems/CatAnimationSystem.js?v=0574a';
 
 const LOOPING_STATES = new Set(['idle', 'walk', 'sit', 'sleep']);
 

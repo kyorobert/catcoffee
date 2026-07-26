@@ -19,24 +19,43 @@ export const ORTHO_ROOM_ZONES = Object.freeze({
   customerEntryPoint: Object.freeze({x: 8, y: 0}),             // single logical entry cell
   customerEntryStaging: Object.freeze({x: 8, y: 1}),           // where a customer stands after entering
 
-  // --- service (three layers): equipment(y0)+staff aisle(y1) BEHIND the counter(y2);
-  //     customers order/queue in FRONT at y3. Staff never share the customer side. ---
+  // --- functional bands occupy the LEFT/CENTRE columns x1-6; the right columns x7-8 are the
+  //     aisle. ARCH-0574 makes the bands a clean, non-overlapping partition of x1-6 (one zone
+  //     per cell) so each area reads as a distinct floor region and the demo groups tightly. ---
+  // service (three layers): equipment(y0)+staff aisle(y1) BEHIND the counter(y2); customers
+  // order/queue in FRONT at y3. Staff never share the customer side.
   staffWorkZone: Object.freeze({x: 1, y: 0, w: 6, h: 2}),      // continuous walk-behind for staff
   serviceCounterLine: Object.freeze({x: 1, y: 2, w: 6, h: 1}), // the counter bar (divides staff/customer)
-  customerServiceZone: Object.freeze({x: 1, y: 3, w: 7, h: 1}),// order / cashier / pickup / queue frontage
+  customerServiceZone: Object.freeze({x: 1, y: 3, w: 6, h: 1}),// order / cashier / pickup / queue frontage
 
-  // --- seating + cats ---
-  seatingZone: Object.freeze({x: 1, y: 4, w: 8, h: 2}),        // main table groups (y4-5)
-  catZone: Object.freeze({x: 1, y: 6, w: 4, h: 2}),            // cats front-left (y6-7)
+  // seating + cats: grouped table sets, then a concentrated cat corner.
+  seatingZone: Object.freeze({x: 1, y: 4, w: 6, h: 2}),        // grouped table sets (y4-5)
+  catZone: Object.freeze({x: 1, y: 6, w: 6, h: 2}),            // concentrated cat corner (y6-7)
 
   // --- circulation: the right-side vertical spine (door -> service/seating) is >= 2 cells wide ---
   mainAisle: Object.freeze({x: 7, y: 1, w: 2, h: 6}),
 
-  // --- first-screen full-bleed target: gameplay columns/rows only. Excludes the outer x0 & x9
-  //     margins (decorative / wall) and the tall decorative upper wall (a door strip is added by
-  //     the projection helper). It contains the door, counter, seating, aisle and cat zones. ---
+  // --- first-screen target: gameplay columns/rows only. Excludes the outer x0 & x9 margins
+  //     (decorative / wall). It contains the door, counter, seating, aisle and cat zones so the
+  //     first screen focuses on the effective business area (a short wall strip is added by the
+  //     projection helper for the door). ---
   coreGameplayBounds: Object.freeze({x: 1, y: 0, w: 8, h: 8})
 });
+
+// Zone keys for a cell, used for floor tinting so the business areas read at a glance.
+// The x1-6 bands partition cleanly (one zone per cell); x7-8 is the aisle; the rest is outer.
+// ('work' = the walk-behind band behind the counter — kept identity-neutral.)
+export const ORTHO_ZONE_KEYS = Object.freeze(['work', 'counter', 'service', 'seating', 'cat', 'aisle', 'outer']);
+export function zoneAt(x, y, zones = ORTHO_ROOM_ZONES) {
+  if (x < 1 || x > 8 || y < 0 || y > 7) return 'outer';
+  if (x >= 7) return 'aisle';                                  // x7-8: the right-side spine
+  if (rectContainsCell(zones.staffWorkZone, x, y)) return 'work';
+  if (rectContainsCell(zones.serviceCounterLine, x, y)) return 'counter';
+  if (rectContainsCell(zones.customerServiceZone, x, y)) return 'service';
+  if (rectContainsCell(zones.seatingZone, x, y)) return 'seating';
+  if (rectContainsCell(zones.catZone, x, y)) return 'cat';
+  return 'outer';
+}
 
 // --- pure helpers ---
 export function zoneCells(rect) {

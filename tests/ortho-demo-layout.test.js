@@ -2,13 +2,13 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0573a';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0573a';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0573a';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0574a';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0574a';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0574a';
 import {ORTHO_DEMO_LAYOUT, ORTHO_DEMO_ENTRANCE, buildOrthoDemoItems, isDemoLayoutRequested}
-  from '../assets/js/config/ortho-demo-layout.js?v=0573a';
+  from '../assets/js/config/ortho-demo-layout.js?v=0574a';
 import {ORTHO_ROOM_ZONES as Z, rectContainsCell, zoneCells}
-  from '../assets/js/config/ortho-room-zones.js?v=0573a';
+  from '../assets/js/config/ortho-room-zones.js?v=0574a';
 
 const {cols, rows} = ROOM_CONFIG.floor;
 
@@ -22,8 +22,8 @@ for (const [s, e] of [
 // --- fixture shape: frozen data, deterministic display-only ids, existing furniture ---
 assert.ok(Object.isFrozen(ORTHO_DEMO_LAYOUT), 'ORTHO_DEMO_LAYOUT is frozen');
 const items = buildOrthoDemoItems();
-assert.ok(items.length >= 14 && items.length <= 18, 'demo is a compact 14-18 item cafe (ARCH-0573)');
-assert.ok(items.length > 17, 'demo is slightly denser than V0572 (17 items)');
+assert.ok(items.length >= 20 && items.length <= 26, 'demo is a dense but readable cafe (ARCH-0574, ~20-26 items)');
+assert.ok(items.length > 18, 'demo is denser than V0573 (18 items)');
 assert.equal(items.length, ORTHO_DEMO_LAYOUT.length);
 const ids = new Set(items.map(i => i.id));
 assert.equal(ids.size, items.length, 'demo item ids are unique');
@@ -39,16 +39,24 @@ assert.notEqual(again[0], items[0]);
 assert.deepStrictEqual(again, items);
 
 // --- zone membership: each item's origin cell sits in its intended zone ---
-const equipment = ['coffeeMachine', 'oven', 'dessert', 'smartOrder', 'washStation'];
+const equipment = ['coffeeMachine', 'oven', 'dessert', 'washStation', 'bookshelf'];
 const counters = ['counter', 'console'];
-const cats = ['catBed', 'doubleCatTree', 'scratchPost', 'catTent'];
+const cats = ['catBed', 'doubleCatTree', 'scratchPost', 'catTent', 'catCastle'];
 for (const it of items) {
   if (equipment.includes(it.type)) assert.ok(rectContainsCell(Z.staffWorkZone, it.x, it.y), `${it.type} in staffWorkZone`);
   if (counters.includes(it.type)) assert.ok(rectContainsCell(Z.serviceCounterLine, it.x, it.y), `${it.type} on serviceCounterLine`);
   if (cats.includes(it.type)) assert.ok(rectContainsCell(Z.catZone, it.x, it.y), `${it.type} in catZone`);
+  if (it.type === 'smartOrder') assert.ok(rectContainsCell(Z.customerServiceZone, it.x, it.y), 'the order kiosk faces the customer service zone');
 }
-assert.ok(items.some(i => counters.includes(i.type)), 'a counter bar exists (serviceCounterLine)');
-assert.ok(items.filter(i => cats.includes(i.type)).length >= 2, 'a front cat cluster exists');
+// A CONTINUOUS service band: the counter cells and the equipment cells each cover x1-6 with no gap.
+const gridForBand = new GridSystem(ROOM_CONFIG, FURNITURE_CONFIG, {mode: 'ortho'});
+const cellsAt = row => new Set(items.flatMap(it => gridForBand.getFootprintCells(it.type, it.x, it.y, it.r)).filter(c => c.y === row).map(c => c.x));
+const counterXs = cellsAt(2), equipmentXs = cellsAt(0);
+for (let x = 1; x <= 6; x++) {
+  assert.ok(equipmentXs.has(x), `continuous equipment band covers x${x} (no gap)`);
+  assert.ok(counterXs.has(x), `continuous counter bar covers x${x} (no gap)`);
+}
+assert.ok(items.filter(i => cats.includes(i.type)).length >= 2, 'a concentrated cat cluster exists');
 // No furniture inside the main aisle spine (kept clear for circulation).
 for (const it of items) {
   const cells = new GridSystem(ROOM_CONFIG, FURNITURE_CONFIG, {mode: 'ortho'}).getFootprintCells(it.type, it.x, it.y, it.r);
@@ -90,7 +98,7 @@ assert.ok(walkable(Z.customerEntryStaging.x, Z.customerEntryStaging.y), 'entry s
 const reach = reachFrom(Z.customerEntryStaging.x, Z.customerEntryStaging.y);
 for (const k of ['4,3', '5,3', '7,3']) assert.ok(reach.has(k), `service frontage reachable from entry: ${k}`);
 for (const k of ['3,4', '3,5', '4,5']) assert.ok(reach.has(k), `seating approach reachable from entry: ${k}`);
-for (const k of ['4,6', '4,7']) assert.ok(reach.has(k), `cat area reachable from entry: ${k}`);
+for (const k of ['4,6', '5,6']) assert.ok(reach.has(k), `cat area reachable from entry: ${k}`);
 assert.ok(reach.size >= 40, 'a large connected walkable area (aisles not a one-cell maze)');
 
 // Main aisle (door -> service spine) is fully walkable and ~2 cells wide.

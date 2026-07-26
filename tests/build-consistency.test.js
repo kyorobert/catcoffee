@@ -1,16 +1,16 @@
 import assert from 'node:assert/strict';
 import {readFileSync, readdirSync, statSync} from 'node:fs';
 import {join} from 'node:path';
-import {APP_VERSION, BUILD_ID, SAVE_KEY, BuildMismatchError, assertBuildConsistency} from '../assets/js/config/build-info.js?v=0573a';
+import {APP_VERSION, BUILD_ID, SAVE_KEY, BuildMismatchError, assertBuildConsistency} from '../assets/js/config/build-info.js?v=0574a';
 
 const html = readFileSync('index.html', 'utf8');
-assert.equal(BUILD_ID, '0573a');
+assert.equal(BUILD_ID, '0574a');
 assert.equal(SAVE_KEY, 'catCafePhaserV0540');
-assert.equal(APP_VERSION, 'V0.57.3-alpha｜正交滿版營業區原型版');
-assert(html.includes('data-build-id="0573a"'));
-assert(html.includes("window.__CAT_CAFE_HTML_BUILD_ID__ = '0573a'"));
-assert(html.includes('./assets/vendor/phaser-3.90.0.min.js?v=0573a'));
-assert(html.includes('./assets/js/main.js?v=0573a'));
+assert.equal(APP_VERSION, 'V0.57.4-alpha｜正交營業區聚焦分區版');
+assert(html.includes('data-build-id="0574a"'));
+assert(html.includes("window.__CAT_CAFE_HTML_BUILD_ID__ = '0574a'"));
+assert(html.includes('./assets/vendor/phaser-3.90.0.min.js?v=0574a'));
+assert(html.includes('./assets/js/main.js?v=0574a'));
 assert(!/https?:\/\//i.test(html), 'runtime HTML must not use a CDN');
 assert(!/file:\/\//i.test(html));
 assert(!html.includes('data-boot-clear'));
@@ -28,16 +28,16 @@ for (const file of runtimeFiles) {
   assert(!source.includes('?v=0552a'), `${file} contains obsolete module query v=0552a`);
   if (file.endsWith('.js')) {
     for (const match of source.matchAll(/(?:from\s*|import\s*)["'](\.{1,2}\/[^"']+\.js)(\?v=[^"']+)?["']/g)) {
-      assert.equal(match[2], '?v=0573a', `${file} has an unversioned or inconsistent import: ${match[0]}`);
+      assert.equal(match[2], '?v=0574a', `${file} has an unversioned or inconsistent import: ${match[0]}`);
     }
   }
 }
 
-assert.equal(assertBuildConsistency('0573a'), true);
+assert.equal(assertBuildConsistency('0574a'), true);
 assert.throws(() => assertBuildConsistency('0550-old'), error => {
   assert(error instanceof BuildMismatchError);
   assert.equal(error.htmlBuildId, '0550-old');
-  assert.equal(error.jsBuildId, '0573a');
+  assert.equal(error.jsBuildId, '0574a');
   assert(error.message.includes('介面版本不一致'));
   return true;
 });
@@ -46,6 +46,6 @@ const main = readFileSync('assets/js/main.js', 'utf8');
 assert(main.indexOf('assertBuildConsistency') < main.indexOf('resolveDomContract(document)'));
 assert(main.indexOf('resolveDomContract(document)') < main.indexOf('new SaveAdapter'));
 assert(main.indexOf('new SaveAdapter') < main.indexOf('new Phaser.Game'));
-assert(readFileSync('assets/js/config/cat-config.js', 'utf8').includes("CAT_ASSET_VERSION = '0573a'"));
+assert(readFileSync('assets/js/config/cat-config.js', 'utf8').includes("CAT_ASSET_VERSION = '0574a'"));
 
 console.log(`Build consistency tests passed: ${APP_VERSION}, Build ${BUILD_ID}.`);

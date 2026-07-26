@@ -1,5 +1,5 @@
-import {getFurnitureVisualDefinition} from '../config/furniture-visual-config.js?v=0573a';
-import {resolveFurnitureDirection,rotationToDirection} from './furniture-direction.js?v=0573a';
+import {getFurnitureVisualDefinition} from '../config/furniture-visual-config.js?v=0574a';
+import {resolveFurnitureDirection,rotationToDirection} from './furniture-direction.js?v=0574a';
 
 // Pure display description shared by the scene entity and its drag ghost.
 // It contains only JSON-like values and never touches a texture manager or sprite.

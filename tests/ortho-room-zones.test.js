@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {ORTHO_ROOM_ZONES as Z, zoneCells, rectContainsCell, rectContainsRect, rectsOverlap, rectInsideGrid}
-  from '../assets/js/config/ortho-room-zones.js?v=0573a';
+import {ORTHO_ROOM_ZONES as Z, zoneCells, rectContainsCell, rectContainsRect, rectsOverlap, rectInsideGrid,
+  zoneAt, ORTHO_ZONE_KEYS}
+  from '../assets/js/config/ortho-room-zones.js?v=0574a';
 
 // --- pure helpers behave ---
 assert.deepEqual(zoneCells({x: 2, y: 3, w: 2, h: 2}), [
@@ -69,4 +70,35 @@ for (const banned of ['Phaser', 'document', 'window', 'localStorage', 'SaveAdapt
 // staffWorkZone / customerServiceZone / customerEntryPoint are legitimate spatial semantics,
 // not per-actor logic. This module holds no cashier / serving / AI behaviour.
 
-console.log('Ortho room zones: 2-cell door at x7-8 (x9 wall), single entry x8 + staging, three non-overlapping service layers, >=2-cell main aisle, core contains all key zones yet crops the outer margins; pure Node-testable grid data.');
+// --- zoneAt (ARCH-0574): the x1-6 bands partition cleanly, x7-8 is the aisle, x0/x9 outer ---
+const {cols, rows} = Z.grid;
+const counts = {};
+for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+  const z = zoneAt(x, y);
+  assert.ok(ORTHO_ZONE_KEYS.includes(z), `zoneAt(${x},${y}) → known key, got ${z}`);
+  counts[z] = (counts[z] || 0) + 1;
+}
+// every CORE cell (x1-8, y0-7) is a non-outer zone; the aisle owns x7-8; x0/x9 are outer.
+for (let y = 0; y < rows; y++) {
+  assert.equal(zoneAt(0, y), 'outer', `x0 is outer (y${y})`);
+  assert.equal(zoneAt(9, y), 'outer', `x9 is outer (y${y})`);
+  for (let x = 7; x <= 8; x++) assert.equal(zoneAt(x, y), 'aisle', `x${x} is aisle (y${y})`);
+  for (let x = 1; x <= 6; x++) assert.notEqual(zoneAt(x, y), 'outer', `core band cell (${x},${y}) is a real zone`);
+}
+// the row bands map to the intended functions on x1-6.
+for (let x = 1; x <= 6; x++) {
+  assert.equal(zoneAt(x, 0), 'work'); assert.equal(zoneAt(x, 1), 'work');
+  assert.equal(zoneAt(x, 2), 'counter');
+  assert.equal(zoneAt(x, 3), 'service');
+  assert.equal(zoneAt(x, 4), 'seating'); assert.equal(zoneAt(x, 5), 'seating');
+  assert.equal(zoneAt(x, 6), 'cat'); assert.equal(zoneAt(x, 7), 'cat');
+}
+// zoneAt agrees with the underlying rects on x1-6 (single source of truth).
+for (const [key, rectName] of [['work', 'staffWorkZone'], ['counter', 'serviceCounterLine'],
+  ['service', 'customerServiceZone'], ['seating', 'seatingZone'], ['cat', 'catZone']]) {
+  for (const c of zoneCells(Z[rectName])) if (c.x <= 6) assert.equal(zoneAt(c.x, c.y), key, `${rectName} cell → ${key}`);
+}
+assert.deepEqual(counts, {work: 12, counter: 6, service: 6, seating: 12, cat: 12, aisle: 16, outer: 16},
+  'clean partition: 64 core cells across work/counter/service/seating/cat/aisle, 16 outer');
+
+console.log('Ortho room zones: 2-cell door at x7-8 (x9 wall), single entry x8 + staging, three non-overlapping service layers, >=2-cell main aisle, core contains all key zones; zoneAt partitions the x1-6 bands + x7-8 aisle cleanly (one zone per cell); pure Node-testable grid data.');

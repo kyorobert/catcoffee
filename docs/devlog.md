@@ -2,6 +2,19 @@
 
 每筆紀錄包含版本、目標、完成內容、驗證、已知限制與下一步。歷史版本若 repository 沒有完整日期或測試輸出，會明確標示為回溯摘要，不補造證據。
 
+## 2026-07-26｜ARCH-0574-ORTHOGONAL-PORTRAIT-COMPOSITION-AND-ZONING-REFINE
+
+- 版本／Build：**V0.57.4-alpha｜正交營業區聚焦分區版** / **0574a**（由 0573a 升版；存檔 key `catCafePhaserV0540`、schema 5401、migration 5401 皆不變）
+- iPhone 回饋：V0573 核心滿版但「周遭留白仍太多、看不出分區」（連續服務區/員工側vs顧客側/座位成組/貓咪集中皆看不出）。目標：首屏聚焦有效營業區、縮牆、分區一眼可辨。**本任務為構圖與分區精修，不是家具重畫（ART-0574）。**
+- 根因（誠實）：門在 x7-8，首屏 core 必含 x8 → fit zoom 鎖在 ~0.526，無法在不裁門下放大單件家具。故不靠放大縮放，改三管齊下：縮牆＋加密 Demo＋分區底色。
+- A 縮牆聚焦：`ORTHOGONAL_ROOM_RENDER` wallHeight 200→155、coreTopStrip 140→118、doorHeight 130→112。上方空牆變薄、門周邊不再大片空。首屏仍 core(x1-8) 滿版：safe 縱向 94%/93%/91%（較 V0573 96/95/93% 略降，換更少空牆），crop ~8%，可 zoom-out 看整房。
+- C 分區底色（可辨關鍵）：新增 `ortho-room-zones.zoneAt(x,y)`（純格邏輯）＋`ORTHOGONAL_ROOM_RENDER.zoneFloor`（暖色）；`drawRoomOrtho` 依 zoneAt 為每格上分區底色（`shadeColor` 逐格二階明暗）。zone key `staff`→`work`（身份中性，維持投影 purity）。分區收斂為乾淨分割：`customerServiceZone`/`seatingZone`/`catZone` 收為 x1-6，與 x7-8 走道不重疊（zoneAt 核心 64 格：work12/counter6/service6/seating12/cat12/aisle16）。
+- C Demo 重排（23 件，密度 28%→48%）：連續設備帶(coffeeMachine/oven/washStation/dessert/bookshelf 覆蓋 x1-6)＋連續櫃檯(counter/console/counter 覆蓋 x1-6)＋顧客前廳(smartOrder 左角)＋兩組座位(x1-2、x4-5 各在 rugStripe 上)＋集中貓咪角(doubleCatTree/catCastle/scratchPost/pawRug/creamSofa)。保留 y1 後走道、y3 前廳、x3/x6 直走道、x7-8 主走道；動線 入口→點餐→座位 不穿工作核心。Node 驗證全部合法、可達、工作側連續、主走道 12/12、設備帶+櫃檯各無縫覆蓋 x1-6。
+- 修改檔案：改 `ortho-room-zones.js`/`OrthogonalProjection.js`/`CafeScene.js`(drawRoomOrtho+shadeColor)/`ortho-demo-layout.js`；更新 `ortho-room-zones`(zoneAt)/`ortho-demo-layout`(23件)/`camera-framing`(新wall/strip)/`ortho-projection`(身份中性)/`build-consistency` 測試。版本機械升版 0573a→0574a＋`check.js`（版本/Build/obsolete `?v=0573a`/protected hash 更新 OrthogonalProjection/ortho-room-zones/GridSystem/flat-presets/viewport-metrics）；docs decisions(DEC-021)/current-state/roadmap/handoff/README ＋ V0574 三份 ＋ evidence/v0574。`camera-framing`/`scene-viewport`/`SpatialGrid`/`room-config`/`furniture-config`/`projection-mode` hash 未變。
+- 驗證：`check:deploy` 通過（0574a、55 modules）；`check:dev` 通過（**本機真實 Chrome** browser smoke）；`ortho-room-zones`/`ortho-demo-layout`(23)/`camera-framing`(94-91% fill)/`ortho-projection`/`grid-projection-compat`(iso/Flat golden 未改) 皆通過；15 張 real-browser 證據＋before/after 零 page error。
+- 誠實判斷：#1門保留、#3連續服務區、#4工作/顧客側、#5座位成組、#6貓咪集中、#2留白（縮牆+密度+底色）皆明顯改善，應可通過分區辨識目標；單件家具尺寸與 V0573 相同（幾何鎖定，非本版放大）；分區底色在小螢幕差異偏微妙可再調。最終以 iPhone 實機為準。
+- 已知限制／未完成：家具仍 Placeholder（ART-0574）；分區僅空間/視覺、無行為（ARCH-0575-STATION-REGISTRY）；桌面左右有邊距；手機實機驗收 pending；未 commit/push/部署；本環境無 `.git`。
+
 ## 2026-07-26｜ARCH-0573-ORTHOGONAL-FULL-BLEED-AND-CORE-ZONING
 
 - 版本／Build：**V0.57.3-alpha｜正交滿版營業區原型版** / **0573a**（由 0572a 升版；存檔 key `catCafePhaserV0540`、schema 5401、migration 5401 皆不變）

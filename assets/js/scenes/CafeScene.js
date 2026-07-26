@@ -1,31 +1,31 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0573a';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0573a';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0573a';
-import {GridSystem} from '../systems/GridSystem.js?v=0573a';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0573a';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0573a';
-import {CameraController} from '../systems/CameraController.js?v=0573a';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0573a';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0573a';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0573a';
-import {CatEntity} from '../entities/CatEntity.js?v=0573a';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0573a';
-import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0573a';
-import {AmbientEffects} from '../entities/AmbientEffects.js?v=0573a';
-import {INPUT_MODE} from '../core/input-state.js?v=0573a';
-import {InputModeController} from '../phaser/InputModeController.js?v=0573a';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0573a';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0573a';
-import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0573a';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0573a';
-import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0573a';
-import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0573a';
-import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0573a';
-import {ORTHOGONAL_ROOM_RENDER} from '../systems/OrthogonalProjection.js?v=0573a';
-import {ORTHO_ROOM_ZONES} from '../config/ortho-room-zones.js?v=0573a';
-import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0573a';
-import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0573a';
-import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0573a';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0574a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0574a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0574a';
+import {GridSystem} from '../systems/GridSystem.js?v=0574a';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0574a';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0574a';
+import {CameraController} from '../systems/CameraController.js?v=0574a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0574a';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0574a';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0574a';
+import {CatEntity} from '../entities/CatEntity.js?v=0574a';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0574a';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0574a';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0574a';
+import {INPUT_MODE} from '../core/input-state.js?v=0574a';
+import {InputModeController} from '../phaser/InputModeController.js?v=0574a';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0574a';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0574a';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0574a';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0574a';
+import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0574a';
+import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0574a';
+import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0574a';
+import {ORTHOGONAL_ROOM_RENDER} from '../systems/OrthogonalProjection.js?v=0574a';
+import {ORTHO_ROOM_ZONES,zoneAt} from '../config/ortho-room-zones.js?v=0574a';
+import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0574a';
+import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0574a';
+import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0574a';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -224,6 +224,12 @@ export class CafeScene extends Phaser.Scene{
   // Framing constants live in ORTHOGONAL_ROOM_RENDER; the palette comes from ROOM_CONFIG.
   // Walls are purely visual (depth -1000) and change no grid/occupancy/pathfinding data.
   // The iso and flat branches above are left untouched.
+  // Lighten (factor>0) or darken (factor<0) a 0xRRGGBB colour by a fraction. Pure helper for
+  // the subtle per-cell zone-floor 2-tone; no engine state.
+  shadeColor(hex,factor){
+    const clamp=c=>Math.max(0,Math.min(255,Math.round(c*(1+factor))));
+    return (clamp((hex>>16)&255)<<16)|(clamp((hex>>8)&255)<<8)|clamp(hex&255);
+  }
   drawRoomOrtho(){
     const graphics=this.add.graphics();
     const {floor,walls,worldWidth,worldHeight}=ROOM_CONFIG;
@@ -249,12 +255,15 @@ export class CafeScene extends Phaser.Scene{
     const doorX=doorLeftCell[0].x+6,doorW=(doorRightCell[1].x-6)-(doorLeftCell[0].x+6),doorTop=floorTop-R.doorHeight;
     graphics.fillStyle(R.door.fill,1).fillRect(doorX,doorTop,doorW,R.doorHeight);
     graphics.lineStyle(5,R.door.frame,1).strokeRect(doorX,doorTop,doorW,R.doorHeight);
-    // Floor cells: axis-aligned rectangles with faint, Placement-aligned grid lines.
+    // Floor cells: axis-aligned rectangles tinted BY ZONE (ARCH-0574) so the business areas
+    // — service backdrop, staff work side, customer frontage, seating, cats and the aisle —
+    // read at a glance; a subtle 2-tone by parity keeps the floor from looking flat.
     for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
       const rect=this.grid.getCellDiamond(x,y);
-      const color=floor.colors[(x+y*3)%floor.colors.length];
+      const base=R.zoneFloor[zoneAt(x,y)]??R.zoneFloor.outer;
+      const color=this.shadeColor(base,((x+y)&1)?-0.06:0.04);
       graphics.fillStyle(color,1).fillPoints(rect,true);
-      graphics.lineStyle(1,floor.lineColor,.28).strokePoints([...rect,rect[0]],false);
+      graphics.lineStyle(1,floor.lineColor,.22).strokePoints([...rect,rect[0]],false);
     }
     // Entry mat on the single logical entry cell (customerEntryPoint), then wall/floor seam,
     // floor outline and side edges.

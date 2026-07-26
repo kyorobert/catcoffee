@@ -1,4 +1,4 @@
-import {deriveOverlayInsets} from '../core/scene-viewport.js?v=0573a';
+import {deriveOverlayInsets} from '../core/scene-viewport.js?v=0574a';
 
 // Centralised DOM adapter that measures which on-canvas overlays cover the game canvas,
 // so the CameraController never queries multiple DOM selectors itself. It reads live

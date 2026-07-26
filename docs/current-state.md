@@ -1,4 +1,4 @@
-# V0.57.3-alpha 專案現況
+# V0.57.4-alpha 專案現況
 
 本文件描述 repository 目前可直接查證的狀態，不代表未來產品承諾。決策以 [decisions.md](./decisions.md) 為準。
 
@@ -6,9 +6,9 @@
 
 | 項目 | 現況 |
 |---|---|
-| 版本 | `V0.57.3-alpha｜正交滿版營業區原型版` |
-| Build ID | `0573a` |
-| package version | `0.57.3-alpha` |
+| 版本 | `V0.57.4-alpha｜正交營業區聚焦分區版` |
+| Build ID | `0574a` |
+| package version | `0.57.4-alpha` |
 | 引擎 | Phaser `3.90.0`，Canvas renderer |
 | 引擎來源 | `assets/vendor/phaser-3.90.0.min.js` |
 | 部署 | GitHub Pages 純靜態相對路徑，不依賴 CDN |
@@ -21,14 +21,16 @@
 - `GridSystem` 為 `SpatialGrid`（投影無關邏輯）＋ `SceneProjection` 的相容 Facade；投影模組有 `IsoProjection`（2:1 等角，**預設／rollback**）、`FlatProjection`（淺斜／淺俯視，**已被產品拒絕，僅保留回歸**）與 **`OrthogonalProjection`（正交平面）**。
 - **`OrthogonalProjection`**：真正軸對齊 `axisX={88,0}`、`axisY={0,120}`（`axisX.y=0`、`axisY.x=0`，無 skew／shear／rotation／perspective），cell 為矩形、origin 由房間 centroid 推導置中；集中於 `ORTHOGONAL_PROJECTION_PARAMS`（`assets/js/systems/OrthogonalProjection.js`）。
 - **URL**：`/`／`?projection=iso`→iso（**預設**）；`?projection=ortho`（別名 `orthogonal`）→正交；`?projection=ortho&demoLayout=1`→正交 + 非存檔 Demo 構圖；可疊 `&artDebug=1`；`?projection=flat`（含 `flatPreset=near-iso/balanced/current`）保留作歷史回歸；非法值回退 iso。
-- **Zone metadata（V0.57.3 新增）**：`assets/js/config/ortho-room-zones.js` 以純格座標矩形描述入口門／入口點／員工工作區／櫃檯帶／顧客服務區／座位／貓咪／主走道／核心取景區。**純資料、可投影、無 world pixel、無 Phaser/DOM、無 actor 身份、可 Node 測試；非 StationRegistry、非 CustomerFlowSystem、無行為邏輯。**
-- **Demo Layout**：`assets/js/config/ortho-demo-layout.js` 純資料 fixture（**18 件**現有家具，依 `ortho-room-zones` 分區），僅 ortho 有效、display-only；**不寫入存檔、不改 `state.items`／inventory／coins、不觸發 save**。
+- **Zone metadata（V0.57.3 新增，V0.57.4 收斂為乾淨分割）**：`assets/js/config/ortho-room-zones.js` 以純格座標矩形描述入口門／入口點／員工工作區／櫃檯帶／顧客服務區／座位／貓咪／主走道／核心取景區；功能帶收斂為 x1-6（與 x7-8 走道不重疊），並提供 `zoneAt(x,y)`／`ORTHO_ZONE_KEYS`（每格單一 zone，供分區底色）。**純資料、可投影、無 world pixel、無 Phaser/DOM、無 actor 身份（zone key 為身份中性的 `work`/`counter`/`service`/`seating`/`cat`/`aisle`/`outer`）、可 Node 測試；非 StationRegistry、非 CustomerFlowSystem、無行為邏輯。**
+- **分區地板底色（V0.57.4 新增）**：`ORTHOGONAL_ROOM_RENDER.zoneFloor` 提供各 zone 暖色底色；`CafeScene.drawRoomOrtho` 依 `zoneAt` 為每格上分區底色（`shadeColor` 逐格二階明暗），使營業區一眼可辨。純視覺、無行為。
+- **Demo Layout**：`assets/js/config/ortho-demo-layout.js` 純資料 fixture（**23 件**現有家具，依 `ortho-room-zones` 分區、連續服務帶＋成組座位＋集中貓咪、地板占用 ~48%），僅 ortho 有效、display-only；**不寫入存檔、不改 `state.items`／inventory／coins、不觸發 save**。
 - **預設仍為 iso**；Orthogonal 尚未成為正式預設，待手機實機再驗收。投影與 demoLayout **不寫入存檔**。家具 `x/y/r`、Occupancy、Placement、Pathfinding、存檔 key／schema 未因投影改變。
 - **Flat A／B／C 已被產品負責人拒絕**（見 [DEC-016 Superseded](./decisions.md)、[DEC-017](./decisions.md)）；正交房間幾何正確，但現有等角家具仍為 Placeholder，**正式家具重作尚未開始**（延後至核心滿版與分區實機通過後，候選 `ART-0574`）。
 - **手機取景演進**：
   - `ARCH-0571`（[DEC-018](./decisions.md)）：新增純模組 `core/scene-viewport.js`＋`core/camera-framing.js`＋DOM adapter `ui/viewport-metrics.js`；`CameraController` 對 ortho 改為「以內容 bounds＋safe viewport 計算 fit＋centerOn＋內容 clamp」。
   - `ARCH-0572`（[DEC-019](./decisions.md)）：正交房間比例 cellWidth 104→88／cellHeight 88→120＋整面背牆，房間占 canvas ~44%→~78%；右上角單格入口門、上方連續櫃檯帶；Demo 17 件。
-  - **`ARCH-0573`（[DEC-020](./decisions.md)，本版）**：首屏由「整房 contain（仍留上下白）」改為「**核心營業區滿版**」。分離 **roomBounds**（整房＝地板＋整面背牆＋外圈，作 Camera pan／zoom-out 範圍）與 **coreGameplayBounds**（首屏取景目標＝遊戲欄 x1–8＋短牆條）。手機核心區縱向占 **safe viewport 96%／95%／93%**（390／393／430），左右每側裁切 ~8%（皆外圈欄，關鍵分區 0 裁切）；zoom-out 下限＝整房 fit（可見整房、無空背景）。入口改為 **x7–8 兩格視覺門**（x9 留牆；`customerEntryPoint=(8,0)`、staging `(8,1)`；**logical 存檔入口 `(8,7)/(9,7)` 不變**）。real-browser before/after 證據 `docs/evidence/v0573/`；見 [V0573 結果](./V0573_ORTHOGONAL_CORE_FULLBLEED_RESULT.md)、[驗收](./V0573_ORTHOGONAL_CORE_FULLBLEED_ACCEPTANCE.md)、[比較 HTML](./V0573_ORTHOGONAL_CORE_FULLBLEED_COMPARISON.html)。手機實機再驗收 pending。
+  - `ARCH-0573`（[DEC-020](./decisions.md)）：首屏由「整房 contain」改為「**核心營業區滿版**」。分離 **roomBounds**（整房＝pan/zoom-out 範圍）與 **coreGameplayBounds**（首屏取景＝x1-8＋短牆條）；核心縱向占 safe viewport 96/95/93%、裁切 ~8%。入口改為 **x7-8 兩格視覺門**（x9 留牆；`customerEntryPoint=(8,0)`、staging `(8,1)`；logical 存檔入口 `(8,7)/(9,7)` 不變）。
+  - **`ARCH-0574`（[DEC-021](./decisions.md)，本版）**：**營業區聚焦與分區辨識**。縮短背牆（wallHeight 200→155、coreTopStrip 140→118、doorHeight 130→112）減少空牆；新增**分區地板底色**（`zoneAt`＋`zoneFloor`）使連續服務區/工作側/顧客側/成組座位/集中貓咪一眼可辨；分區收斂為 x1-6 乾淨分割；Demo 加密重排為 **23 件**（連續設備帶＋連續櫃檯＋兩組座位＋集中貓咪角，占用 ~28%→~48%）。首屏 core 仍滿版（safe 縱向 94/93/91%）、可 zoom-out 看整房。**因門在 x7-8、core 必含 x8，取景寬度受幾何鎖定（單件家具尺寸與 V0573 相同，非本版放大）；未改 cell 尺寸、未重畫家具。** real-browser before/after 證據 `docs/evidence/v0574/`；見 [V0574 結果](./V0574_ORTHOGONAL_COMPOSITION_RESULT.md)、[驗收](./V0574_ORTHOGONAL_COMPOSITION_ACCEPTANCE.md)、[比較 HTML](./V0574_ORTHOGONAL_COMPOSITION_COMPARISON.html)。手機實機再驗收 pending。
 
 ## B. 架構地圖
 
@@ -48,7 +50,7 @@
 | 模組 | 單一責任 |
 |---|---|
 | `BootScene` | 預載家具／貓咪／環境 texture、回報進度、建立缺圖 fallback、啟動 `CafeScene` |
-| `CafeScene` | 組裝 state、systems、entities、controllers 與場景生命週期；ortho 由 `buildOrthoFraming` 提供 core/room bounds、`drawRoomOrtho` 由 zones 畫房間與兩格門 |
+| `CafeScene` | 組裝 state、systems、entities、controllers 與場景生命週期；ortho 由 `buildOrthoFraming` 提供 core/room bounds、`drawRoomOrtho` 由 zones 畫房間、兩格門與**分區地板底色**（`zoneAt`＋`zoneFloor`） |
 | `GridSystem` | Grid ↔ world、cell 矩形、footprint cells／polygon、anchor、placeable mask（投影無關；ortho 為軸對齊矩形） |
 | `OccupancySystem` | `floorDecoration`、`floorObject`、`wallObject`、`character`、`reserved` 分層占用與 walkability snapshot |
 | `PlacementSystem` | 邊界、placeable、入口、牆面與重疊驗證；椅桌關係不作拖曳硬阻擋 |
@@ -97,12 +99,12 @@
 
 ## F. 測試狀態
 
-### 本次任務（ARCH-0573）實際執行
+### 本次任務（ARCH-0574）實際執行
 
-- `node check.js --deploy`：通過（Build `0573a`、35 DOM IDs、13 nested selectors、**55** JavaScript modules）。
-- `node check.js --dev`：通過（含**本機真實 Chrome** browser smoke：ortho 首屏核心滿版可見、外圈裁切、可 zoom-out 至整房、無初始選取/情境列、ortho-demo boot 與 invalid 回退 iso）。
-- 個別：`ortho-room-zones`（新）、`ortho-demo-layout`（18 件、分區、BFS、工作區-顧客分離、工作區連續）、`camera-framing`（core 96/95/93% safe fill、room 8% crop、minZoom=整房 fit）、`ortho-projection`（door/doorHeight/coreTopStrip）、`build-consistency`、`grid-projection-compat`（iso/Flat golden 未改）皆通過。
-- 15 張 real-browser 證據（`docs/evidence/v0573/`）＋before/after 零 page error。
+- `node check.js --deploy`：通過（Build `0574a`、35 DOM IDs、13 nested selectors、**55** JavaScript modules）。
+- `node check.js --dev`：通過（含**本機真實 Chrome** browser smoke：ortho 首屏核心可見、外圈裁切、可 zoom-out 至整房、無初始選取/情境列、ortho-demo boot 與 invalid 回退 iso）。
+- 個別：`ortho-room-zones`（zoneAt 乾淨分割 64 格）、`ortho-demo-layout`（23 件、連續設備帶/櫃檯、分區、BFS、工作區-顧客分離）、`camera-framing`（core 94/93/91% safe fill、room 8% crop、minZoom=整房 fit）、`ortho-projection`（door/doorHeight/coreTopStrip、身份中性）、`build-consistency`、`grid-projection-compat`（iso/Flat golden 未改）皆通過。
+- 15 張 real-browser 證據（`docs/evidence/v0574/`）＋before(V0573)/after(V0574) 零 page error。
 
 ### Repository 內已有
 
