@@ -12,8 +12,10 @@
 // These centralise the numbers so nothing is hardcoded per device: every viewport
 // derives its own zoom/centre from the same policy.
 export const ORTHO_FRAMING = Object.freeze({
-  marginCss: 10,          // breathing space around the room, CSS px per side
-  toolbarReserveCss: 78,  // bottom band kept for the floating context toolbar
+  marginCss: 8,           // breathing space around the room, CSS px per side (ARCH-0575: tighter)
+  toolbarReserveCss: 40,  // bottom band kept for the floating context toolbar (ARCH-0575: was 78 —
+                          // the full reserve was wasted as top/bottom void on the first screen where
+                          // no toolbar is shown; the toolbar only overlays transiently on selection)
   maxInitialZoom: 0.9,    // never START more zoomed-in than this (keeps whole room in view)
   minZoomFloor: 0.18      // absolute lower guard so zoom never degenerates
 });

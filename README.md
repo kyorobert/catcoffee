@@ -1,11 +1,11 @@
-# 貓咪咖啡廳 V0.57.4-alpha
+# 貓咪咖啡廳 V0.57.5-alpha
 
-版本：`V0.57.4-alpha｜正交營業區聚焦分區版`  
-Build ID：`0574a`
+版本：`V0.57.5-alpha｜正交滿版操作修正版`  
+Build ID：`0575a`
 
-V0.57.4-alpha 把 **`OrthogonalProjection`（正交平面）手機首屏聚焦在「有效營業區」並讓分區一眼可辨**（構圖與分區精修，**非家具重畫**）：**縮短背牆**（wallHeight 200→155、coreTopStrip 140→118、doorHeight 130→112）減少上方空牆；新增**分區地板底色**（`ortho-room-zones.zoneAt()`＋`ORTHOGONAL_ROOM_RENDER.zoneFloor`，`drawRoomOrtho` 逐格上色）使**上方連續服務區、員工工作側 vs 顧客側、成組座位、集中貓咪區**一眼可辨；空間分區收斂為 x1-6 乾淨分割（每格單一 zone）；Demo 依分區加密重排為 **23 件**（連續設備帶＋連續櫃檯＋兩組桌椅地毯＋前左集中貓咪角，地板占用 ~28%→~48%）。首屏 core（x1-8）仍滿版（safe viewport 縱向 **94%／93%／91%**）、可 zoom-out 看整房。**因門在 x7-8、core 必含 x8，取景寬度受幾何鎖定（單件家具尺寸與 V0573 相同、非本版放大）；地板保持完全水平／垂直、cell 尺寸不變、未重畫家具。預設仍為 2:1 等角（iso）**；Orthogonal 仍 opt-in、等手機實機驗收。**僅改 Demo/prototype 視覺與路線；logical 存檔入口 `(8,7)/(9,7)` 與存檔 key `catCafePhaserV0540`（schema/migration 5401）、家具 `x/y/r`／footprint／Occupancy／Placement／Pathfinding 皆不變，投影/camera/demoLayout 不寫入存檔。** 等角家具在正交地板仍為 Placeholder（透視待 `ART-0574`）。
+V0.57.5-alpha 修好 **`OrthogonalProjection`（正交平面）手機的滿版取景與 Zoom/Pan 操作**（修 zoom/pan、滿版與分區視覺，**非家具重畫**）：**P0 修好放大後無法平移**——根因是互動平移直接位移 `scrollX/Y` 後，clamp 讀到只在 `preRender` 更新的**過期 `camera.midPoint`** 再 `centerOn` 回去，把平移量歸零；改由**即時 `scrollX + width/2`（`viewCentre()`）**推導中心，zoom-in 後 X/Y 皆可 pan、四邊 clamp、minZoom 看整房。**清除左右不明深色直條**（`zoneFloor.outer` 由暗色改中性淺色地板、全 tint 低對比）。**顯著減少四周留白**（`marginCss 10→8`、`toolbarReserveCss 78→40`、背牆做成**有家具的較高背牆** wallHeight 155→260/coreTopStrip 138→220/doorHeight 118→168 ＋ **wainscot 護牆板**、房外背景近地板暖色），上下留白由 V0574 ~44px 降至 **~18px（390/393）/26px（430）**。**cell 88×120 不變、未重畫家具、未建第二套 CameraController；門在 x7-8＋88×120 使 portrait 天生 width-constrained，無法在不裁門下 100% 填滿（單件家具未放大）。預設仍為 2:1 等角（iso）**；Orthogonal 仍 opt-in、等手機實機驗收。**存檔 key `catCafePhaserV0540`（schema/migration 5401）、logical 存檔入口 `(8,7)/(9,7)`、家具 `x/y/r`／footprint／Occupancy／Placement／Pathfinding 皆不變，投影/camera/demoLayout 不寫入存檔。** 等角家具在正交地板仍為 Placeholder（透視待 `ART-0576`）。
 
-## 投影模式（V0.57.4）
+## 投影模式（V0.57.5）
 
 - 預設（iso）：`index.html` 或 `?projection=iso`
 - **Orthogonal 正交平面**：`?projection=ortho`（別名 `?projection=orthogonal`）
@@ -14,7 +14,7 @@ V0.57.4-alpha 把 **`OrthogonalProjection`（正交平面）手機首屏聚焦�
 - Flat（已拒絕，保留回歸）：`?projection=flat`（含 `flatPreset=near-iso/balanced/current`）
 - 非法 `projection`（如 `?projection=abc`）安全回退 iso。
 - 投影模式與 `demoLayout` 皆**不寫入存檔**；重整後由網址參數決定。
-- 營業區聚焦與分區辨識見 [V0574 結果](./docs/V0574_ORTHOGONAL_COMPOSITION_RESULT.md)、[V0574 人工驗收](./docs/V0574_ORTHOGONAL_COMPOSITION_ACCEPTANCE.md)、[before/after 比較 HTML](./docs/V0574_ORTHOGONAL_COMPOSITION_COMPARISON.html)、截圖 `docs/evidence/v0574/`；前一版核心滿版見 [V0573 結果](./docs/V0573_ORTHOGONAL_CORE_FULLBLEED_RESULT.md)。
+- 滿版取景與 Zoom/Pan 修正見 [V0575 結果](./docs/V0575_ORTHOGONAL_FULLBLEED_PAN_RESULT.md)、[V0575 人工驗收](./docs/V0575_ORTHOGONAL_FULLBLEED_PAN_ACCEPTANCE.md)、[before/after 比較 HTML](./docs/V0575_ORTHOGONAL_FULLBLEED_PAN_COMPARISON.html)、截圖與指標 `docs/evidence/v0575/`；前一版分區辨識見 [V0574 結果](./docs/V0574_ORTHOGONAL_COMPOSITION_RESULT.md)。
 - 正交房間原型見 [V0570 結果](./docs/V0570_ORTHOGONAL_ROOM_RESULT.md)、[V0570 驗收](./docs/V0570_ORTHOGONAL_ROOM_ACCEPTANCE.md)、[家具重作計畫](./docs/V0570_ORTHOGONAL_ASSET_REBUILD_PLAN.md)、截圖 `docs/evidence/v0570/`；前版 Flat 見 [V0561 構圖比較](./docs/V0561_FLAT_PRESET_COMPARISON_RESULT.md)。
 
 ## V0.55.2 家具重繪內容（前版，保留）

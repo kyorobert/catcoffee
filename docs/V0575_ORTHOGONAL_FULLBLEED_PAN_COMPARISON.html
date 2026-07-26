@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V0.57.5 正交滿版取景與 Zoom/Pan 修正 before/after</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; font-family: system-ui, "Segoe UI", "Microsoft JhengHei", sans-serif; line-height: 1.6; background: #1c1714; color: #f2e9e2; }
+  header { padding: 20px 24px; background: #2a211c; border-bottom: 1px solid #4a3a30; }
+  h1 { margin: 0 0 6px; font-size: 20px; }
+  header p { margin: 4px 0; color: #d8c7ba; font-size: 14px; }
+  main { max-width: 1200px; margin: 0 auto; padding: 20px 16px 60px; }
+  section { margin: 28px 0; }
+  h2 { font-size: 17px; border-left: 4px solid #c98b5f; padding-left: 10px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  figure { margin: 0; background: #241d19; border: 1px solid #45362c; border-radius: 10px; overflow: hidden; }
+  figcaption { padding: 8px 12px; font-size: 13px; color: #e7d7c9; background: #2f251f; }
+  figcaption b { color: #ffd9b0; }
+  img { display: block; width: 100%; height: auto; background: #000; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 10px; }
+  th, td { border: 1px solid #4a3a30; padding: 6px 9px; text-align: center; }
+  th { background: #2f251f; }
+  .note { color: #cbb9ab; font-size: 13px; }
+  @media (max-width: 820px) { .pair, .grid4, .grid3 { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>V0.57.5-alpha｜正交滿版取景、Zoom/Pan 修正與分區視覺清理（ARCH-0575）</h1>
+  <p>Build <b>0575a</b>｜存檔 key <code>catCafePhaserV0540</code> 不變｜依 DEC-022｜<b>修 zoom/pan、滿版與分區視覺，非家具重畫</b></p>
+  <p>P0 修好 zoom-in 後的左右上下平移（根因：clamp 讀到過期 midPoint）；清除左右深色直條（外圈改中性淺色）；四周留白由 ~44px 降至 ~18px。截圖為自動化 real-browser（Chrome），非實機驗收。</p>
+</header>
+<main>
+
+  <section>
+    <h2>1. 手機直立首屏 before(V0574) / after(V0575)（390×844）</h2>
+    <div class="pair">
+      <figure><img src="evidence/v0575/mobile-390-v0574-before.png" alt="V0574 before"><figcaption><b>Before — V0.57.4</b>：四周留白多、左右深色直條、放大後無法平移。</figcaption></figure>
+      <figure><img src="evidence/v0575/mobile-390-v0575-after.png" alt="V0575 after"><figcaption><b>After — V0.57.5</b>：留白 ~18px、外圈中性淺色（無深色帶）、有家具的較高背牆（wainscot）、可 zoom-in 平移。</figcaption></figure>
+    </div>
+    <table>
+      <tr><th>視窗</th><th>首屏 zoom</th><th>上下留白 V0574→V0575</th><th>X pan range(zoom-in 1.35)</th><th>Y pan range</th></tr>
+      <tr><td>390×844</td><td>0.531</td><td>~44px → <b>18px</b></td><td>798px</td><td>983px</td></tr>
+      <tr><td>393×852</td><td>0.536</td><td>~44px → <b>19px</b></td><td>~800px</td><td>~985px</td></tr>
+      <tr><td>430×932</td><td>0.588</td><td>~44px → <b>26px</b></td><td>~880px</td><td>~1080px</td></tr>
+    </table>
+    <p class="note">門固定 x7-8 使 portrait 天生 width-constrained（無法在不裁門下 100% 填滿高度）；本版以縮牆浪費、加高有家具的背牆、去情境列保留浪費，把留白降到 ~18px，並保留 zoom-out 看整房、zoom-in pan 探索。每張指標見 <code>evidence/v0575/metrics.json</code>。</p>
+  </section>
+
+  <section>
+    <h2>2. P0：Zoom-in 後四向平移（拖曳改變 scrollX/Y）</h2>
+    <div class="grid4">
+      <figure><img src="evidence/v0575/mobile-390-demo-zoomin-center.png" alt="center"><figcaption>放大置中</figcaption></figure>
+      <figure><img src="evidence/v0575/mobile-390-demo-zoomin-pan-left.png" alt="pan left"><figcaption>平移左（scrollX 289）</figcaption></figure>
+      <figure><img src="evidence/v0575/mobile-390-demo-zoomin-pan-right.png" alt="pan right"><figcaption>平移右（scrollX 880）</figcaption></figure>
+      <figure><img src="evidence/v0575/mobile-390-demo-zoomin-pan-top.png" alt="pan top"><figcaption>平移上</figcaption></figure>
+    </div>
+    <div class="grid4" style="margin-top:12px">
+      <figure><img src="evidence/v0575/mobile-390-demo-zoomin-pan-bottom.png" alt="pan bottom"><figcaption>平移下</figcaption></figure>
+      <figure><img src="evidence/v0575/mobile-390-demo-minzoom.png" alt="minzoom"><figcaption>縮小看整房（置中）</figcaption></figure>
+      <figure><img src="evidence/v0575/desktop-1440-demo-zoomin-pan.png" alt="desktop pan"><figcaption>桌面放大平移</figcaption></figure>
+      <figure><img src="evidence/v0575/mobile-390-demo-artdebug.png" alt="artdebug"><figcaption>Art Debug</figcaption></figure>
+    </div>
+    <p class="note">根因：互動平移直接位移 <code>scrollX/Y</code>，但 clamp 以只在 preRender 更新的 <code>camera.midPoint</code> 重算中心再 centerOn 回去 → 把平移量歸零。修正：clamp 改由即時 <code>scrollX + width/2</code> 推導中心（<code>viewCentre()</code>）。左右平移 scrollX 289→880 證明可實際探索。</p>
+  </section>
+
+  <section>
+    <h2>3. 三種手機寬度 / 真實存檔</h2>
+    <div class="grid3">
+      <figure><img src="evidence/v0575/mobile-393-demo-initial.png" alt="393"><figcaption>393×852 首屏</figcaption></figure>
+      <figure><img src="evidence/v0575/mobile-430-demo-initial.png" alt="430"><figcaption>430×932 首屏</figcaption></figure>
+      <figure><img src="evidence/v0575/mobile-390-ortho-existing-initial.png" alt="existing"><figcaption>真實存檔（非 Demo）首屏</figcaption></figure>
+    </div>
+    <p class="note">左右外圈 x0/x9 改為中性淺色地板（無不明深色直條）；家具仍為等角 Placeholder（正交透視待 <code>ART-0576</code>）。詳見 <a href="V0575_ORTHOGONAL_FULLBLEED_PAN_RESULT.md" style="color:#ffd9b0">V0575 結果</a>。</p>
+  </section>
+
+</main>
+</body>
+</html>

@@ -1,6 +1,6 @@
-import {INPUT_MODE} from '../core/input-state.js?v=0574a';
-import {computeSafeViewport} from '../core/scene-viewport.js?v=0574a';
-import {computeInitialFraming, clampCenterToContent} from '../core/camera-framing.js?v=0574a';
+import {INPUT_MODE} from '../core/input-state.js?v=0575a';
+import {computeSafeViewport} from '../core/scene-viewport.js?v=0575a';
+import {computeInitialFraming, clampCenterToContent} from '../core/camera-framing.js?v=0575a';
 
 export class CameraController {
   constructor(scene, roomConfig, {inputMode = null, isFurnitureDragging = () => false, onPinchStart = null, framing = null} = {}) {
@@ -77,11 +77,25 @@ export class CameraController {
     return this.framing.getRoomBounds ? this.framing.getRoomBounds() : this.framing.getContentBounds();
   }
 
+  // The world point currently at the centre of the view. We derive it from the LIVE scrollX/Y
+  // (Phaser's `centerOn(x,y)` sets scrollX = x - width/2), NOT from `camera.midPoint`, which is
+  // only recomputed in preRender — reading it right after a manual scroll change yields a STALE
+  // value and would snap the camera back, killing interactive panning (ARCH-0575 P0 fix).
+  viewCentre() {
+    const cam = this.camera;
+    return {x: cam.scrollX + cam.width / 2, y: cam.scrollY + cam.height / 2};
+  }
+
+  // Clamp so the visible view stays inside the room. On an axis where the room (in projected
+  // px at the current zoom) is LARGER than the view, panning is allowed up to the room edge; on
+  // an axis where it is smaller, that axis locks to the room centre. Recomputed from the live
+  // zoom + view centre every call (pan / pinch / wheel / resize).
   clampToContent() {
     if (!this.framing) return;
     const zoom = this.camera.zoom || 1;
+    const view = this.viewCentre();
     const centre = clampCenterToContent({
-      centerX: this.camera.midPoint.x, centerY: this.camera.midPoint.y,
+      centerX: view.x, centerY: view.y,
       viewWidth: this.camera.width / zoom, viewHeight: this.camera.height / zoom,
       content: this.getRoomBounds()
     });

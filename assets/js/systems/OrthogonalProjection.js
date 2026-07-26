@@ -41,20 +41,30 @@ export const ORTHOGONAL_PROJECTION_PARAMS = Object.freeze({
 // x7-8, mat at `customerEntryPoint`) — a Demo/prototype visual + route only, the logical save
 // entrance in room-config is unchanged.
 export const ORTHOGONAL_ROOM_RENDER = Object.freeze({
-  wallHeight: 155,       // back wall (whole-room framing + pan range) — shortened in ARCH-0574
-  doorHeight: 112,       // door height on the lower wall (fits inside coreTopStrip)
-  coreTopStrip: 118,     // wall strip above the floor kept in the first-screen core framing
+  // ARCH-0575: because the door fixes the core width (x7-8), the portrait fit is width-limited,
+  // so the room can only fill the tall screen if the back wall is a real, furnished height. The
+  // wall is a proper cafe back wall (wainscot + wall art + menu board + door) that fills the top of
+  // the frame instead of a thin empty band; the core strip carries most of it onto the first
+  // screen so top/bottom void is small.
+  wallHeight: 260,       // back wall (whole-room framing + pan range)
+  doorHeight: 168,       // door height on the lower wall (fits inside coreTopStrip)
+  coreTopStrip: 220,     // wall strip above the floor kept in the first-screen core framing
   topWallLineWidth: 6,
   floorOutlineWidth: 4,
   sideEdgeLineWidth: 4,
   bottomPad: 24,
+  backdropFill: 0xbfa079, // warm ambient beyond the room, close to the floor so margins do not read as a stark "card mat"
   door: Object.freeze({fill: 0x6b4636, frame: 0x8f4f49, matFill: 0x9f765a}),
-  decoration: Object.freeze({windowFx: 0.22, boardFx: 0.5, heightFactor: 0.36, windowScale: 0.78, boardScale: 0.76}),
-  // Per-zone floor tints (warm, cohesive; distinct enough to read the zoning). Keyed by
-  // ortho-room-zones.zoneAt(); each cell also gets a subtle 2-tone by parity for texture.
+  // Wainscot panelling on the lower wall + a molding line — furnishes the taller backdrop.
+  wainscot: Object.freeze({heightFactor: 0.4, fill: 0xc47f5f, molding: 0xecd2a6, moldingWidth: 5}),
+  decoration: Object.freeze({windowFx: 0.24, boardFx: 0.52, heightFactor: 0.28, windowScale: 0.9, boardScale: 0.86}),
+  // Per-zone floor tints (ARCH-0575): LOW-contrast warm hints, all light-valued so no zone reads
+  // as a shadow or an unusable dark band. `outer` (the x0/x9 columns) is a NEUTRAL floor colour —
+  // those cells are real, placeable floor, not a dead margin. `zoneAt()` provides the key and the
+  // renderer falls back to `outer` for any unknown key.
   zoneFloor: Object.freeze({
-    work: 0x9a7d61, counter: 0xb08c66, service: 0xe7d4b3, seating: 0xd8bd93,
-    cat: 0xe0c1b1, aisle: 0xd6c4a8, outer: 0x7f6549
+    work: 0xd8b184, counter: 0xceac78, service: 0xf6dca8, seating: 0xe9c08d,
+    cat: 0xedc2a0, aisle: 0xe9c79a, outer: 0xe7c295
   })
 });
 

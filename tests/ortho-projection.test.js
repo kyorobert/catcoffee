@@ -2,16 +2,17 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-// Import via the same `?v=0574a` specifier the runtime uses so `instanceof` resolves
+// Import via the same `?v=0575a` specifier the runtime uses so `instanceof` resolves
 // against the same module instance GridSystem composes internally.
-import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0574a';
-import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0574a';
+import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0575a';
+import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0575a';
 import {OrthogonalProjection, ORTHOGONAL_PROJECTION_PARAMS, ORTHOGONAL_ROOM_RENDER}
-  from '../assets/js/systems/OrthogonalProjection.js?v=0574a';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0574a';
-import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0574a';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0574a';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0574a';
+  from '../assets/js/systems/OrthogonalProjection.js?v=0575a';
+import {ORTHO_ZONE_KEYS} from '../assets/js/config/ortho-room-zones.js?v=0575a';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0575a';
+import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0575a';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0575a';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0575a';
 
 const approx = (a, b, eps = 1e-9) => Math.abs(a - b) <= eps;
 const {cols, rows} = ROOM_CONFIG.floor;
@@ -153,6 +154,22 @@ const probe = grid => {
 };
 assert.deepStrictEqual(probe(gOrtho), probe(gIso), 'Occupancy/Placement/footprint logical results identical iso vs ortho');
 assert.deepStrictEqual(probe(gOrthoAlias), probe(gOrtho), 'alias and ortho behave identically');
+
+// --- F. Zone floor palette (ARCH-0575): centralised, every zone keyed, NO dark bands ---
+// The x0/x9 columns are painted with the `outer` tint; it (and every tint) must be a LIGHT
+// floor colour so the room edges never read as a shadow / unusable dark bar.
+const zf = ORTHOGONAL_ROOM_RENDER.zoneFloor;
+const lum = hex => 0.299 * ((hex >> 16) & 255) + 0.587 * ((hex >> 8) & 255) + 0.114 * (hex & 255);
+for (const key of ORTHO_ZONE_KEYS) {
+  assert.equal(typeof zf[key], 'number', `zoneFloor has a colour for every zone key: ${key}`);
+  assert.ok(lum(zf[key]) > 150, `zone '${key}' floor is a LIGHT tint (lum ${lum(zf[key]).toFixed(0)} > 150), not a dark band`);
+}
+// outer (x0/x9) and aisle must be NEUTRAL — close to each other and to the seating floor, so the
+// outer columns blend with the room instead of forming a vertical colour wall.
+assert.ok(Math.abs(lum(zf.outer) - lum(zf.aisle)) < 25, 'outer and aisle tints are close (neutral, no vertical wall)');
+assert.ok(Math.abs(lum(zf.outer) - lum(zf.seating)) < 30, 'outer blends with the room floor');
+assert.ok(ORTHOGONAL_ROOM_RENDER.backdropFill > 0 && lum(ORTHOGONAL_ROOM_RENDER.backdropFill) > 110,
+  'the beyond-room backdrop is a warm ambient, not a stark dark mat');
 
 // --- Purity: no engine/DOM/storage, no actor identity ---
 const source = readFileSync(new URL('../assets/js/systems/OrthogonalProjection.js', import.meta.url), 'utf8');

@@ -1,31 +1,31 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0574a';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0574a';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0574a';
-import {GridSystem} from '../systems/GridSystem.js?v=0574a';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0574a';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0574a';
-import {CameraController} from '../systems/CameraController.js?v=0574a';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0574a';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0574a';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0574a';
-import {CatEntity} from '../entities/CatEntity.js?v=0574a';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0574a';
-import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0574a';
-import {AmbientEffects} from '../entities/AmbientEffects.js?v=0574a';
-import {INPUT_MODE} from '../core/input-state.js?v=0574a';
-import {InputModeController} from '../phaser/InputModeController.js?v=0574a';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0574a';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0574a';
-import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0574a';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0574a';
-import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0574a';
-import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0574a';
-import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0574a';
-import {ORTHOGONAL_ROOM_RENDER} from '../systems/OrthogonalProjection.js?v=0574a';
-import {ORTHO_ROOM_ZONES,zoneAt} from '../config/ortho-room-zones.js?v=0574a';
-import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0574a';
-import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0574a';
-import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0574a';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0575a';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0575a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0575a';
+import {GridSystem} from '../systems/GridSystem.js?v=0575a';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0575a';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0575a';
+import {CameraController} from '../systems/CameraController.js?v=0575a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0575a';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0575a';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0575a';
+import {CatEntity} from '../entities/CatEntity.js?v=0575a';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0575a';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0575a';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0575a';
+import {INPUT_MODE} from '../core/input-state.js?v=0575a';
+import {InputModeController} from '../phaser/InputModeController.js?v=0575a';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0575a';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0575a';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0575a';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0575a';
+import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0575a';
+import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0575a';
+import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0575a';
+import {ORTHOGONAL_ROOM_RENDER} from '../systems/OrthogonalProjection.js?v=0575a';
+import {ORTHO_ROOM_ZONES,zoneAt} from '../config/ortho-room-zones.js?v=0575a';
+import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0575a';
+import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0575a';
+import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0575a';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -241,10 +241,16 @@ export class CafeScene extends Phaser.Scene{
     const BL=this.grid.getCellDiamond(0,rows-1)[3];
     const floorW=TR.x-TL.x,floorTop=TL.y,wallTop=floorTop-R.wallHeight;
     // Room base fills well beyond the world (side margins, ceiling, below-floor and any
-    // fit-zoom overscan) so the rectangular room never sits on a black or oblique void.
-    graphics.fillStyle(walls.left.fill,1).fillRect(-worldWidth,-worldHeight,worldWidth*3,worldHeight*3);
+    // fit-zoom overscan). ARCH-0575: use a warm ambient tone close to the floor so the small
+    // breathing margin reads as soft surroundings, not a stark contrasting "card mat".
+    graphics.fillStyle(R.backdropFill,1).fillRect(-worldWidth,-worldHeight,worldWidth*3,worldHeight*3);
     // Back wall standing above the floor: the equipment backdrop and door surface.
     graphics.fillStyle(walls.right.fill,1).fillRect(TL.x,wallTop,floorW,R.wallHeight);
+    // Wainscot panelling on the lower wall + a molding line, so the taller wall reads as a
+    // furnished cafe back wall rather than a big empty band.
+    const wain=R.wainscot,wainH=R.wallHeight*wain.heightFactor,wainTop=floorTop-wainH;
+    graphics.fillStyle(wain.fill,1).fillRect(TL.x,wainTop,floorW,wainH);
+    graphics.lineStyle(wain.moldingWidth,wain.molding,1).strokePoints([{x:TL.x,y:wainTop},{x:TR.x,y:wainTop}],false);
     // 2-cell customer entrance door on the LOWER back wall (visual + prototype route). Cells
     // come from ortho-room-zones (visualDoorBounds spans x7-8; x9 stays wall so the door is
     // not flush to the edge). The door is shorter than the full wall (doorHeight) so it sits

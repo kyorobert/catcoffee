@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {deriveOverlayInsets, computeSafeViewport} from '../assets/js/core/scene-viewport.js?v=0574a';
+import {deriveOverlayInsets, computeSafeViewport} from '../assets/js/core/scene-viewport.js?v=0575a';
 import {computeFitZoom, clampCenterToContent, computeInitialFraming, ORTHO_FRAMING}
-  from '../assets/js/core/camera-framing.js?v=0574a';
+  from '../assets/js/core/camera-framing.js?v=0575a';
 
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
-// The orthogonal room content used at runtime (floor + back wall), world px (ARCH-0574 wall 155).
-const content = {x: 340, y: -75, width: 880, height: 1139};
+// The orthogonal room content used at runtime (floor + back wall), world px (ARCH-0575 wall 260).
+const content = {x: 340, y: -180, width: 880, height: 1244};
 
 // --- A. Safe viewport: overlay insets + clamped usable rect (Node-testable, no DOM) ---
 const canvas = {left: 0, top: 86, right: 390, bottom: 782}; // 390x696 canvas below the HUD
@@ -79,8 +79,8 @@ assert.deepEqual(clampCenterToContent({centerX: 9999, centerY: -9999, viewWidth:
 // --- D. Core full-bleed vs whole-room pan range (ARCH-0573, wall shortened in ARCH-0574) ---
 // room = floor + back wall (155) + outer x0/x9 margins; core = gameplay columns x1-8 + a short
 // wall strip (118). Projected values from the 10x8 room at cellWidth 88 / cellHeight 120.
-const room = {x: 340, y: -75, width: 880, height: 1139};
-const core = {x: 428, y: -38, width: 704, height: 1102};
+const room = {x: 340, y: -180, width: 880, height: 1244};
+const core = {x: 428, y: -140, width: 704, height: 1204};
 for (const [cw, ch] of [[390, 696], [393, 704], [430, 784]]) {
   const s = computeSafeViewport({canvasWidth: cw, canvasHeight: ch, insets: {bottom: 78}});
   const f = computeInitialFraming({core, room, safe: s, canvasWidth: cw, canvasHeight: ch, maxZoom: 1.65, policy: {}});
@@ -107,6 +107,24 @@ for (const [cw, ch] of [[390, 696], [393, 704], [430, 784]]) {
   const s = computeSafeViewport({canvasWidth: 390, canvasHeight: 696, insets: {bottom: 78}});
   const f = computeInitialFraming({content: room, safe: s, canvasWidth: 390, canvasHeight: 696, maxZoom: 1.65});
   assert.equal(f.minZoom, f.zoom, 'single-content path keeps minZoom == fit zoom (back-compat)');
+}
+
+// --- E. Zoom-in leaves a real pan range on both axes (ARCH-0575) ---
+// When the view (canvas/zoom) is SMALLER than the room, the clamp must allow a non-zero range of
+// centres on that axis (so the player can pan), and only lock-centre when the view is larger.
+{
+  const canvasW = 390, canvasH = 696, zoomIn = 1.3;
+  const vw = canvasW / zoomIn, vh = canvasH / zoomIn;      // view smaller than the room on both axes
+  assert.ok(vw < room.width && vh < room.height, 'zoomed-in view is smaller than the room');
+  const cMinX = clampCenterToContent({centerX: -1e6, centerY: 0, viewWidth: vw, viewHeight: vh, content: room}).x;
+  const cMaxX = clampCenterToContent({centerX: 1e6, centerY: 0, viewWidth: vw, viewHeight: vh, content: room}).x;
+  const cMinY = clampCenterToContent({centerX: 0, centerY: -1e6, viewWidth: vw, viewHeight: vh, content: room}).y;
+  const cMaxY = clampCenterToContent({centerX: 0, centerY: 1e6, viewWidth: vw, viewHeight: vh, content: room}).y;
+  assert.ok(cMaxX - cMinX > 1, `X pan range > 0 when zoomed in (${(cMaxX - cMinX).toFixed(0)} world px)`);
+  assert.ok(cMaxY - cMinY > 1, `Y pan range > 0 when zoomed in (${(cMaxY - cMinY).toFixed(0)} world px)`);
+  // an axis where the view is LARGER than the room locks to the room centre (no pan there).
+  const big = clampCenterToContent({centerX: 1e6, centerY: 0, viewWidth: room.width * 3, viewHeight: vh, content: room});
+  assert.equal(big.x, room.x + room.width / 2, 'axis with view > room locks to centre');
 }
 
 // --- Purity: the framing/viewport helpers carry no engine/DOM/storage/actor identity ---
