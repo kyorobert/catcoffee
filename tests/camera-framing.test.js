@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {deriveOverlayInsets, computeSafeViewport} from '../assets/js/core/scene-viewport.js?v=0575a';
+import {deriveOverlayInsets, computeSafeViewport} from '../assets/js/core/scene-viewport.js?v=0575b';
 import {computeFitZoom, clampCenterToContent, computeInitialFraming, ORTHO_FRAMING}
-  from '../assets/js/core/camera-framing.js?v=0575a';
+  from '../assets/js/core/camera-framing.js?v=0575b';
 
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
 // The orthogonal room content used at runtime (floor + back wall), world px (ARCH-0575 wall 260).

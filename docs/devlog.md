@@ -2,6 +2,19 @@
 
 每筆紀錄包含版本、目標、完成內容、驗證、已知限制與下一步。歷史版本若 repository 沒有完整日期或測試輸出，會明確標示為回溯摘要，不補造證據。
 
+## 2026-07-26｜ARCH-0575A-ORTHOGONAL-ROOM-SHELL-FULLBLEED-AND-DOOR-SCALE
+
+- 版本／Build：**V0.57.5-alpha｜正交房間外殼與門比例修正版** / **0575b**（由 0575a 升版；package 維持 0.57.5-alpha；存檔 key `catCafePhaserV0540`、schema 5401、migration 5401 皆不變）
+- iPhone 驗收（0575a）：Zoom/Pan **通過**（凍結核心）；房間**外殼滿版未通過**（四周房外背景、像卡片）、**視覺門比例未通過**（近兩格深色矩形、像倉庫門）。小範圍修外殼與門，不重構 Camera、不重畫家具。
+- 留白根因（已稽核）：主因是**房間視覺外殼只畫到邏輯 10×8 Grid 矩形**，Grid 邊界外即背景 → 卡片感；Camera framing 殘留極少（V0575 已壓到 ~18px）且核心凍結；非 CSS/DOM。
+- A 外殼滿版：`ORTHOGONAL_ROOM_RENDER.shell={side84,top120,bottom132,floorFill}`；`drawRoomOrtho` 把地板外殼（中性淺色）＋牆面外殼（牆色）畫到超出 Grid 到 safe viewport 邊緣；取消粗矩形卡片外框，改細牆腳線/收邊（`playAreaLineWidth`）區分可玩區。**純視覺、不新增 placeable cells、不改 placeableMask/Grid/Occupancy/存檔**。real-browser 手機 390/393/430 首屏外圈背景 external margin ~18px→**~0px**。可 zoom-out 整房、zoom-in pan 外圍。
+- B 門比例＋視覺：`logicalEntranceZone {x7,w2}` 維持兩格；新增較小 `visualDoorBounds {x:6.8,w:1.4}`（grid-coord、置中 x7-8、實測 123×124 world px、右緣 gridX 8.2≤8.5 → x9 牆）；`doorHeight 168→124`；門改分層繪製 `door={frame,leaf,glass,glassEdge,handle,panel,matFill}`——木門扇(非黑洞)＋玻璃格窗(muntins)＋黃銅門把＋門框＋下嵌板。entryPoint(8,0)/staging(8,1)/x9/舊存檔入口(8,7)(9,7) 不變。**visualDoorBounds ≠ 兩格 logical entrance。**
+- Camera：**CameraController 核心未改**（viewCentre/pan/clamp 不動；非受保護、僅 `?v=` 隨版本升）。real-browser 真實指標拖曳仍 X/Y 可 pan、四邊 clamp、minZoom 整房。
+- 修改檔案：`ortho-room-zones`（logicalEntranceZone＋縮小 visualDoorBounds）、`OrthogonalProjection`（shell/playAreaLineWidth/doorHeight/door 分層色）、`CafeScene.drawRoomOrtho`（外殼延伸＋細收邊＋分層門）。測試：`ortho-room-zones`（門幾何：logicalEntranceZone、visualDoorBounds<2格/置中/x9牆）、`ortho-projection`（shell 延伸、door leaf 非暗、glass>leaf>frame 層次、doorHeight~124）、`browser-smoke`（shell margin≈0、door 中央非暗塊、zoom-in pan 回歸）、`build-consistency`（版本）。Build 升版 0575a→0575b＋`check.js`（Build/APP_VERSION/obsolete `?v=0575a`/protected hash：OrthogonalProjection/ortho-room-zones/GridSystem/flat-presets/viewport-metrics；camera-framing 與 CameraController hash 不變/無 hash）；docs decisions(DEC-023)/current-state/roadmap/handoff/README ＋ V0575B 三份 ＋ evidence/v0575b(+metrics.json)。
+- 驗證：`check:deploy` 通過（0575b、55 modules）；`check:dev` 通過（**本機真實 Chrome**，含 shell external margin≈0、door 非暗、zoom-in 真實拖曳 pan、x0/x9 非暗、demo 不寫存檔、invalid 回退）；`ortho-room-zones`/`ortho-projection`/`camera-framing`/`ortho-demo-layout`(23)/`grid-projection-compat`(iso/Flat golden 未改) 皆通過；18 張 real-browser 證據＋metrics.json 零 page error。
+- 誠實判斷：外圈背景 ~18px→~0px（外殼填滿、不再卡片）、門由兩格深塊→1.4 格分層木門、Zoom/Pan 凍結且回歸通過皆達成；桌面左右邊距（手機優先）、門仍 Prototype、家具仍 Placeholder；最終以 iPhone 實機為準。
+- 已知限制：家具/門仍 Placeholder/Prototype（ART-0576）；桌面邊距；分區僅視覺、無行為（ARCH-0576-STATION-REGISTRY）；手機實機驗收 pending；未 commit/push/部署；本環境無 `.git`。
+
 ## 2026-07-26｜ARCH-0575-ORTHOGONAL-FULLBLEED-PAN-AND-ZONE-CLEANUP
 
 - 版本／Build：**V0.57.5-alpha｜正交滿版操作修正版** / **0575a**（由 0574a 升版；存檔 key `catCafePhaserV0540`、schema 5401、migration 5401 皆不變）

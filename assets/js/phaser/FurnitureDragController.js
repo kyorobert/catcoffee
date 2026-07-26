@@ -1,6 +1,6 @@
-import {INPUT_MODE} from '../core/input-state.js?v=0575a';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0575a';
-import {getFurnitureDisplayState} from '../core/furniture-display-state.js?v=0575a';
+import {INPUT_MODE} from '../core/input-state.js?v=0575b';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0575b';
+import {getFurnitureDisplayState} from '../core/furniture-display-state.js?v=0575b';
 
 const DRAG_THRESHOLD_PX = 8;
 

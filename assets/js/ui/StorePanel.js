@@ -1,5 +1,5 @@
-import {FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0575a';
-import {getPurchasableFurniture} from '../core/furniture-catalog-selector.js?v=0575a';
+import {FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0575b';
+import {getPurchasableFurniture} from '../core/furniture-catalog-selector.js?v=0575b';
 
 function requireElement(element, label) {
   if (!(element instanceof Element)) throw new TypeError(`${label} 必須是有效的 Element`);

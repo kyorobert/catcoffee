@@ -5,7 +5,7 @@ import {existsSync,readFileSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0575a';
+import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0575b';
 import {CAT_PROFILES,CAT_ANIMATION_LAYOUT,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const root=process.cwd();
@@ -44,7 +44,7 @@ const server=createServer((request,response)=>{
     response.end(readFileSync(file,'utf8').replace('id="careBtn"','id="careBtn-missing"'));return;
   }
   if(relativePath==='index.html'&&requestUrl.searchParams.get('fixture')==='build-mismatch'){
-    response.end(readFileSync(file,'utf8').replace('data-build-id="0575a"','data-build-id="0550-old"'));return;
+    response.end(readFileSync(file,'utf8').replace('data-build-id="0575b"','data-build-id="0550-old"'));return;
   }
   response.end(readFileSync(file));
 });
@@ -145,7 +145,7 @@ try{
     });
     const problems=[];
     if(!state.phaser||!state.game)problems.push('Phaser global or game missing');
-    if(state.htmlBuildId!=='0575a'||state.jsBuildId!=='0575a')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
+    if(state.htmlBuildId!=='0575b'||state.jsBuildId!=='0575b')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
     if(state.gameReady!=='1')problems.push(`gameReady is ${state.gameReady}`);
     if(loadedUrls.some(url=>/\?v=0550a(?:$|[&#])/.test(url)||url.includes('?v=0542a')))problems.push('obsolete runtime cache query loaded');
     if(state.canvasCount!==1||state.canvasWidth<=0||state.canvasHeight<=0)problems.push(`invalid canvas ${state.canvasCount} ${state.canvasWidth}x${state.canvasHeight}`);
@@ -175,7 +175,7 @@ try{
        if(storeIds.length!==47)problems.push(`normal store contains ${storeIds.length} items instead of 47`);
        if(PROTOTYPE_FURNITURE_IDS.some(id=>!storeIds.includes(id)))problems.push('a V0.55.2 redraw is missing from the store');
        const redrawThumbnails=await page.locator(PROTOTYPE_FURNITURE_IDS.map(id=>`.store-card[data-id="${id}"] img`).join(',')).evaluateAll(images=>images.map(image=>({src:image.getAttribute('src'),width:image.naturalWidth,height:image.naturalHeight})));
-       if(redrawThumbnails.length!==25||redrawThumbnails.some(image=>!image.src?.includes('/redrawn/')||!image.src.endsWith('.png?v=0575a')||image.width<=0||image.height<=0))problems.push(`invalid redraw store thumbnails: ${JSON.stringify(redrawThumbnails)}`);
+       if(redrawThumbnails.length!==25||redrawThumbnails.some(image=>!image.src?.includes('/redrawn/')||!image.src.endsWith('.png?v=0575b')||image.width<=0||image.height<=0))problems.push(`invalid redraw store thumbnails: ${JSON.stringify(redrawThumbnails)}`);
        const redrawBefore=await page.evaluate(()=>({coins:window.gameController.getState().coins,count:window.gameController.getState().items.length}));
        await page.click('.store-card[data-id="squareCafeTable"]');
        await page.waitForTimeout(100);
@@ -355,6 +355,24 @@ try{
         toolbarHidden:document.getElementById('selectionBar').classList.contains('hidden')
       };
     });
+    // ARCH-0575A: at INITIAL framing the visual SHELL (wall+floor drawn beyond the grid) should
+    // reach the safe-viewport edges (little/no backdrop margin), and the door must NOT be a dark
+    // 2-cell slab (its centre pixel is a light wood/glass door, not a black hole).
+    const shellDoor=await page.evaluate(()=>{
+      const s=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene'),cam=s.cameras.main;
+      const TL=s.grid.getCellDiamond(0,0)[0],TR=s.grid.getCellDiamond(9,0)[1],BR=s.grid.getCellDiamond(9,7)[2];
+      const floorTop=TL.y,wallTop=floorTop-260;               // ORTHOGONAL_ROOM_RENDER.wallHeight
+      const shTop=wallTop-120,shBot=BR.y+132,shLeft=TL.x-84,shRight=TR.x+84; // shell {top,bottom,side}
+      const wv=cam.worldView,z=cam.zoom;
+      const ext={top:Math.round(Math.max(0,(shTop-wv.y)*z)),bottom:Math.round(Math.max(0,(wv.y+wv.height-shBot)*z)),
+        left:Math.round(Math.max(0,(shLeft-wv.x)*z)),right:Math.round(Math.max(0,(wv.x+wv.width-shRight)*z))};
+      // door centre pixel (gridX 7.5, mid door height) via live worldView → screen
+      const dc=s.grid.gridToWorld(7.5,0), dy=floorTop-62;
+      const cv=window.__CAT_CAFE_GAME__.canvas,ctx=cv.getContext('2d',{willReadFrequently:true});
+      const sx=Math.round((dc.x-wv.x)/wv.width*cv.width),sy=Math.round((dy-wv.y)/wv.height*cv.height);
+      const d=ctx.getImageData(Math.min(cv.width-1,Math.max(0,sx)),Math.min(cv.height-1,Math.max(0,sy)),1,1).data;
+      return {ext,doorCentreLum:Math.round(0.299*d[0]+0.587*d[1]+0.114*d[2])};
+    });
     // ARCH-0575 P0: zoom-in MUST enable real panning. The V0574 bug was "zoom works, pan dead"
     // because the clamp re-centred off a STALE camera.midPoint. Zoom in, drag in each direction
     // with a REAL pointer, and assert the camera actually scrolls and clamps within the room.
@@ -395,6 +413,9 @@ try{
     if(pan.yReturned<=2)problems.push('cannot pan back on Y');
     if(ortho.demo&&edge.left<120)problems.push(`left x0 column is a dark bar (lum ${edge.left})`);
     if(ortho.demo&&edge.right<120)problems.push(`right x9 column is a dark bar (lum ${edge.right})`);
+    // ARCH-0575A: shell reaches the edges (small external backdrop margin) + door is not a dark slab.
+    for(const side of ['top','bottom','left','right']) if(shellDoor.ext[side]>16)problems.push(`shell leaves a ${side} backdrop margin of ${shellDoor.ext[side]}px (not full-bleed)`);
+    if(shellDoor.doorCentreLum<120)problems.push(`visual door centre is a dark slab (lum ${shellDoor.doorCentreLum})`);
     if(state.demo!==ortho.demo)problems.push(`demoLayoutActive is ${state.demo}`);
     if(ortho.demo&&state.stateItems!==18)problems.push(`demo mutated state.items (${state.stateItems})`);
     if(state.savedLeak)problems.push('projection/demoLayout leaked into the save');
@@ -407,7 +428,7 @@ try{
     if(state.selectedId)problems.push('a furniture is selected on the first screen');
     if(!state.toolbarHidden)problems.push('context toolbar is shown on the first screen');
     if(pageErrors.length)problems.push(JSON.stringify(pageErrors));
-    results.push({scenario:ortho.name,viewport:'390x844',...state,pan,edge,problems});
+    results.push({scenario:ortho.name,viewport:'390x844',...state,pan,edge,shellDoor,problems});
     await context.close();
     if(problems.length)throw new Error(`${ortho.name}: ${problems.join('; ')}`);
   }

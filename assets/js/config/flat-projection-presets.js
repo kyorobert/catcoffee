@@ -19,7 +19,7 @@
 // Flat basis (Preset C). `near-iso` sits close to iso (more room depth, gentler
 // flattening); `balanced` sits in the middle (flatter floor, back wall still clear);
 // `current` reuses the ARCH-0562 Flat values verbatim as the comparison baseline.
-import {FLAT_PROJECTION_PARAMS} from '../systems/FlatProjection.js?v=0575a';
+import {FLAT_PROJECTION_PARAMS} from '../systems/FlatProjection.js?v=0575b';
 
 export const FLAT_PRESET_QUERY_KEY = 'flatPreset';
 

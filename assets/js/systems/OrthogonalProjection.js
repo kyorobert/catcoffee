@@ -47,14 +47,20 @@ export const ORTHOGONAL_ROOM_RENDER = Object.freeze({
   // the frame instead of a thin empty band; the core strip carries most of it onto the first
   // screen so top/bottom void is small.
   wallHeight: 260,       // back wall (whole-room framing + pan range)
-  doorHeight: 168,       // door height on the lower wall (fits inside coreTopStrip)
+  doorHeight: 124,       // ARCH-0575A: a natural cafe-door height (~1 cell), not a 2-cell slab
   coreTopStrip: 220,     // wall strip above the floor kept in the first-screen core framing
   topWallLineWidth: 6,
-  floorOutlineWidth: 4,
-  sideEdgeLineWidth: 4,
+  playAreaLineWidth: 2,  // ARCH-0575A: SUBTLE playable-grid edge, replaces the bold "card" outline
   bottomPad: 24,
-  backdropFill: 0xbfa079, // warm ambient beyond the room, close to the floor so margins do not read as a stark "card mat"
-  door: Object.freeze({fill: 0x6b4636, frame: 0x8f4f49, matFill: 0x9f765a}),
+  // ARCH-0575A: the VISUAL SHELL (wall + floor) is drawn this far BEYOND the logical 10x8 grid so
+  // the room material reaches the safe-viewport edges (no "room card floating in backdrop"). These
+  // are display-only world px; they add NO placeable cells and do not change the grid or framing.
+  shell: Object.freeze({side: 84, top: 120, bottom: 132, floorFill: 0xe4bf90}),
+  backdropFill: 0xbfa079, // warm ambient far beyond the shell (only seen when fully zoomed out)
+  // ARCH-0575A prototype door: a real cafe door — warm wood leaf (not a black hole), a glass panel
+  // with muntins, a brass handle and a frame. Layered so it reads clearly and is not a dark slab.
+  door: Object.freeze({frame: 0x7a4f34, leaf: 0xcaa068, glass: 0xbcd6d2, glassEdge: 0x8fb3ad,
+    handle: 0xd8b24a, panel: 0x9c774c, matFill: 0x9f765a}),
   // Wainscot panelling on the lower wall + a molding line — furnishes the taller backdrop.
   wainscot: Object.freeze({heightFactor: 0.4, fill: 0xc47f5f, molding: 0xecd2a6, moldingWidth: 5}),
   decoration: Object.freeze({windowFx: 0.24, boardFx: 0.52, heightFactor: 0.28, windowScale: 0.9, boardScale: 0.86}),

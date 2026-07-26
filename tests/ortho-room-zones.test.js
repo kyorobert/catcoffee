@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ORTHO_ROOM_ZONES as Z, zoneCells, rectContainsCell, rectContainsRect, rectsOverlap, rectInsideGrid,
   zoneAt, ORTHO_ZONE_KEYS}
-  from '../assets/js/config/ortho-room-zones.js?v=0575a';
+  from '../assets/js/config/ortho-room-zones.js?v=0575b';
 
 // --- pure helpers behave ---
 assert.deepEqual(zoneCells({x: 2, y: 3, w: 2, h: 2}), [
@@ -24,23 +24,28 @@ for (const key of Object.keys(Z)) assert.ok(Object.isFrozen(Z[key]), `${key} is 
 
 // --- grid matches the room and every zone is legal inside it ---
 assert.deepEqual(Z.grid, {cols: 10, rows: 8}, 'zones describe the 10x8 room');
-const rectKeys = ['visualDoorBounds', 'customerEntranceZone', 'staffWorkZone', 'serviceCounterLine',
+const rectKeys = ['logicalEntranceZone', 'customerEntranceZone', 'staffWorkZone', 'serviceCounterLine',
   'customerServiceZone', 'seatingZone', 'catZone', 'mainAisle', 'coreGameplayBounds'];
 for (const key of rectKeys) assert.ok(rectInsideGrid(Z[key]), `${key} fits inside the grid`);
 
-// --- 2-cell visual door at the top-right, not flush to the edge; x9 stays wall ---
-assert.equal(Z.visualDoorBounds.w, 2, 'visual door is 2 cells wide');
-assert.equal(Z.visualDoorBounds.h, 1, 'visual door is on the wall row');
-assert.equal(Z.visualDoorBounds.y, 0, 'visual door is on the back wall (y0)');
-assert.ok(Z.visualDoorBounds.x + Z.visualDoorBounds.w <= 9, 'door never reaches x9 (x9 stays wall)');
-assert.deepEqual(Z.visualDoorBounds, {x: 7, y: 0, w: 2, h: 1}, 'door occupies x7-8');
+// --- ARCH-0575A: logical entrance is 2 INTEGER cells (x7-8); the VISUAL door LEAF is SMALLER ---
+assert.deepEqual(Z.logicalEntranceZone, {x: 7, y: 0, w: 2, h: 1}, 'logical entrance is the 2 cells x7-8 on the wall row');
+assert.ok(Z.logicalEntranceZone.x + Z.logicalEntranceZone.w <= 9, 'entrance never reaches x9 (x9 stays wall)');
+// visualDoorBounds is the drawn door leaf, in GRID-COORD space (cells 7-8 span 6.5..8.5, centre 7.5).
+const vd = Z.visualDoorBounds;
+assert.equal(vd.y, 0, 'visual door is on the back wall row');
+assert.ok(vd.w < 2, `visual door leaf is NARROWER than the 2-cell slot (w=${vd.w})`);
+assert.ok(vd.w >= 1.3 && vd.w <= 1.5, `visual door leaf is ~1.3-1.5 cells wide (w=${vd.w})`);
+assert.ok(Math.abs((vd.x + vd.w / 2) - 7.5) < 1e-6, 'visual door leaf is centred in the x7-8 entrance (gridX 7.5)');
+assert.ok(vd.x + vd.w <= 8.5, 'visual door stays within cells 7-8; x9 (gridX >= 8.5) is wall');
+assert.ok(vd.x >= 6.5, 'visual door does not spill left of the entrance');
 
 // --- single logical entry point + staging, both inside the door column ---
 assert.deepEqual(Z.customerEntryPoint, {x: 8, y: 0}, 'single entry cell at x8 on the wall row');
-assert.ok(rectContainsCell(Z.visualDoorBounds, Z.customerEntryPoint.x, Z.customerEntryPoint.y), 'entry point sits within the door');
+assert.ok(rectContainsCell(Z.logicalEntranceZone, Z.customerEntryPoint.x, Z.customerEntryPoint.y), 'entry point sits within the logical entrance');
 assert.deepEqual(Z.customerEntryStaging, {x: 8, y: 1}, 'staging is one cell in from the entry');
 assert.ok(rectContainsCell(Z.mainAisle, Z.customerEntryStaging.x, Z.customerEntryStaging.y), 'staging sits in the main aisle');
-assert.ok(rectContainsRect(Z.customerEntranceZone, Z.visualDoorBounds), 'entrance zone contains the visual door');
+assert.ok(rectContainsRect(Z.customerEntranceZone, Z.logicalEntranceZone), 'entrance zone contains the logical entrance');
 
 // --- three service layers are stacked and do NOT overlap; work side is behind the counter ---
 assert.equal(Z.staffWorkZone.y + Z.staffWorkZone.h, Z.serviceCounterLine.y, 'counter sits directly in front of the work side');
@@ -101,4 +106,4 @@ for (const [key, rectName] of [['work', 'staffWorkZone'], ['counter', 'serviceCo
 assert.deepEqual(counts, {work: 12, counter: 6, service: 6, seating: 12, cat: 12, aisle: 16, outer: 16},
   'clean partition: 64 core cells across work/counter/service/seating/cat/aisle, 16 outer');
 
-console.log('Ortho room zones: 2-cell door at x7-8 (x9 wall), single entry x8 + staging, three non-overlapping service layers, >=2-cell main aisle, core contains all key zones; zoneAt partitions the x1-6 bands + x7-8 aisle cleanly (one zone per cell); pure Node-testable grid data.');
+console.log('Ortho room zones: 2-cell LOGICAL entrance x7-8 (x9 wall) with a SMALLER ~1.4-cell visual door leaf centred in it, single entry x8 + staging, three non-overlapping service layers, >=2-cell main aisle, core contains all key zones; zoneAt partitions the x1-6 bands + x7-8 aisle cleanly; pure Node-testable grid data.');

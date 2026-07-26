@@ -2,19 +2,20 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-// Import via the same `?v=0575a` specifier the runtime uses so `instanceof` resolves
+// Import via the same `?v=0575b` specifier the runtime uses so `instanceof` resolves
 // against the same module instance GridSystem composes internally.
-import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0575a';
-import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0575a';
+import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0575b';
+import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0575b';
 import {OrthogonalProjection, ORTHOGONAL_PROJECTION_PARAMS, ORTHOGONAL_ROOM_RENDER}
-  from '../assets/js/systems/OrthogonalProjection.js?v=0575a';
-import {ORTHO_ZONE_KEYS} from '../assets/js/config/ortho-room-zones.js?v=0575a';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0575a';
-import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0575a';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0575a';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0575a';
+  from '../assets/js/systems/OrthogonalProjection.js?v=0575b';
+import {ORTHO_ZONE_KEYS} from '../assets/js/config/ortho-room-zones.js?v=0575b';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0575b';
+import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0575b';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0575b';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0575b';
 
 const approx = (a, b, eps = 1e-9) => Math.abs(a - b) <= eps;
+const lum = hex => 0.299 * ((hex >> 16) & 255) + 0.587 * ((hex >> 8) & 255) + 0.114 * (hex & 255);
 const {cols, rows} = ROOM_CONFIG.floor;
 const worldW = ROOM_CONFIG.worldWidth, worldH = ROOM_CONFIG.worldHeight;
 const spatial = new SpatialGrid(ROOM_CONFIG, FURNITURE_CONFIG);
@@ -77,12 +78,26 @@ for (const [x, y] of [[0, 0], [3, 5], [8, 6]]) {
 assert.deepStrictEqual(ortho.getCellDiamond(0, 0)[0], {x: 340, y: 80});
 assert.deepStrictEqual(ortho.getCellDiamond(cols - 1, rows - 1)[2], {x: 1220, y: 1040});
 assert.ok(minX >= 0 || true); // (bounds already asserted per-cell)
-assert.ok(ORTHOGONAL_ROOM_RENDER.wallHeight > 0 && ORTHOGONAL_ROOM_RENDER.door?.fill, 'render metadata present (wall + door surface)');
+assert.ok(ORTHOGONAL_ROOM_RENDER.wallHeight > 0, 'wall render metadata present');
 // ARCH-0573: the door sits on the LOWER wall and fits inside the full-bleed core strip.
 assert.ok(ORTHOGONAL_ROOM_RENDER.doorHeight > 0 && ORTHOGONAL_ROOM_RENDER.doorHeight <= ORTHOGONAL_ROOM_RENDER.coreTopStrip,
   'door height fits within the core top strip');
 assert.ok(ORTHOGONAL_ROOM_RENDER.coreTopStrip > 0 && ORTHOGONAL_ROOM_RENDER.coreTopStrip < ORTHOGONAL_ROOM_RENDER.wallHeight,
   'core top strip is a partial slice of the full wall (outer wall crops on the first screen)');
+// ARCH-0575A: the VISUAL SHELL extends the drawn room beyond the logical grid so the cafe reaches
+// the screen edges. Display-only extents; they do NOT change the grid or add placeable cells.
+const shell = ORTHOGONAL_ROOM_RENDER.shell;
+for (const k of ['side', 'top', 'bottom']) assert.ok(shell[k] > 0, `shell extends beyond the grid on ${k} (${shell[k]} px)`);
+assert.ok(lum(shell.floorFill) > 150, 'shell floor is a LIGHT neutral floor tone, not a dark border');
+// ARCH-0575A door prototype: a real cafe door, NOT a dark slab. Warm wood leaf clearly lighter
+// than a black hole; frame + glass + handle layers present.
+const dr = ORTHOGONAL_ROOM_RENDER.door;
+for (const part of ['frame', 'leaf', 'glass', 'handle']) assert.equal(typeof dr[part], 'number', `door has a ${part} colour`);
+assert.ok(lum(dr.leaf) > 140, `door leaf is a warm wood tone, not a black hole (lum ${lum(dr.leaf).toFixed(0)})`);
+assert.ok(lum(dr.glass) > lum(dr.leaf), 'the glass panel is lighter than the wood leaf (reads as glass)');
+assert.ok(lum(dr.leaf) > lum(dr.frame), 'the leaf is lighter than its frame (layered, not flat)');
+assert.ok(ORTHOGONAL_ROOM_RENDER.doorHeight >= 110 && ORTHOGONAL_ROOM_RENDER.doorHeight <= 135,
+  'door height is a natural ~1-cell door (~115-130 px), not a 2-cell slab');
 
 // --- C. Footprint: logical cells identical to iso; polygon is an axis-aligned rect ---
 const footCases = [
@@ -159,7 +174,6 @@ assert.deepStrictEqual(probe(gOrthoAlias), probe(gOrtho), 'alias and ortho behav
 // The x0/x9 columns are painted with the `outer` tint; it (and every tint) must be a LIGHT
 // floor colour so the room edges never read as a shadow / unusable dark bar.
 const zf = ORTHOGONAL_ROOM_RENDER.zoneFloor;
-const lum = hex => 0.299 * ((hex >> 16) & 255) + 0.587 * ((hex >> 8) & 255) + 0.114 * (hex & 255);
 for (const key of ORTHO_ZONE_KEYS) {
   assert.equal(typeof zf[key], 'number', `zoneFloor has a colour for every zone key: ${key}`);
   assert.ok(lum(zf[key]) > 150, `zone '${key}' floor is a LIGHT tint (lum ${lum(zf[key]).toFixed(0)} > 150), not a dark band`);

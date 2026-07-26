@@ -6,8 +6,8 @@
 
 | 項目 | 現況 |
 |---|---|
-| 版本 | `V0.57.5-alpha｜正交滿版操作修正版` |
-| Build ID | `0575a` |
+| 版本 | `V0.57.5-alpha｜正交房間外殼與門比例修正版` |
+| Build ID | `0575b` |
 | package version | `0.57.5-alpha` |
 | 引擎 | Phaser `3.90.0`，Canvas renderer |
 | 引擎來源 | `assets/vendor/phaser-3.90.0.min.js` |
@@ -31,7 +31,8 @@
   - `ARCH-0572`（[DEC-019](./decisions.md)）：正交房間比例 cellWidth 104→88／cellHeight 88→120＋整面背牆，房間占 canvas ~44%→~78%；右上角單格入口門、上方連續櫃檯帶；Demo 17 件。
   - `ARCH-0573`（[DEC-020](./decisions.md)）：首屏由「整房 contain」改為「**核心營業區滿版**」。分離 **roomBounds**（整房＝pan/zoom-out 範圍）與 **coreGameplayBounds**（首屏取景＝x1-8＋短牆條）；核心縱向占 safe viewport 96/95/93%、裁切 ~8%。入口改為 **x7-8 兩格視覺門**（x9 留牆；`customerEntryPoint=(8,0)`、staging `(8,1)`；logical 存檔入口 `(8,7)/(9,7)` 不變）。
   - `ARCH-0574`（[DEC-021](./decisions.md)）：**營業區聚焦與分區辨識**。分區地板底色（`zoneAt`＋`zoneFloor`）＋分區收斂 x1-6 乾淨分割＋Demo 加密 23 件（連續設備帶/櫃檯、兩組座位、集中貓咪角，占用 ~28%→~48%）。
-  - **`ARCH-0575`（[DEC-022](./decisions.md)，本版）**：**滿版取景、Zoom/Pan 修正與分區視覺清理**。**P0 修好 zoom-in 後平移**（根因：clamp 讀到只在 preRender 更新的過期 `camera.midPoint`；改由即時 `scrollX+width/2` 推導中心 `viewCentre()`）；**清除左右深色直條**（`zoneFloor.outer` 由暗色改中性淺色、全 tint 低對比）；**顯著減少留白**（`marginCss 10→8`、`toolbarReserveCss 78→40`、背牆加高為有家具的背牆 wallHeight 155→260/coreTopStrip 138→220/doorHeight 118→168 ＋ wainscot 護牆板、背景近地板暖色），上下留白 V0574 ~44px → **18/19/26px（390/393/430）**。zoom-in 後 X/Y 皆可 pan（真實拖曳 scrollX 289→880）、四邊 clamp、minZoom 整房、門完整可見。**cell 88×120 不變、未重畫家具、未建第二套 CameraController；門在 x7-8＋88×120 使 portrait 天生 width-constrained，無法在不裁門下 100% 填滿（單件家具未放大）。** real-browser before/after 證據 `docs/evidence/v0575/`＋`metrics.json`；見 [V0575 結果](./V0575_ORTHOGONAL_FULLBLEED_PAN_RESULT.md)、[驗收](./V0575_ORTHOGONAL_FULLBLEED_PAN_ACCEPTANCE.md)、[比較 HTML](./V0575_ORTHOGONAL_FULLBLEED_PAN_COMPARISON.html)。手機實機再驗收 pending。
+  - **`ARCH-0575A`（[DEC-023](./decisions.md)，本版，Build 0575b）**：**房間視覺外殼滿版化與入口門比例修正**。留白根因為房間外殼只畫到邏輯 Grid；改為把**牆＋地板視覺外殼畫到超出 Grid**（`ORTHOGONAL_ROOM_RENDER.shell`）延伸至 safe viewport 邊緣，手機首屏外圈背景 ~18px→**~0px**（純視覺、**不新增 placeable cells**、不改 Grid/存檔；細牆腳線取代粗卡片外框）。**視覺門與邏輯入口分離**：`logicalEntranceZone` 維持兩格 x7-8，新增較小 `visualDoorBounds`（~1.4 格、123×124 world px、置中 x7-8、x9 牆），門改為分層繪製（門框＋玻璃格窗＋黃銅門把＋木門扇，非深色黑洞）。**Zoom/Pan 核心凍結**（CameraController 未改），real-browser 拖曳 pan 回歸通過。`customerEntryPoint (8,0)`／staging／舊存檔入口 `(8,7)/(9,7)`／cell 88×120 皆不變。real-browser 證據 `docs/evidence/v0575b/`＋`metrics.json`；見 [V0575B 結果](./V0575B_ORTHOGONAL_ROOM_SHELL_RESULT.md)、[驗收](./V0575B_ORTHOGONAL_ROOM_SHELL_ACCEPTANCE.md)、[比較 HTML](./V0575B_ORTHOGONAL_ROOM_SHELL_COMPARISON.html)。手機實機再驗收 pending。
+  - `ARCH-0575`（[DEC-022](./decisions.md)）：**滿版取景、Zoom/Pan 修正與分區視覺清理**。**P0 修好 zoom-in 後平移**（根因：clamp 讀到只在 preRender 更新的過期 `camera.midPoint`；改由即時 `scrollX+width/2` 推導中心 `viewCentre()`）；**清除左右深色直條**（`zoneFloor.outer` 由暗色改中性淺色、全 tint 低對比）；**顯著減少留白**（`marginCss 10→8`、`toolbarReserveCss 78→40`、背牆加高為有家具的背牆 wallHeight 155→260/coreTopStrip 138→220/doorHeight 118→168 ＋ wainscot 護牆板、背景近地板暖色），上下留白 V0574 ~44px → **18/19/26px（390/393/430）**。zoom-in 後 X/Y 皆可 pan（真實拖曳 scrollX 289→880）、四邊 clamp、minZoom 整房、門完整可見。**cell 88×120 不變、未重畫家具、未建第二套 CameraController；門在 x7-8＋88×120 使 portrait 天生 width-constrained，無法在不裁門下 100% 填滿（單件家具未放大）。** real-browser before/after 證據 `docs/evidence/v0575/`＋`metrics.json`；見 [V0575 結果](./V0575_ORTHOGONAL_FULLBLEED_PAN_RESULT.md)、[驗收](./V0575_ORTHOGONAL_FULLBLEED_PAN_ACCEPTANCE.md)、[比較 HTML](./V0575_ORTHOGONAL_FULLBLEED_PAN_COMPARISON.html)。手機實機再驗收 pending。
 
 ## B. 架構地圖
 
@@ -51,7 +52,7 @@
 | 模組 | 單一責任 |
 |---|---|
 | `BootScene` | 預載家具／貓咪／環境 texture、回報進度、建立缺圖 fallback、啟動 `CafeScene` |
-| `CafeScene` | 組裝 state、systems、entities、controllers 與場景生命週期；ortho 由 `buildOrthoFraming` 提供 core/room bounds、`drawRoomOrtho` 由 zones 畫房間、兩格門與**分區地板底色**（`zoneAt`＋`zoneFloor`） |
+| `CafeScene` | 組裝 state、systems、entities、controllers 與場景生命週期；ortho 由 `buildOrthoFraming` 提供 core/room bounds、`drawRoomOrtho` 畫**延伸至邊緣的視覺外殼**（`shell`，超出 Grid 但不新增可放置格）、分區地板底色（`zoneAt`＋`zoneFloor`）與**較小分層入口門**（`visualDoorBounds`，與兩格 `logicalEntranceZone` 分離） |
 | `GridSystem` | Grid ↔ world、cell 矩形、footprint cells／polygon、anchor、placeable mask（投影無關；ortho 為軸對齊矩形） |
 | `OccupancySystem` | `floorDecoration`、`floorObject`、`wallObject`、`character`、`reserved` 分層占用與 walkability snapshot |
 | `PlacementSystem` | 邊界、placeable、入口、牆面與重疊驗證；椅桌關係不作拖曳硬阻擋 |
@@ -100,12 +101,12 @@
 
 ## F. 測試狀態
 
-### 本次任務（ARCH-0575）實際執行
+### 本次任務（ARCH-0575A，Build 0575b）實際執行
 
-- `node check.js --deploy`：通過（Build `0575a`、35 DOM IDs、13 nested selectors、**55** JavaScript modules）。
-- `node check.js --dev`：通過（含**本機真實 Chrome** browser smoke：ortho 首屏核心可見、**zoom-in 真實指標拖曳後 X/Y scroll 皆改變且四邊 clamp**、x0/x9 取樣非暗帶、可 zoom-out 至整房、demo 不寫存檔、invalid 回退 iso）。
-- 個別：`camera-framing`（zoom-in 兩軸 pan range>0、view>room 鎖中心、core fill）、`ortho-projection`（zoneFloor 每 zone 淺色無暗帶、outer/aisle 中性、backdrop 暖色、身份中性）、`ortho-demo-layout`（23 件）、`ortho-room-zones`（zoneAt 分割）、`grid-projection-compat`（iso/Flat golden 未改）皆通過。
-- 16 張 real-browser 證據（`docs/evidence/v0575/`）＋`metrics.json`（每張 zoom/scroll/worldView/pan range/margins）＋before(V0574)/after(V0575) 零 page error。
+- `node check.js --deploy`：通過（Build `0575b`、35 DOM IDs、13 nested selectors、**55** JavaScript modules）。
+- `node check.js --dev`：通過（含**本機真實 Chrome** browser smoke：**shell external margin≈0（外殼延伸滿版）**、**door 中央非暗塊（門非黑洞）**、zoom-in 真實指標拖曳後 X/Y scroll 皆改變且四邊 clamp、x0/x9 取樣非暗帶、可 zoom-out 至整房、demo 不寫存檔、invalid 回退 iso）。
+- 個別：`ortho-room-zones`（門幾何：logicalEntranceZone 兩格、visualDoorBounds<2 格/置中 x7-8/x9 牆）、`ortho-projection`（shell 延伸、door leaf 非暗、glass>leaf>frame 層次、doorHeight~124）、`camera-framing`（pan range>0，未改）、`ortho-demo-layout`（23 件）、`grid-projection-compat`（iso/Flat golden 未改）皆通過。
+- 18 張 real-browser 證據（`docs/evidence/v0575b/`）＋`metrics.json`（每張 visualShellBounds/visualDoorBounds/logicalEntranceZone/externalMargin/pan range）＋before(0575a)/after(0575b)＋門 before/after 零 page error。
 
 ### Repository 內已有
 

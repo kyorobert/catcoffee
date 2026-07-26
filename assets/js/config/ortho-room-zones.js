@@ -14,10 +14,16 @@ export const ORTHO_ROOM_ZONES = Object.freeze({
   grid: Object.freeze({cols: 10, rows: 8}),
 
   // --- customer entrance (top-right, not flush to the edge) ---
-  visualDoorBounds: Object.freeze({x: 7, y: 0, w: 2, h: 1}),   // 2-cell door on the wall; x9 = wall
+  // logicalEntranceZone is the 2 INTEGER wall cells the entrance occupies (x7-8, x9 stays wall).
+  logicalEntranceZone: Object.freeze({x: 7, y: 0, w: 2, h: 1}),
   customerEntranceZone: Object.freeze({x: 7, y: 0, w: 2, h: 2}),
   customerEntryPoint: Object.freeze({x: 8, y: 0}),             // single logical entry cell
   customerEntryStaging: Object.freeze({x: 8, y: 1}),           // where a customer stands after entering
+  // visualDoorBounds is the SMALLER visual door LEAF (ARCH-0575A), NOT the whole 2-cell slot:
+  // it is ~1.4 cellWidths wide, centred inside the 2-cell entrance. Its x/w are in GRID-COORD
+  // space (cell centres at integers; cells 7-8 span gridX 6.5..8.5, centre 7.5), so the renderer
+  // projects its x and x+w columns to the world. x9 (gridX 8.5..9.5) stays wall.
+  visualDoorBounds: Object.freeze({x: 6.8, y: 0, w: 1.4, h: 1}),
 
   // --- functional bands occupy the LEFT/CENTRE columns x1-6; the right columns x7-8 are the
   //     aisle. ARCH-0574 makes the bands a clean, non-overlapping partition of x1-6 (one zone
