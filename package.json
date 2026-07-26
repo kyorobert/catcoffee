@@ -17,6 +17,7 @@
     "test:build": "node ./tests/build-consistency.test.js",
     "test:http": "node ./tests/http.test.js",
     "test:browser": "node ./tests/browser-smoke.test.js",
+    "test:entrance": "node ./tests/entrance-migration.test.js",
     "test:ortho-area": "node ./tests/ortho-playable-area-skin.test.js",
     "test:furniture-visual": "node ./tests/furniture-visual-config.test.js",
     "test:furniture-classification": "node ./tests/furniture-art-classification.test.js",

@@ -2,16 +2,16 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {ORTHO_ROOM_ZONES,ORTHO_ZONE_KEYS,zoneAt}
-  from '../assets/js/config/ortho-room-zones.js?v=0576a';
+import {ORTHO_ROOM_ZONES,ORTHO_ENTRANCE_CELLS,ORTHO_ZONE_KEYS,zoneAt}
+  from '../assets/js/config/ortho-room-zones.js?v=0576b';
 import {
   DEFAULT_ORTHOGONAL_ROOM_SKIN as SKIN,
   getOrthogonalCellAppearance,
   getOrthogonalRoomSkin
-} from '../assets/js/config/ortho-room-skin.js?v=0576a';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0576a';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0576a';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0576a';
+} from '../assets/js/config/ortho-room-skin.js?v=0576b';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0576b';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0576b';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0576b';
 
 const luminance = hex =>
   0.299 * ((hex >> 16) & 255) + 0.587 * ((hex >> 8) & 255) + 0.114 * (hex & 255);
@@ -31,12 +31,30 @@ for(let y=0;y<ROOM_CONFIG.floor.rows;y++)for(let x=0;x<ROOM_CONFIG.floor.cols;x+
   if(placeable)assert.equal(appearance.fill,SKIN.floor.zoneFill[zoneAt(x,y)],`cell ${x},${y} uses its zone palette`);
   else assert.equal(appearance.fill,SKIN.floor.reserved.fill,`cell ${x},${y} uses reserved treatment`);
 }
-assert.equal(ROOM_CONFIG.floor.placeableMask[7][8],false);
-assert.equal(ROOM_CONFIG.floor.placeableMask[7][9],false);
+assert.deepEqual(ORTHO_ENTRANCE_CELLS,[{x:7,y:0},{x:8,y:0}]);
+assert.equal(ROOM_CONFIG.floor.placeableMask[0][7],false);
+assert.equal(ROOM_CONFIG.floor.placeableMask[0][8],false);
+assert.equal(ROOM_CONFIG.floor.placeableMask[7][8],true);
+assert.equal(ROOM_CONFIG.floor.placeableMask[7][9],true);
+assert.deepEqual(ROOM_CONFIG.entrance.cells,ORTHO_ENTRANCE_CELLS);
+assert.equal(ROOM_CONFIG.floor.placeableMask.flat().filter(Boolean).length,78,'exactly 78 logical floor cells remain placeable');
 
 // B. The beyond-grid shell is fixed architecture, not a floor-like extension.
 assert.equal(SKIN.shell.role,'fixed-architecture');
-for(const extent of ['side','top','bottom'])assert.ok(SKIN.shell[extent]>0,`shell has ${extent} extent`);
+assert.equal(SKIN.shell.material,'narrow-wood-trim');
+for(const extent of ['sideThicknessWorld','topExtensionWorld','bottomThicknessWorld']){
+  assert.ok(SKIN.shell[extent]>0,`shell has ${extent} extent`);
+}
+for(const {width,zoom} of [
+  {width:390,zoom:.53125},
+  {width:393,zoom:.5355},
+  {width:430,zoom:.588}
+]){
+  const sideCss=SKIN.shell.sideThicknessWorld*zoom;
+  const bottomCss=SKIN.shell.bottomThicknessWorld*zoom;
+  assert.ok(sideCss>=8&&sideCss<=16,`${width}px side shell is ${sideCss.toFixed(1)} CSS px`);
+  assert.ok(bottomCss>=8&&bottomCss<=16,`${width}px bottom shell is ${bottomCss.toFixed(1)} CSS px`);
+}
 const lightestDistance=Math.min(...Object.values(SKIN.floor.zoneFill)
   .map(color=>Math.abs(luminance(color)-luminance(SKIN.shell.fill))));
 assert.ok(lightestDistance>35,`shell luminance is visibly separated from every playable floor tint (${lightestDistance.toFixed(1)})`);
@@ -46,18 +64,19 @@ assert.ok(SKIN.floor.playableBoundary.width>=2,'playable area has an explicit bo
 // C. Representative edge placements use the one PlacementSystem/footprint source.
 for(const sample of [
   ['chair',0,0,0],                  // 1x1 top-left
-  ['chair',9,6,0],                 // 1x1 right edge, above reserved entrance
+  ['chair',9,7,0],                 // old bottom entrance is released
   ['doubleCatTree',0,6,0],         // 1x2 bottom-left edge
   ['catCastle',0,6,0],             // 2x2 bottom-left corner
-  ['catCastle',8,0,0]              // 2x2 top-right corner
+  ['catCastle',8,6,0]              // 2x2 bottom-right corner
 ]){
   const [type,x,y,r]=sample;
   assert.equal(validate(type,x,y,r).valid,true,`${type} ${x},${y} r${r} is a valid visible edge placement`);
 }
-assert.equal(validate('chair',9,7).blockingReason,'reserved-entrance','reserved bottom edge is explicitly blocked');
+assert.equal(validate('chair',7,0).blockingReason,'reserved-entrance','new top entrance is explicitly blocked');
+assert.equal(validate('chair',8,0).blockingReason,'reserved-entrance','both formal entrance cells are blocked');
 assert.equal(validate('doubleCatTree',9,7).blockingReason,'out-of-bounds','1x2 beyond bottom edge is out of bounds');
 assert.equal(validate('catCastle',9,6).blockingReason,'out-of-bounds','2x2 beyond right edge is out of bounds');
-assert.equal(validate('catCastle',7,6).blockingReason,'reserved-entrance','2x2 touching reserved entrance is blocked consistently');
+assert.equal(validate('catCastle',6,0).blockingReason,'reserved-entrance','2x2 touching the new entrance is blocked consistently');
 
 // A point in the visible architectural shell snaps outside the logical grid and is rejected.
 const topLeft=grid.getCellDiamond(0,0)[0];

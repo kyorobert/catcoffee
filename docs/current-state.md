@@ -1,11 +1,13 @@
 # V0.57.6-alpha 專案現況
 
-## Build 0576a（ARCH-0575C）
+## Build 0576b（ARCH-0576A）
 
 - 正交模式仍為 opt-in；iso 仍是預設／rollback。
-- 新 `ortho-room-skin.js` 是正交房間 visual tokens 的唯一來源；`OrthogonalProjection` 回到純幾何。
-- 10×8 logical grid／placeableMask 未變：78 格 playable、舊入口 `(8,7)/(9,7)` 兩格 reserved。
-- playable cell 使用 zone floor palette；reserved cell 使用 threshold；Grid 外滿版 shell 使用深木 `fixed-architecture` panel/trim，不再像可放置地板。
+- 家具 context toolbar 已有 44×44 CSS px 以上觸控區；Cancel 會完整清除 selection／InputMode／Camera lock。
+- `ortho-room-skin.js` 左右／下框架改為手機初始視角約 12.8–15.3 px 的窄建築帶，上牆保留。
+- 10×8 logical grid 仍為 78 格 playable；正式入口改由 `logicalEntranceZone` 產生 `(7,0)/(8,0)` mask，舊 `(8,7)/(9,7)` 已釋放。
+- `migrationCompletedVersion=5402`；入口衝突家具一次性 archive＋inventory，Demo 唯讀不遷移、不寫 save。
+- `CURRENT_KEY=catCafePhaserV0540`、`sceneSchemaVersion=5401`、CameraController／Grid 幾何／家具 ID 與 footprint 均未改。
 - 門的 visual geometry/style 由 Skin 管理；logical entrance metadata 仍由 `ortho-room-zones.js` 管理。
 - `FurnitureDragController.evaluateCandidate()` 統一 preview/commit evaluation；candidate 變動以 signature 失效。
 - CameraController、Grid/Occupancy/Placement、save key/schema、furniture data contract 未改。

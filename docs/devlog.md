@@ -1,5 +1,14 @@
 # 開發日誌
 
+## 2026-07-26：V0.57.6-alpha / ARCH-0576A / Build 0576b
+
+- 基線真實 Chrome 重現：Cancel 中心 `elementFromPoint` 命中按鈕、click count=1，但 selection 不清除；根因為 Scene 公開取消流程只清 drag arm，並非 Canvas／overlay 搶事件。
+- context toolbar 手機 hit target 改為至少 44×44 px；Cancel、Store、Sell 完成 InputMode／Camera／selection 清理。
+- `logicalEntranceZone` 成為入口 mask 唯一來源：reserved `(7,0)/(8,0)`，舊 `(8,7)/(9,7)` 釋放，playable count 維持 78。
+- Room Skin shell 攁為窄木作：390／393／430 初始視角分別約 12.75／12.85／14.11 px（side）。
+- Save migration 5402 完成 1×1／1×2／2×2 安全 archive＋inventory、冪等重載、單次 Toast；Demo read-only。
+- 安裝版 Chrome 真實 touch、visualViewport 尺寸變更、zoom/pan、入口、migration 與所有既有 smoke 通過；證據在 `docs/evidence/v0576b/`。
+
 ## 2026-07-26：V0.57.6-alpha / ARCH-0575C
 
 - 修改前 gate：`npm test`、`check:deploy`、`check:dev`（含 Chrome smoke）全數通過。

@@ -65,33 +65,38 @@ export const DEFAULT_ORTHOGONAL_ROOM_SKIN = deepFreeze({
       innerColor: 0xf6ddb6,
       innerAlpha: 0.72
     },
-    // Cells inside the logical grid that are intentionally reserved (the legacy
-    // entrance cells) get a threshold treatment instead of normal floor colour.
+    // Cells inside the formal top entrance zone get a shallow threshold treatment
+    // instead of becoming dark, full-cell floor blocks.
     reserved: {
-      fill: 0xa57a5a,
-      insetFill: 0xbc9470,
+      role: 'entrance-threshold',
+      fill: 0xe1bb8d,
+      insetFill: 0xc99567,
       line: 0x76513f,
-      alpha: 1
+      alpha: 1,
+      bandDepth: 16,
+      bandInset: 4
     }
   },
 
-  // Fixed architectural apron outside the grid. The darker wood, inset panels and
-  // double trim deliberately distinguish it from the light placeable floor.
+  // Fixed architectural edging outside the grid. Left/right/bottom are deliberately
+  // narrow: at the supported portrait fit zooms these tokens render at roughly 8–16
+  // CSS px. The top extension remains large enough for the complete Room Skin wall.
   shell: {
     role: 'fixed-architecture',
-    side: 84,
-    top: 120,
-    bottom: 132,
+    material: 'narrow-wood-trim',
+    sideThicknessWorld: 24,
+    topExtensionWorld: 120,
+    bottomThicknessWorld: 26,
     fill: 0x8c674f,
     insetFill: 0xa77b5a,
     panelLine: 0x72503f,
     panelLineAlpha: 0.55,
-    panelInset: 13,
-    panelStep: 42,
+    panelInset: 5,
+    panelStep: 18,
     trimColor: 0x5f4437,
-    trimWidth: 5,
+    trimThickness: 4,
     highlightColor: 0xd5ae7e,
-    highlightWidth: 2
+    edgeHighlight: 1
   },
 
   door: {

@@ -2,16 +2,16 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-// Import via the same `?v=0576a` specifier the runtime uses so `instanceof` resolves
+// Import via the same `?v=0576b` specifier the runtime uses so `instanceof` resolves
 // against the same module instance GridSystem composes internally.
-import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0576a';
-import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0576a';
+import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0576b';
+import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0576b';
 import {OrthogonalProjection, ORTHOGONAL_PROJECTION_PARAMS}
-  from '../assets/js/systems/OrthogonalProjection.js?v=0576a';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0576a';
-import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0576a';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0576a';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0576a';
+  from '../assets/js/systems/OrthogonalProjection.js?v=0576b';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0576b';
+import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0576b';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0576b';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0576b';
 
 const approx = (a, b, eps = 1e-9) => Math.abs(a - b) <= eps;
 const {cols, rows} = ROOM_CONFIG.floor;

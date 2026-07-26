@@ -1,7 +1,7 @@
-import {ToastManager} from '../systems/ToastManager.js?v=0576a';
-import {StorePanel} from './StorePanel.js?v=0576a';
-import {CarePanel} from './CarePanel.js?v=0576a';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0576a';
+import {ToastManager} from '../systems/ToastManager.js?v=0576b';
+import {StorePanel} from './StorePanel.js?v=0576b';
+import {CarePanel} from './CarePanel.js?v=0576b';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0576b';
 
 export class UiBridge {
   constructor(game, saveAdapter, furnitureConfig, {startup = null, dom} = {}) {
@@ -86,6 +86,11 @@ export class UiBridge {
 
   bindButtons() {
     const options = {signal: this.abortController.signal};
+    // Keep real touch/pointer events inside the DOM context toolbar. The canvas is
+    // deliberately not covered by an interactive overlay, while these controls
+    // remain explicit 44px targets above it.
+    this.dom.selectionBar.addEventListener('pointerdown', event => event.stopPropagation(), options);
+    this.dom.selectionBar.addEventListener('pointerup', event => event.stopPropagation(), options);
     this.dom.openStoreBtn.addEventListener('click', () => this.store.open(), options);
     this.dom.helperBtn.addEventListener('click', () => this.scene()?.togglePlacementHelper(), options);
     this.dom.careBtn.addEventListener('click', () => this.care.open(this.saveAdapter.state, this.selectedCatId), options);

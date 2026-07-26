@@ -3,8 +3,8 @@
 // can be projected to world bounds by any projection. This is SCENE SPATIAL SEMANTICS for
 // the prototype (where the door / counter / seating / cats / aisle are and which region the
 // first screen should full-bleed). It is NOT StationRegistry and NOT CustomerFlowSystem;
-// no cashier / cooking / serving / AI logic lives here. It never touches the save: the
-// logical save entrance in room-config ((8,7)/(9,7)) is unchanged.
+// no cashier / cooking / serving / AI logic lives here. ARCH-0576A promotes
+// logicalEntranceZone to the single source used to generate ROOM_CONFIG's reserved mask.
 //
 // Rectangles are {x, y, w, h} in grid cells (x/y top-left inclusive, w/h in cells). The
 // customer entrance occupies a 2-cell logical zone on the top wall at the right; x9 stays
@@ -46,6 +46,23 @@ export const ORTHO_ROOM_ZONES = Object.freeze({
 // The x1-6 bands partition cleanly (one zone per cell); x7-8 is the aisle; the rest is outer.
 // ('work' = the walk-behind band behind the counter — kept identity-neutral.)
 export const ORTHO_ZONE_KEYS = Object.freeze(['work', 'counter', 'service', 'seating', 'cat', 'aisle', 'outer']);
+export const ORTHO_ENTRANCE_CELLS = Object.freeze(
+  zoneCells(ORTHO_ROOM_ZONES.logicalEntranceZone).map(cell => Object.freeze(cell))
+);
+
+// Create the shared logical mask from zone metadata. Room config consumes this helper;
+// Scene, Placement and drag code never carry their own entrance-cell list.
+export function buildOrthogonalPlaceableMask(
+  {cols, rows} = ORTHO_ROOM_ZONES.grid,
+  reservedCells = ORTHO_ENTRANCE_CELLS
+) {
+  const mask = Array.from({length: rows}, () => Array(cols).fill(true));
+  reservedCells.forEach(({x, y}) => {
+    if (x >= 0 && x < cols && y >= 0 && y < rows) mask[y][x] = false;
+  });
+  return mask;
+}
+
 export function zoneAt(x, y, zones = ORTHO_ROOM_ZONES) {
   if (x < 1 || x > 8 || y < 0 || y > 7) return 'outer';
   if (x >= 7) return 'aisle';                                  // x7-8: the right-side spine

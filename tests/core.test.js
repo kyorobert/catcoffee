@@ -17,7 +17,9 @@ for(let y=0;y<ROOM_CONFIG.floor.rows;y++)for(let x=0;x<ROOM_CONFIG.floor.cols;x+
 assert.deepEqual(grid.getFootprintSize('woodTable',0),[2,1]);
 assert.deepEqual(grid.getFootprintSize('woodTable',1),[1,2]);
 assert.equal(grid.isPlaceableCell(0,0),true);
-assert.equal(grid.isPlaceableCell(9,7),false);
+assert.equal(grid.isPlaceableCell(7,0),false);
+assert.equal(grid.isPlaceableCell(8,0),false);
+assert.equal(grid.isPlaceableCell(9,7),true);
 assert.equal(grid.isInsideGrid(10,0),false);
 
 for(const [type,x,y,rotation] of [['plant',4,3,0],['woodTable',2,2,0],['woodTable',2,2,1]]){
@@ -58,7 +60,7 @@ assert.equal(occupancy.canOccupy(grid.getFootprintCells('plant',0,3,0),{layer:'f
 occupancy.build([]);
 const placement=new PlacementSystem(grid,occupancy,FURNITURE_CONFIG);
 assert.equal(placement.validatePlacement({type:'plant',x:4,y:4,rotation:0}).valid,true);
-assert.equal(placement.validatePlacement({type:'plant',x:9,y:7,rotation:0}).blockingReason,'reserved-entrance');
+assert.equal(placement.validatePlacement({type:'plant',x:7,y:0,rotation:0}).blockingReason,'reserved-entrance');
 occupancy.addItem({id:'plant-a',type:'plant',x:4,y:4,r:0});
 assert.equal(placement.validatePlacement({type:'plant',x:4,y:4,rotation:0}).blockingReason,'overlap');
 const chairResult=placement.validatePlacement({type:'chair',x:1,y:1,rotation:0});
@@ -73,7 +75,7 @@ class MemoryStorage{
   removeItem(key){this.values.delete(key)}
 }
 const unknownItem={id:'legacy-unknown',type:'futureFurniture',x:8,y:1,r:0};
-const invalidItem={id:'legacy-invalid',type:'plant',x:9,y:7,r:0};
+const invalidItem={id:'legacy-invalid',type:'plant',x:7,y:0,r:0};
 const legacy={coins:777,reputation:333,xp:99,items:[{id:'legacy-chair',type:'chair',x:3,y:2,r:1},unknownItem,invalidItem]};
 const legacyRaw=JSON.stringify(legacy);
 const storage=new MemoryStorage({catCafeDecorV049:legacyRaw});
@@ -90,7 +92,7 @@ assert.ok(storage.getItem(CURRENT_KEY),'new Phaser save key is created');
 adapter.migrateIfNeeded(grid);
 assert.equal(adapter.state.migrationCompletedVersion,MIGRATION_COMPLETED_VERSION);
 assert.equal(adapter.state.inventory.plant,1,'invalid furniture is moved to inventory once');
-assert.equal(adapter.state.migrationArchive.find(entry=>entry.item?.id===invalidItem.id)?.reason,'reserved-cell');
+assert.equal(adapter.state.migrationArchive.find(entry=>entry.item?.id===invalidItem.id)?.reason,'entrance-relocated');
 const warningCount=adapter.state.migrationWarnings.length;
 adapter.migrateIfNeeded(grid);
 assert.equal(adapter.state.inventory.plant,1,'repeat Scene creation does not duplicate inventory');

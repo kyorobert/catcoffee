@@ -1,5 +1,21 @@
 # 專案決策紀錄
 
+## DEC-025：正交入口由 zone metadata 產生唯一 mask，框架維持窄建築帶
+
+- 日期：2026-07-26
+- 狀態：Accepted
+- Task：`ARCH-0576A-ORTHOGONAL-INTERACTION-SHELL-AND-ENTRANCE-CLEANUP`
+- 決策：
+  - 家具 context toolbar 的 Rotate／Store／Sell／Cancel 必須是至少 44×44 CSS px 的真實 DOM 觸控目標；Cancel 必須同時清理 drag、selection、InputMode 與 Camera lock。
+  - 左、右、下 shell 在 390／393／430 初始手機視角維持約 8–16 CSS px；上牆保留 Room Skin 完整內容。shell 不新增 placeable cell。
+  - 正式入口由 `ORTHO_ROOM_ZONES.logicalEntranceZone` 產生 `ORTHO_ENTRANCE_CELLS` 與 `placeableMask`；Scene、Placement、Preview、Commit、Occupancy、Pathfinding 不得保有第二份入口清單。
+  - 正式 reserved entrance 為 `(7,0)`、`(8,0)`；舊 `(8,7)`、`(9,7)` 釋放為可玩地板。10×8 Grid 與 78 個 placeable cells 維持。
+  - `migrationCompletedVersion=5402` 對 footprint 與新入口相交的 instance 執行一次性安全入庫，完整 archive `id/type/x/y/r` 與衝突格；不得遺失、重複入庫或重複 Toast。
+  - Demo 使用唯讀存檔 Adapter，不遷移、不寫入正式 state。
+- 不變：`catCafePhaserV0540`、`sceneSchemaVersion=5401`、CameraController 核心、Grid 幾何、家具 ID／footprint、iso／flat rollback。
+- 後果：V0576 的手機輸入、視覺 shell 與入口邏輯使用一致來源；`ART-0577-CORE-ORTHOGONAL-FURNITURE` 未在本任務開始。
+- 證據：[結果](./V0576B_ORTHOGONAL_INTERACTION_ENTRANCE_RESULT.md)、[驗收](./V0576B_ORTHOGONAL_INTERACTION_ENTRANCE_ACCEPTANCE.md)、[比較](./V0576B_ORTHOGONAL_INTERACTION_ENTRANCE_COMPARISON.html)、`docs/evidence/v0576b/`。
+
 ## DEC-024：正交可玩區以 placeableMask 為唯一視覺與放置真相；Room Skin 與 Projection 分離
 
 - 日期：2026-07-26

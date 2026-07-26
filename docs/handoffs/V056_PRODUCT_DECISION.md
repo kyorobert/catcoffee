@@ -1,5 +1,7 @@
 # V0.56 產品決策交接（給產品負責人）
 
+> **更新（2026-07-26f，V0.57.6-alpha / Build 0576b）**：`ARCH-0576A` 已完成。iPhone 尺寸 context toolbar 的四個動作已用真實 Chrome touch 中心驗證，Cancel 會完整清理 selection/InputMode/Camera；左右／下 shell 已縮至 8–16 CSS px 範圍。正式入口由 `logicalEntranceZone` 唯一產生 `(7,0)/(8,0)` mask，舊底部入口釋放；migration 5402 安全入庫且冪等，Demo 唯讀。CameraController、Grid 幾何、家具資料與 save key 未改。iPhone Safari 真機 Gate 仍 pending；`ART-0577` 未開始。
+
 > **更新（2026-07-26e，V0.57.6-alpha / Build 0576a）**：`ARCH-0575C` 已完成。V0575B 的非可玩 shell 不再使用類地板淺色，改為明確 `fixed-architecture` 木作帶；playable cell 視覺直接由既有 placeableMask 驅動。新增 Room Skin foundation，牆／護牆板／收邊／floor palette／door geometry+style／decor anchors 與 Projection 幾何分離。家具 preview/commit 共用 candidate evaluation，1×1/1×2/2×2 邊界測試通過。V0575 zoom/pan/clamp、Grid/Occupancy/Placement、存檔契約未改。Chrome 390/393/430 與 desktop smoke 通過；iPhone 真機仍 pending。請先完成真機 Gate，再決定是否批准 `ART-0576-CORE-ORTHOGONAL-FURNITURE`。
 
 - 任務 ID：`ARCH-0560-FLAT-CAFE-AUDIT`

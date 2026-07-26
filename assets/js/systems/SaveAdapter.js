@@ -1,7 +1,7 @@
 export const CURRENT_KEY='catCafePhaserV0540';
 export const LEGACY_SAVE_KEYS=Object.freeze(['catCafeDecorV049','catCafeDecorV048','catCafeDecorV0473','catCafeDecorV04703']);
 export const LEGACY_BACKUP_KEY='catCafeLegacySaveBackupV0532';
-export const MIGRATION_COMPLETED_VERSION=5401;
+export const MIGRATION_COMPLETED_VERSION=5402;
 
 const initialItems=[
   ['rugStripe',3,4,0],['rugPink',6,5,0],['counter',7,2,1],['dessert',8,3,0],
@@ -12,9 +12,10 @@ const initialItems=[
 ];
 
 export class SaveAdapter{
-  constructor(furnitureConfig,storage=window.localStorage){
+  constructor(furnitureConfig,storage=window.localStorage,{readOnly=false}={}){
     this.furniture=furnitureConfig;
     this.storage=storage;
+    this.readOnly=Boolean(readOnly);
     this.state=this.load();
   }
   defaultState(){
@@ -53,9 +54,9 @@ export class SaveAdapter{
     const legacy=this.findLegacyRaw();
     if(!legacy)return this.defaultState();
     try{
-      if(!this.storage.getItem(LEGACY_BACKUP_KEY))this.storage.setItem(LEGACY_BACKUP_KEY,legacy.raw);
+      if(!this.readOnly&&!this.storage.getItem(LEGACY_BACKUP_KEY))this.storage.setItem(LEGACY_BACKUP_KEY,legacy.raw);
       const state=this.normalizeState(JSON.parse(legacy.raw),{fromLegacy:true});
-      this.storage.setItem(CURRENT_KEY,JSON.stringify(state));
+      if(!this.readOnly)this.storage.setItem(CURRENT_KEY,JSON.stringify(state));
       return state;
     }catch(error){
       console.error('Save migration failed; legacy keys remain unchanged.',error);
@@ -98,7 +99,17 @@ export class SaveAdapter{
     return state;
   }
   migrateIfNeeded(grid){
-    if(Number(this.state.migrationCompletedVersion)>=MIGRATION_COMPLETED_VERSION)return this.state.migrationWarnings;
+    const fromVersion=Number(this.state.migrationCompletedVersion||0);
+    if(fromVersion>=MIGRATION_COMPLETED_VERSION||this.readOnly)return {
+      performed:false,
+      fromVersion,
+      toVersion:MIGRATION_COMPLETED_VERSION,
+      entranceConflictCount:0,
+      newWarnings:[]
+    };
+    const warningStart=this.state.migrationWarnings.length;
+    const entranceKeys=new Set((grid.room?.entrance?.cells||[]).map(cell=>`${cell.x},${cell.y}`));
+    let entranceConflictCount=0;
     const kept=[];
     const occupied={floorObject:new Set(),wallObject:new Set()};
     for(const item of this.state.items){
@@ -112,10 +123,19 @@ export class SaveAdapter{
         if(layer!=='floorDecoration')cells.forEach(cell=>occupied[layer]?.add(`${cell.x},${cell.y}`));
         continue;
       }
-      const reason=!inside?'out-of-bounds':(!placeable?'reserved-cell':'overlap');
+      const entranceConflict=cells.some(cell=>entranceKeys.has(`${cell.x},${cell.y}`));
+      const reason=!inside?'out-of-bounds':(entranceConflict?'entrance-relocated':(!placeable?'reserved-cell':'overlap'));
       if(!this.state.migrationArchive.some(entry=>entry.item?.id===item.id)){
-        this.state.migrationArchive.push({item:{...item},reason});
+        this.state.migrationArchive.push({
+          item:{...item},
+          reason,
+          migrationVersion:MIGRATION_COMPLETED_VERSION,
+          conflictingEntranceCells:cells
+            .filter(cell=>entranceKeys.has(`${cell.x},${cell.y}`))
+            .map(cell=>({x:cell.x,y:cell.y}))
+        });
         this.state.inventory[item.type]=(this.state.inventory[item.type]||0)+1;
+        if(entranceConflict)entranceConflictCount++;
       }
       if(!this.state.migrationWarnings.some(warning=>warning.itemId===item.id&&warning.reason===reason)){
         this.state.migrationWarnings.push({itemId:item.id,type:item.type,reason,action:'inventory'});
@@ -125,8 +145,14 @@ export class SaveAdapter{
     this.state.sceneSchemaVersion=5401;
     this.state.migrationCompletedVersion=MIGRATION_COMPLETED_VERSION;
     this.save();
-    return this.state.migrationWarnings;
+    return {
+      performed:true,
+      fromVersion,
+      toVersion:MIGRATION_COMPLETED_VERSION,
+      entranceConflictCount,
+      newWarnings:this.state.migrationWarnings.slice(warningStart)
+    };
   }
-  clearCurrent(){this.storage.removeItem(CURRENT_KEY)}
-  save(){this.storage.setItem(CURRENT_KEY,JSON.stringify(this.state))}
+  clearCurrent(){if(!this.readOnly)this.storage.removeItem(CURRENT_KEY)}
+  save(){if(!this.readOnly)this.storage.setItem(CURRENT_KEY,JSON.stringify(this.state))}
 }

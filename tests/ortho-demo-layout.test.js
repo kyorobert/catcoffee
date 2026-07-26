@@ -2,13 +2,13 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0576a';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0576a';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0576a';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0576b';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0576b';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0576b';
 import {ORTHO_DEMO_LAYOUT, ORTHO_DEMO_ENTRANCE, buildOrthoDemoItems, isDemoLayoutRequested}
-  from '../assets/js/config/ortho-demo-layout.js?v=0576a';
+  from '../assets/js/config/ortho-demo-layout.js?v=0576b';
 import {ORTHO_ROOM_ZONES as Z, rectContainsCell, zoneCells}
-  from '../assets/js/config/ortho-room-zones.js?v=0576a';
+  from '../assets/js/config/ortho-room-zones.js?v=0576b';
 
 const {cols, rows} = ROOM_CONFIG.floor;
 
@@ -93,7 +93,7 @@ function reachFrom(sx, sy, wall = () => false) {
 }
 // The demo prototype entry is ortho-room-zones' single logical entry point (2-cell door at x7-8).
 assert.deepEqual(ORTHO_DEMO_ENTRANCE, {x: 8, y: 0}, 'demo entry point matches customerEntryPoint (x8)');
-assert.ok(walkable(ORTHO_DEMO_ENTRANCE.x, ORTHO_DEMO_ENTRANCE.y), 'entry point cell is walkable');
+assert.equal(walkable(ORTHO_DEMO_ENTRANCE.x, ORTHO_DEMO_ENTRANCE.y),false,'door threshold is formally reserved');
 assert.ok(walkable(Z.customerEntryStaging.x, Z.customerEntryStaging.y), 'entry staging cell is walkable');
 const reach = reachFrom(Z.customerEntryStaging.x, Z.customerEntryStaging.y);
 for (const k of ['4,3', '5,3', '7,3']) assert.ok(reach.has(k), `service frontage reachable from entry: ${k}`);

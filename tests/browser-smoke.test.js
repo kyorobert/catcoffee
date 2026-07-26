@@ -5,7 +5,7 @@ import {existsSync,readFileSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0576a';
+import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0576b';
 import {CAT_PROFILES,CAT_ANIMATION_LAYOUT,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const root=process.cwd();
@@ -44,7 +44,7 @@ const server=createServer((request,response)=>{
     response.end(readFileSync(file,'utf8').replace('id="careBtn"','id="careBtn-missing"'));return;
   }
   if(relativePath==='index.html'&&requestUrl.searchParams.get('fixture')==='build-mismatch'){
-    response.end(readFileSync(file,'utf8').replace('data-build-id="0576a"','data-build-id="0550-old"'));return;
+    response.end(readFileSync(file,'utf8').replace('data-build-id="0576b"','data-build-id="0550-old"'));return;
   }
   response.end(readFileSync(file));
 });
@@ -145,7 +145,7 @@ try{
     });
     const problems=[];
     if(!state.phaser||!state.game)problems.push('Phaser global or game missing');
-    if(state.htmlBuildId!=='0576a'||state.jsBuildId!=='0576a')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
+    if(state.htmlBuildId!=='0576b'||state.jsBuildId!=='0576b')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
     if(state.gameReady!=='1')problems.push(`gameReady is ${state.gameReady}`);
     if(loadedUrls.some(url=>/\?v=0550a(?:$|[&#])/.test(url)||url.includes('?v=0542a')))problems.push('obsolete runtime cache query loaded');
     if(state.canvasCount!==1||state.canvasWidth<=0||state.canvasHeight<=0)problems.push(`invalid canvas ${state.canvasCount} ${state.canvasWidth}x${state.canvasHeight}`);
@@ -175,7 +175,7 @@ try{
        if(storeIds.length!==47)problems.push(`normal store contains ${storeIds.length} items instead of 47`);
        if(PROTOTYPE_FURNITURE_IDS.some(id=>!storeIds.includes(id)))problems.push('a V0.55.2 redraw is missing from the store');
        const redrawThumbnails=await page.locator(PROTOTYPE_FURNITURE_IDS.map(id=>`.store-card[data-id="${id}"] img`).join(',')).evaluateAll(images=>images.map(image=>({src:image.getAttribute('src'),width:image.naturalWidth,height:image.naturalHeight})));
-       if(redrawThumbnails.length!==25||redrawThumbnails.some(image=>!image.src?.includes('/redrawn/')||!image.src.endsWith('.png?v=0576a')||image.width<=0||image.height<=0))problems.push(`invalid redraw store thumbnails: ${JSON.stringify(redrawThumbnails)}`);
+       if(redrawThumbnails.length!==25||redrawThumbnails.some(image=>!image.src?.includes('/redrawn/')||!image.src.endsWith('.png?v=0576b')||image.width<=0||image.height<=0))problems.push(`invalid redraw store thumbnails: ${JSON.stringify(redrawThumbnails)}`);
        const redrawBefore=await page.evaluate(()=>({coins:window.gameController.getState().coins,count:window.gameController.getState().items.length}));
        await page.click('.store-card[data-id="squareCafeTable"]');
        await page.waitForTimeout(100);
@@ -306,6 +306,151 @@ try{
     await context.close();
     if(problems.length)throw new Error(`${scenario.name} ${viewport.width}x${viewport.height}: ${problems.join('; ')}`);
   }
+  // ARCH-0576A: use real mobile touch events at each context-toolbar button's
+  // geometric centre. The furniture selection setup is deterministic, while every
+  // action itself goes through the browser's pointer/click pipeline.
+  for(const viewport of [{width:390,height:844},{width:393,height:852},{width:430,height:932}]){
+    for(const action of [
+      {id:'cancelPlacementBtn',kind:'cancel'},
+      {id:'rotateBtn',kind:'rotate'},
+      {id:'storeBtn',kind:'store'},
+      {id:'sellBtn',kind:'sell'}
+    ]){
+      const context=await browser.newContext({viewport,isMobile:true,hasTouch:true,deviceScaleFactor:1});
+      await context.addInitScript(()=>localStorage.clear());
+      const page=await context.newPage();
+      const pageErrors=[];
+      page.on('pageerror',error=>pageErrors.push(error.message));
+      await page.goto(origin+'/?projection=ortho',{waitUntil:'domcontentloaded',timeout:20000});
+      await page.waitForFunction(()=>document.body.dataset.gameReady==='1',null,{timeout:20000});
+      const before=await page.evaluate(()=>{
+        const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+        const item=scene.state.items.find(entry=>entry.type==='plant')||scene.state.items[0];
+        scene.selectItem(item.id);
+        const raw=structuredClone(scene.state);
+        return {
+          id:item.id,type:item.type,r:item.r||0,coins:raw.coins,
+          inventory:raw.inventory[item.type]||0,x:item.x,y:item.y,
+          camera:{x:scene.cameras.main.scrollX,y:scene.cameras.main.scrollY,zoom:scene.cameras.main.zoom}
+        };
+      });
+      // Mimic a Safari visualViewport height change before exercising the toolbar.
+      await page.setViewportSize({width:viewport.width,height:Math.max(620,viewport.height-96)});
+      await page.setViewportSize(viewport);
+      await page.waitForTimeout(50);
+      const hit=await page.evaluate(buttonId=>{
+        const button=document.getElementById(buttonId);
+        const rect=button.getBoundingClientRect();
+        window.__CONTEXT_ACTION_CLICKS__=0;
+        button.addEventListener('click',()=>window.__CONTEXT_ACTION_CLICKS__++,{once:false});
+        const x=rect.left+rect.width/2,y=rect.top+rect.height/2;
+        const top=document.elementFromPoint(x,y);
+        return {x,y,width:rect.width,height:rect.height,topId:top?.id||'',disabled:button.disabled};
+      },action.id);
+      if(hit.width<44||hit.height<44)throw new Error(`${viewport.width} ${action.id}: unsafe hit target ${hit.width}x${hit.height}`);
+      if(hit.topId!==action.id||hit.disabled)throw new Error(`${viewport.width} ${action.id}: centre hit ${hit.topId}, disabled=${hit.disabled}`);
+      await page.touchscreen.tap(hit.x,hit.y);
+      await page.waitForTimeout(160);
+      const after=await page.evaluate(({before,kind})=>{
+        const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+        const item=scene.state.items.find(entry=>entry.id===before.id);
+        const saved=JSON.parse(localStorage.getItem('catCafePhaserV0540')||'null');
+        return {
+          clickCount:window.__CONTEXT_ACTION_CLICKS__,
+          selectedId:scene.selectedId,
+          toolbarHidden:document.getElementById('selectionBar').classList.contains('hidden'),
+          mode:scene.inputMode.getMode(),
+          cameraEnabled:scene.cameraController.isEnabled(),
+          camera:{x:scene.cameras.main.scrollX,y:scene.cameras.main.scrollY,zoom:scene.cameras.main.zoom},
+          item:item?{x:item.x,y:item.y,r:item.r||0}:null,
+          coins:scene.state.coins,inventory:scene.state.inventory[before.type]||0,
+          savedItem:saved?.items?.find(entry=>entry.id===before.id)||null,
+          kind
+        };
+      },{before,kind:action.kind});
+      if(after.clickCount!==1)throw new Error(`${viewport.width} ${action.id}: click count ${after.clickCount}`);
+      if(!after.cameraEnabled)throw new Error(`${viewport.width} ${action.id}: camera stayed disabled`);
+      if(Math.abs(after.camera.x-before.camera.x)>.01||Math.abs(after.camera.y-before.camera.y)>.01||Math.abs(after.camera.zoom-before.camera.zoom)>.001){
+        throw new Error(`${viewport.width} ${action.id}: toolbar touch moved camera`);
+      }
+      if(action.kind==='cancel'){
+        if(after.selectedId!==null||!after.toolbarHidden||after.mode!=='idle')throw new Error(`${viewport.width} cancel did not clear selection: ${JSON.stringify(after)}`);
+        if(!after.item||after.item.x!==before.x||after.item.y!==before.y||after.item.r!==before.r||after.coins!==before.coins||after.inventory!==before.inventory){
+          throw new Error(`${viewport.width} cancel mutated game data: ${JSON.stringify({before,after})}`);
+        }
+        // Repeating select/cancel must remain stable and never leave stale UI state.
+        await page.evaluate(id=>window.__CAT_CAFE_GAME__.scene.getScene('CafeScene').selectItem(id),before.id);
+        const repeat=await page.locator('#cancelPlacementBtn').boundingBox();
+        await page.touchscreen.tap(repeat.x+repeat.width/2,repeat.y+repeat.height/2);
+        await page.waitForTimeout(80);
+        const repeated=await page.evaluate(()=>{const s=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');return {selected:s.selectedId,hidden:document.getElementById('selectionBar').classList.contains('hidden'),mode:s.inputMode.getMode()}});
+        if(repeated.selected!==null||!repeated.hidden||repeated.mode!=='idle')throw new Error(`${viewport.width} repeat cancel is unstable: ${JSON.stringify(repeated)}`);
+      }else if(action.kind==='rotate'){
+        if(!after.item||after.item.r!==(before.r+1)%4||after.savedItem?.r!==after.item.r)throw new Error(`${viewport.width} rotate failed: ${JSON.stringify(after)}`);
+      }else if(action.kind==='store'){
+        if(after.item||after.inventory!==before.inventory+1||after.coins!==before.coins||after.mode!=='idle')throw new Error(`${viewport.width} store failed: ${JSON.stringify(after)}`);
+      }else if(action.kind==='sell'){
+        if(after.item||after.coins!==before.coins+Math.floor((FURNITURE_CONFIG[before.type].price||0)*.5)||after.mode!=='idle')throw new Error(`${viewport.width} sell failed: ${JSON.stringify(after)}`);
+      }
+      if(pageErrors.length)throw new Error(`${viewport.width} ${action.id}: ${pageErrors.join('; ')}`);
+      results.push({scenario:`context-${action.kind}`,viewport:`${viewport.width}x${viewport.height}`,hit,after,problems:[]});
+      await context.close();
+    }
+  }
+  {
+    const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+    const migrationFixture={
+      sceneSchemaVersion:5401,migrationCompletedVersion:5401,coins:2468,
+      inventory:{chair:4,doubleCatTree:2,catCastle:1},
+      migrationWarnings:[],migrationArchive:[],
+      items:[
+        {id:'entrance-1x1',type:'chair',x:7,y:0,r:0},
+        {id:'entrance-1x2',type:'doubleCatTree',x:8,y:0,r:0},
+        {id:'entrance-2x2',type:'catCastle',x:6,y:0,r:0},
+        {id:'released-bottom',type:'chair',x:9,y:7,r:0}
+      ]
+    };
+    await context.addInitScript(value=>{
+      if(sessionStorage.getItem('__entranceMigrationFixture'))return;
+      localStorage.setItem('catCafePhaserV0540',JSON.stringify(value));
+      sessionStorage.setItem('__entranceMigrationFixture','1');
+    },migrationFixture);
+    const page=await context.newPage();
+    await page.goto(origin+'/?projection=ortho',{waitUntil:'domcontentloaded',timeout:20000});
+    await page.waitForFunction(()=>document.body.dataset.gameReady==='1',null,{timeout:20000});
+    await page.waitForTimeout(100);
+    const first=await page.evaluate(()=>{
+      const s=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+      return {
+        version:s.state.migrationCompletedVersion,
+        ids:s.state.items.map(item=>item.id),
+        inventory:structuredClone(s.state.inventory),
+        archive:s.state.migrationArchive.filter(entry=>entry.migrationVersion===5402),
+        warnings:s.state.migrationWarnings.filter(entry=>entry.reason==='entrance-relocated'),
+        toast:document.getElementById('gameToast').textContent,
+        toastVisible:document.getElementById('gameToast').classList.contains('show')
+      };
+    });
+    if(first.version!==5402||first.ids.join(',')!=='released-bottom'||first.archive.length!==3||first.warnings.length!==3){
+      throw new Error(`browser entrance migration failed: ${JSON.stringify(first)}`);
+    }
+    if(!first.toastVisible||!first.toast.includes('3 件家具已安全收納'))throw new Error(`migration toast missing: ${first.toast}`);
+    await page.reload({waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>document.body.dataset.gameReady==='1',null,{timeout:20000});
+    await page.waitForTimeout(100);
+    const second=await page.evaluate(()=>{const s=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');return {
+      inventory:structuredClone(s.state.inventory),
+      archive:s.state.migrationArchive.filter(entry=>entry.migrationVersion===5402),
+      warnings:s.state.migrationWarnings.filter(entry=>entry.reason==='entrance-relocated'),
+      toast:document.getElementById('gameToast').textContent,
+      toastVisible:document.getElementById('gameToast').classList.contains('show')
+    }});
+    if(JSON.stringify(second.inventory)!==JSON.stringify(first.inventory)||second.archive.length!==3||second.warnings.length!==3||second.toastVisible){
+      throw new Error(`browser entrance migration is not idempotent: ${JSON.stringify({first,second})}`);
+    }
+    results.push({scenario:'entrance-migration-5402',viewport:'390x844',first,second,problems:[]});
+    await context.close();
+  }
   const artContext=await browser.newContext({viewport:{width:1366,height:768}});
   const artPage=await artContext.newPage();
   await artPage.goto(origin+'/?artDebug=1',{waitUntil:'domcontentloaded',timeout:20000});
@@ -341,6 +486,7 @@ try{
       return {
         mode:scene.projectionMode,demo:Boolean(scene.demoLayoutActive),
         entities:scene.entities.size,stateItems:scene.state.items.length,
+        saveExists:Boolean(saved),
         savedLeak:saved?('projection' in saved||'demoLayout' in saved):false,
         catsFinite:cats.length>0&&cats.every(cat=>Number.isFinite(cat.x)&&Number.isFinite(cat.y)),
         artDebug:scene.artDebug?.enabled||false,
@@ -365,7 +511,10 @@ try{
       const TL=s.grid.getCellDiamond(0,0)[0],TR=s.grid.getCellDiamond(9,0)[1],BR=s.grid.getCellDiamond(9,7)[2];
       const skin=s.orthoRoomSkin,sh=skin.shell;
       const floorTop=TL.y,wallTop=floorTop-skin.layout.wallHeight;
-      const shTop=wallTop-sh.top,shBot=BR.y+sh.bottom,shLeft=TL.x-sh.side,shRight=TR.x+sh.side;
+       const shTop=wallTop-sh.topExtensionWorld;
+       const shBot=BR.y+sh.bottomThicknessWorld;
+       const shLeft=TL.x-sh.sideThicknessWorld;
+       const shRight=TR.x+sh.sideThicknessWorld;
       const wv=cam.worldView,z=cam.zoom;
       const ext={top:Math.round(Math.max(0,(shTop-wv.y)*z)),bottom:Math.round(Math.max(0,(wv.y+wv.height-shBot)*z)),
         left:Math.round(Math.max(0,(shLeft-wv.x)*z)),right:Math.round(Math.max(0,(wv.x+wv.width-shRight)*z))};
@@ -421,6 +570,7 @@ try{
     if(shellDoor.doorCentreLum<120)problems.push(`visual door centre is a dark slab (lum ${shellDoor.doorCentreLum})`);
     if(state.demo!==ortho.demo)problems.push(`demoLayoutActive is ${state.demo}`);
     if(ortho.demo&&state.stateItems!==18)problems.push(`demo mutated state.items (${state.stateItems})`);
+    if(ortho.demo&&state.saveExists)problems.push('demo wrote the current save');
     if(state.savedLeak)problems.push('projection/demoLayout leaked into the save');
     if(!state.catsFinite)problems.push('a cat has a non-finite position');
     if(!state.canvasRenderer)problems.push('renderer is not Canvas');

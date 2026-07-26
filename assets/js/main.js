@@ -1,10 +1,11 @@
-import {createGameConfig} from './config/game-config.js?v=0576a';
-import {FURNITURE_CONFIG} from './config/furniture-config.js?v=0576a';
-import {APP_VERSION, BUILD_ID, assertBuildConsistency} from './config/build-info.js?v=0576a';
-import {resolveDomContract} from './ui/dom-contract.js?v=0576a';
-import {SaveAdapter} from './systems/SaveAdapter.js?v=0576a';
-import {StartupController} from './systems/StartupController.js?v=0576a';
-import {UiBridge} from './ui/UiBridge.js?v=0576a';
+import {createGameConfig} from './config/game-config.js?v=0576b';
+import {FURNITURE_CONFIG} from './config/furniture-config.js?v=0576b';
+import {APP_VERSION, BUILD_ID, assertBuildConsistency} from './config/build-info.js?v=0576b';
+import {resolveDomContract} from './ui/dom-contract.js?v=0576b';
+import {SaveAdapter} from './systems/SaveAdapter.js?v=0576b';
+import {StartupController} from './systems/StartupController.js?v=0576b';
+import {UiBridge} from './ui/UiBridge.js?v=0576b';
+import {isDemoLayoutRequested} from './config/ortho-demo-layout.js?v=0576b';
 
 window.__CAT_CAFE_JS_BUILD_ID__ = BUILD_ID;
 
@@ -51,7 +52,11 @@ async function bootstrap() {
     if (!window.Phaser) throw new Error('本地 Phaser 3.90.0 未成功載入');
 
     startup.setStatus('讀取存檔…');
-    const saveAdapter = new SaveAdapter(FURNITURE_CONFIG);
+    const saveAdapter = new SaveAdapter(
+      FURNITURE_CONFIG,
+      window.localStorage,
+      {readOnly:isDemoLayoutRequested(location.search)}
+    );
     let ui = null;
     let game = null;
 

@@ -1,32 +1,32 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0576a';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0576a';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0576a';
-import {GridSystem} from '../systems/GridSystem.js?v=0576a';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0576a';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0576a';
-import {CameraController} from '../systems/CameraController.js?v=0576a';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0576a';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0576a';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0576a';
-import {CatEntity} from '../entities/CatEntity.js?v=0576a';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0576a';
-import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0576a';
-import {AmbientEffects} from '../entities/AmbientEffects.js?v=0576a';
-import {INPUT_MODE} from '../core/input-state.js?v=0576a';
-import {InputModeController} from '../phaser/InputModeController.js?v=0576a';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0576a';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0576a';
-import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0576a';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0576a';
-import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0576a';
-import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0576a';
-import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0576a';
-import {ORTHO_ROOM_ZONES,zoneAt} from '../config/ortho-room-zones.js?v=0576a';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0576b';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0576b';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0576b';
+import {GridSystem} from '../systems/GridSystem.js?v=0576b';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0576b';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0576b';
+import {CameraController} from '../systems/CameraController.js?v=0576b';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0576b';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0576b';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0576b';
+import {CatEntity} from '../entities/CatEntity.js?v=0576b';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0576b';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0576b';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0576b';
+import {INPUT_MODE} from '../core/input-state.js?v=0576b';
+import {InputModeController} from '../phaser/InputModeController.js?v=0576b';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0576b';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0576b';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0576b';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0576b';
+import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0576b';
+import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0576b';
+import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0576b';
+import {ORTHO_ROOM_ZONES,zoneAt} from '../config/ortho-room-zones.js?v=0576b';
 import {DEFAULT_ORTHOGONAL_ROOM_SKIN,getOrthogonalCellAppearance}
-  from '../config/ortho-room-skin.js?v=0576a';
-import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0576a';
-import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0576a';
-import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0576a';
+  from '../config/ortho-room-skin.js?v=0576b';
+import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0576b';
+import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0576b';
+import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0576b';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -84,7 +84,11 @@ export class CafeScene extends Phaser.Scene{
   // The demo layout NEVER touches state.items, inventory, coins or the save.
   getLayoutItems(){return this.demoLayoutActive?this.demoItems:this.state.items;}
   migrateSaveIfNeeded(){
-    this.saveAdapter.migrateIfNeeded(this.grid);
+    // The opt-in demo is presentation evidence only. It must not migrate or write the
+    // player's real save, even when that save predates the entrance relocation.
+    this.migrationResult=this.demoLayoutActive
+      ?{performed:false,demoSkipped:true,entranceConflictCount:0,newWarnings:[]}
+      :this.saveAdapter.migrateIfNeeded(this.grid);
     this.occupancy=new OccupancySystem(this.grid,FURNITURE_CONFIG);
     this.occupancy.build(this.getLayoutItems());
     this.placement=new PlacementSystem(this.grid,this.occupancy,FURNITURE_CONFIG);
@@ -133,7 +137,13 @@ export class CafeScene extends Phaser.Scene{
     this.registry.get('startupController')?.setProgress(1);
     this.game.events.emit('scene-ready',this);
     this.emitState();
-    if(this.state.migrationWarnings?.length)this.game.events.emit('toast',{message:`${this.state.migrationWarnings.length} 件無法直接遷移的家具已安全保留`,key:'migration-warning',priority:2,duration:4200});
+    const movedCount=Number(this.migrationResult?.entranceConflictCount||0);
+    if(movedCount>0)this.game.events.emit('toast',{
+      message:`入口位置已調整，${movedCount} 件家具已安全收納`,
+      key:'entrance-migration-5402',
+      priority:2,
+      duration:4200
+    });
   }
   drawRoom(){
     if(this.projectionMode===PROJECTION_MODE.ORTHO){this.drawRoomOrtho();return;}
@@ -246,7 +256,10 @@ export class CafeScene extends Phaser.Scene{
     // VISUAL SHELL (ARCH-0575A): the wall + floor are drawn BEYOND the logical 10x8 grid so the
     // room material reaches the safe-viewport edges — the cafe fills the screen instead of sitting
     // as a card in a backdrop. Display-only; adds NO placeable cells and does not touch the grid.
-    const shLeft=TL.x-sh.side,shRight=TR.x+sh.side,shWallTop=wallTop-sh.top,shFloorBottom=BR.y+sh.bottom;
+    const shLeft=TL.x-sh.sideThicknessWorld;
+    const shRight=TR.x+sh.sideThicknessWorld;
+    const shWallTop=wallTop-sh.topExtensionWorld;
+    const shFloorBottom=BR.y+sh.bottomThicknessWorld;
     // far ambient (only seen when fully zoomed out past the shell), then floor shell, then wall shell.
     graphics.fillStyle(skin.backdrop.fill,1).fillRect(-worldWidth,-worldHeight,worldWidth*3,worldHeight*3);
     graphics.fillStyle(sh.fill,1).fillRect(shLeft,floorTop,shRight-shLeft,shFloorBottom-floorTop);
@@ -255,9 +268,9 @@ export class CafeScene extends Phaser.Scene{
     // Fixed shell architecture outside the grid: darker wood + inset panels.
     const inset=sh.panelInset;
     graphics.fillStyle(sh.insetFill,.78)
-      .fillRect(shLeft+inset,floorTop+inset,Math.max(1,sh.side-inset*2),shFloorBottom-floorTop-inset*2)
-      .fillRect(TR.x+inset,floorTop+inset,Math.max(1,sh.side-inset*2),shFloorBottom-floorTop-inset*2)
-      .fillRect(TL.x+inset,BR.y+inset,Math.max(1,floorW-inset*2),Math.max(1,sh.bottom-inset*2));
+      .fillRect(shLeft+inset,floorTop+inset,Math.max(1,sh.sideThicknessWorld-inset*2),shFloorBottom-floorTop-inset*2)
+      .fillRect(TR.x+inset,floorTop+inset,Math.max(1,sh.sideThicknessWorld-inset*2),shFloorBottom-floorTop-inset*2)
+      .fillRect(TL.x+inset,BR.y+inset,Math.max(1,floorW-inset*2),Math.max(1,sh.bottomThicknessWorld-inset*2));
     graphics.lineStyle(2,sh.panelLine,sh.panelLineAlpha);
     for(let y=floorTop+sh.panelStep;y<shFloorBottom;y+=sh.panelStep){
       graphics.strokePoints([{x:shLeft+inset,y},{x:TL.x-inset,y}],false);
@@ -294,9 +307,14 @@ export class CafeScene extends Phaser.Scene{
       graphics.lineStyle(1,appearance.line,appearance.kind==='playable'?skin.floor.cellLineAlpha:.7)
         .strokePoints([...rect,rect[0]],false);
       if(appearance.kind==='reserved'){
-        const cellPad=9;
+        const {bandInset,bandDepth}=skin.floor.reserved;
         graphics.fillStyle(skin.floor.reserved.insetFill,.48)
-          .fillRect(rect[0].x+cellPad,rect[0].y+cellPad,rect[1].x-rect[0].x-cellPad*2,rect[3].y-rect[0].y-cellPad*2);
+          .fillRect(
+            rect[0].x+bandInset,
+            rect[0].y+3,
+            rect[1].x-rect[0].x-bandInset*2,
+            Math.min(bandDepth,rect[3].y-rect[0].y-6)
+          );
       }
     }
     // Wall/floor seam + a SUBTLE playable-grid edge (a thin收邊, not a bold "card" frame) so the
@@ -306,10 +324,13 @@ export class CafeScene extends Phaser.Scene{
     graphics.lineStyle(boundary.width,boundary.color,boundary.alpha).strokePoints([TL,TR,BR,BL,TL],false);
     graphics.lineStyle(boundary.innerWidth,boundary.innerColor,boundary.innerAlpha)
       .strokePoints([{x:TL.x+3,y:TL.y+3},{x:TR.x-3,y:TR.y+3},{x:BR.x-3,y:BR.y-3},{x:BL.x+3,y:BL.y-3},{x:TL.x+3,y:TL.y+3}],false);
-    graphics.lineStyle(sh.trimWidth,sh.trimColor,1)
+    graphics.lineStyle(sh.trimThickness,sh.trimColor,1)
       .strokePoints([{x:shLeft,y:floorTop},{x:shLeft,y:shFloorBottom},{x:shRight,y:shFloorBottom},{x:shRight,y:floorTop}],false);
-    graphics.lineStyle(sh.highlightWidth,sh.highlightColor,.75)
-      .strokePoints([{x:shLeft+sh.trimWidth,y:shFloorBottom-sh.trimWidth},{x:shRight-sh.trimWidth,y:shFloorBottom-sh.trimWidth}],false);
+    graphics.lineStyle(sh.edgeHighlight,sh.highlightColor,.75)
+      .strokePoints([
+        {x:shLeft+sh.trimThickness,y:shFloorBottom-sh.trimThickness},
+        {x:shRight-sh.trimThickness,y:shFloorBottom-sh.trimThickness}
+      ],false);
     // Visual door LEAF: smaller than the 2-cell slot, centred in x7-8; a warm wood door with a
     // glass panel, muntins, a brass handle and a frame (not a dark slab). x9 stays wall.
     const D=skin.door,vd=D.gridBounds;
@@ -464,7 +485,14 @@ export class CafeScene extends Phaser.Scene{
     return this.furnitureDragController?.cleanup({layoutChanged:false});
   }
   cancelDrag(){
-    return this.furnitureDragController?.cancel('ui-cancel');
+    // The drag controller owns drag cleanup, while this public toolbar action also
+    // owns clearing a selected-but-not-dragging item. Keeping both steps here makes
+    // Cancel idempotent across touch, mouse, pointercancel and interrupted drags.
+    this.furnitureDragController?.cancel('ui-cancel');
+    this.selectItem(null);
+    this.cameraController?.setEnabled(true);
+    this.inputMode?.releaseToStable();
+    return true;
   }
   selectItem(itemId){
     this.selectedId=itemId;
@@ -483,23 +511,31 @@ export class CafeScene extends Phaser.Scene{
     else{this.occupancy.addItem(item);this.game.events.emit('toast',{message:result.message,key:'rotate-invalid',priority:2})}
   }
   storeSelection(){
+    if(this.furnitureDragController?.isDragging()){
+      if(this.furnitureDragController.drag?.isNew)return;
+      this.furnitureDragController.cancel('store-selection');
+    }
     const index=this.state.items.findIndex(entry=>entry.id===this.selectedId);
     if(index<0)return;
     const [item]=this.state.items.splice(index,1);
     this.state.inventory[item.type]=(this.state.inventory[item.type]||0)+1;
     this.occupancy.removeItem(item.id);
     this.entities.get(item.id)?.destroy();this.entities.delete(item.id);
-    this.selectedId=null;this.saveAdapter.save();this.emitState();
+    this.selectedId=null;this.inputMode?.releaseToStable();this.saveAdapter.save();this.emitState();
     this.game.events.emit('selection-changed',null);
   }
   sellSelection(){
+    if(this.furnitureDragController?.isDragging()){
+      if(this.furnitureDragController.drag?.isNew)return;
+      this.furnitureDragController.cancel('sell-selection');
+    }
     const index=this.state.items.findIndex(entry=>entry.id===this.selectedId);
     if(index<0)return;
     const [item]=this.state.items.splice(index,1);
     this.state.coins+=Math.floor((FURNITURE_CONFIG[item.type].price||0)*.5);
     this.occupancy.removeItem(item.id);
     this.entities.get(item.id)?.destroy();this.entities.delete(item.id);
-    this.selectedId=null;this.saveAdapter.save();this.emitState();
+    this.selectedId=null;this.inputMode?.releaseToStable();this.saveAdapter.save();this.emitState();
     this.game.events.emit('selection-changed',null);
   }
   togglePlacementHelper(){
@@ -538,7 +574,10 @@ export class CafeScene extends Phaser.Scene{
   maybeSpawnCustomer(){
     if(!['morning','afternoon','evening'].includes(this.state.phase)||this.customers.size>=4)return;
     const id=`customer-${Date.now().toString(36)}`;
-    const entrance=this.grid.getCellCenter(9,7);
+    const entrance=this.grid.getCellCenter(
+      ORTHO_ROOM_ZONES.customerEntryPoint.x,
+      ORTHO_ROOM_ZONES.customerEntryPoint.y
+    );
     const targets=[{x:2,y:5},{x:4,y:5},{x:6,y:4},{x:7,y:6}];
     const targetCell=targets[this.customers.size%targets.length];
     const customer=new CustomerEntity(this,id,entrance,[0x7fa6b8,0xd58ca0,0x86ad79,0xc49a6c][this.customers.size%4]);

@@ -1,7 +1,7 @@
 export const APP_VERSION =
-  'V0.57.6-alpha｜正交可玩區與房間 Skin 基礎版';
+  'V0.57.6-alpha｜正交互動與入口清理版';
 
-export const BUILD_ID = '0576a';
+export const BUILD_ID = '0576b';
 
 // This key is part of the public save contract. Never change it for cache recovery.
 export const SAVE_KEY = 'catCafePhaserV0540';

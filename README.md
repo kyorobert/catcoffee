@@ -1,9 +1,27 @@
 # 貓咪咖啡廳 V0.57.6-alpha
 
-版本：`V0.57.6-alpha｜正交可玩區與房間 Skin 基礎版`  
-Build ID：`0576a`
+版本：`V0.57.6-alpha｜正交互動與入口清理版`  
+Build ID：`0576b`
 
-## V0.57.6-alpha：可玩區與 Room Skin
+## V0.57.6-alpha：正交互動與入口清理
+
+`ARCH-0576A` 修正 iPhone 尺寸的家具 context toolbar：Rotate／Store／Sell／Cancel
+均為至少 44×44 CSS px 的真實觸控目標，Cancel 會同時清除 drag、selection、
+InputMode 與 Camera lock，且不修改家具資料。正交 Room Skin 左右／下框架縮為手機
+初始視角約 8–16 CSS px；上牆維持完整。
+
+正式入口現在由 `ortho-room-zones.js` 的 `logicalEntranceZone` 唯一產生 mask：
+`(7,0)/(8,0)` 為 reserved，舊 `(8,7)/(9,7)` 已釋放，10×8 Grid 仍有 78 格
+playable。存檔 key 與 schema 維持不變；migration 5402 將入口衝突家具完整 archive
+後安全入庫且只執行一次。Demo 使用唯讀存檔 Adapter，不會遷移或寫入玩家資料。
+
+- [結果](./docs/V0576B_ORTHOGONAL_INTERACTION_ENTRANCE_RESULT.md)
+- [驗收](./docs/V0576B_ORTHOGONAL_INTERACTION_ENTRANCE_ACCEPTANCE.md)
+- [Before / After](./docs/V0576B_ORTHOGONAL_INTERACTION_ENTRANCE_COMPARISON.html)
+- 真實 Chrome 證據：`docs/evidence/v0576b/`
+- 新增測試：`npm.cmd run test:entrance`
+
+## V0.57.6-alpha：可玩區與 Room Skin（0576a 歷史）
 
 `ARCH-0575C` 將正交房間的「可放置地板」與「不可放置的視覺外殼」正式分離。`placeableMask` 仍是唯一放置真相：78 個可放置 cell 使用明亮分區地板；兩個保留入口 cell 使用門檻材質；Grid 外的滿版區改為深木固定建築帶、嵌板與雙層收邊，不再偽裝成可放置地板。新 `assets/js/config/ortho-room-skin.js` 集中管理牆面、護牆板、收邊、地板 palette、門幾何／樣式與牆飾 anchor；`OrthogonalProjection` 回到純幾何職責。
 

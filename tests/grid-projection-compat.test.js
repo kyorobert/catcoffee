@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-// Import via the same `?v=0576a` specifier the runtime uses, so `instanceof`
+// Import via the same `?v=0576b` specifier the runtime uses, so `instanceof`
 // resolves against the same module instance GridSystem composes internally.
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0576a';
-import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0576a';
-import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0576a';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0576b';
+import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0576b';
+import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0576b';
 
 // Golden-master compatibility test for ARCH-0561-GRID-PROJECTION-SPLIT.
 // The expected values below were captured from the CURRENT (pre-split) GridSystem
@@ -97,8 +97,9 @@ for (const [[type, x, y, r], expected] of footCellsGolden) {
 }
 
 const insideGolden = [
-  [[0, 0], true, true], [[9, 7], true, false], [[10, 0], false, false], [[0, 8], false, false],
-  [[-1, 0], false, false], [[5, 4], true, true], [[8, 7], true, false], [[9, 0], true, true]
+  [[0, 0], true, true], [[9, 7], true, true], [[10, 0], false, false], [[0, 8], false, false],
+  [[-1, 0], false, false], [[5, 4], true, true], [[8, 7], true, true], [[9, 0], true, true],
+  [[7, 0], true, false], [[8, 0], true, false]
 ];
 for (const [[x, y], inside, placeable] of insideGolden) {
   assert.strictEqual(grid.isInsideGrid(x, y), inside, `isInsideGrid(${x},${y})`);
