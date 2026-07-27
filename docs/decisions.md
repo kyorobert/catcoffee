@@ -13,7 +13,7 @@
   - `migrationCompletedVersion=5402` 對 footprint 與新入口相交的 instance 執行一次性安全入庫，完整 archive `id/type/x/y/r` 與衝突格；不得遺失、重複入庫或重複 Toast。
   - Demo 使用唯讀存檔 Adapter，不遷移、不寫入正式 state。
 - 不變：`catCafePhaserV0540`、`sceneSchemaVersion=5401`、CameraController 核心、Grid 幾何、家具 ID／footprint、iso／flat rollback。
-- 後果：V0576 的手機輸入、視覺 shell 與入口邏輯使用一致來源；`ART-0577-CORE-ORTHOGONAL-FURNITURE` 未在本任務開始。
+- 後果：V0576 的手機輸入、視覺 shell 與入口邏輯使用一致來源；`ART-0577-CORE-ORTHOGONAL-FURNITURE` 未在該架構任務內開始，後續已由 `ART-0577-CORE-ORTHOGONAL-FURNITURE-PASS-1` 完成第一批 12 件。
 - 證據：[結果](./V0576B_ORTHOGONAL_INTERACTION_ENTRANCE_RESULT.md)、[驗收](./V0576B_ORTHOGONAL_INTERACTION_ENTRANCE_ACCEPTANCE.md)、[比較](./V0576B_ORTHOGONAL_INTERACTION_ENTRANCE_COMPARISON.html)、`docs/evidence/v0576b/`。
 
 ## DEC-024：正交可玩區以 placeableMask 為唯一視覺與放置真相；Room Skin 與 Projection 分離
@@ -30,7 +30,7 @@
   - `OrthogonalProjection.js` 只保留 axis/origin/轉換/polygon/anchor 幾何。
   - 家具 preview 與 commit 必須共用同一 candidate evaluation；candidate type/x/y/r 變動後才重新驗證。
 - 不變：CameraController zoom/pan/clamp、88×120 cell、ROOM_CONFIG、placeableMask、Grid/Occupancy/Placement、save key/schema、furniture `id/x/y/r/footprint`、iso/Flat golden。
-- 後果：後續可替換 Room Skin 而不建立第二套 Projection；ART-0576 仍需等產品確認後再開始。
+- 後果：後續可替換 Room Skin 而不建立第二套 Projection；當時的家具候選編號 `ART-0576` 後續由 `ART-0577` 執行第一批 12 件。
 - 證據：[V0576 結果](./V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_RESULT.md)、[驗收](./V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_ACCEPTANCE.md)、`docs/evidence/v0576/`。
 
 相關治理文件：[代理協作規範](../AGENTS.md)｜[目前狀態](./current-state.md)｜[V0552 交接](./handoffs/V0552_TO_CLAUDE.md)
@@ -329,7 +329,7 @@
   - **門的視覺最低要求：Accepted**——Prototype 程式繪製的真實咖啡廳門：木質門扇（非深色黑洞）＋玻璃格窗（muntins）＋黃銅門把＋門框，清楚層次；比例與櫃檯/角色協調，可由後續 `ART` 正式重畫。
   - **iso 暫時仍為預設與 rollback**；Orthogonal 仍 URL opt-in。
 - 實作（本任務 `ARCH-0575A` 完成）：`ortho-room-zones` 新增 `logicalEntranceZone`＋縮小 `visualDoorBounds`（1.4 格、置中）；`OrthogonalProjection.ORTHOGONAL_ROOM_RENDER` 新增 `shell`（side84/top120/bottom132/floorFill）、`playAreaLineWidth`、`doorHeight 168→124`、door 顏色改為 `frame/leaf/glass/glassEdge/handle/panel/matFill`；`CafeScene.drawRoomOrtho` 畫視覺外殼（floor+wall 延伸超出 Grid）、以細收邊取代粗卡片外框、畫較小有層次的門。**未改 CameraController 核心**（clamp/pan/viewCentre 不動）、未改投影軸向/cell 尺寸/placeableMask/Grid/Occupancy/Placement/Pathfinding/存檔 key/schema/logical 入口。新增/更新測試：`ortho-room-zones`（logicalEntranceZone＋visualDoorBounds<2 格/置中/x9 牆）、`ortho-projection`（shell 延伸、door leaf 非暗、glass>leaf>frame 層次、doorHeight ~124）、`browser-smoke`（**shell external margin≈0、door 中央非暗塊、zoom-in pan 仍有效**）。Build 機械升版 0575a→0575b（package 維持 0.57.5-alpha）、`check.js`（Build/APP_VERSION/obsolete `?v=0575a`/protected hash 更新 OrthogonalProjection/ortho-room-zones/GridSystem/flat-presets/viewport-metrics；camera-framing 與 CameraController 未改）。real-browser 證據 `docs/evidence/v0575b/`＋`metrics.json`。細節見 [V0575B 結果](./V0575B_ORTHOGONAL_ROOM_SHELL_RESULT.md)、[驗收](./V0575B_ORTHOGONAL_ROOM_SHELL_ACCEPTANCE.md)、[比較 HTML](./V0575B_ORTHOGONAL_ROOM_SHELL_COMPARISON.html)。
-- 後續（未核准前不執行）：`ART-0576-CORE-ORTHOGONAL-FURNITURE`（僅在房間外殼與門比例實機通過後）；`ARCH-0576-STATION-REGISTRY`（行為本次仍不做）。
+- 歷史後續（當時未核准）：`ART-0576-CORE-ORTHOGONAL-FURNITURE` 是當時的候選編號，後續已由 `ART-0577-CORE-ORTHOGONAL-FURNITURE-PASS-1` 完成第一批 12 件；`ARCH-0576-STATION-REGISTRY` 未在該任務執行。
 ## DEC-026：Orthogonal 核心家具採 projection-specific visual override
 
 - 日期：2026-07-27
@@ -343,6 +343,8 @@
     繼續使用原視覺，保留 rollback。
   - FurnitureEntity、Ghost 與 StorePanel 透過同一 selector 取圖，不在 Entity
     硬編 12 個 ID。
+  - 其餘 35 件家具未包含於第一批，Orthogonal 仍使用既有 base visual。
+  - 第二批家具尚未核准；iPhone Safari 第一批視覺與操作真機 Gate 通過前不得自行開始。
 - 不變契約：ID、footprint、`x/y/r`、價格、layer、station、socket、
   walkBlocking、Occupancy、Placement、存檔 key/schema/migration、Camera 與 Grid。
 - 驗證：12 ID／48 PNG／四方向／透明角落／HTTP／所有 projection URL／

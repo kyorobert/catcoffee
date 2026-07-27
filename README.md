@@ -18,6 +18,11 @@ Build ID：`0577a`
 footprint、`x/y/r`、價格、layer、station、socket、walkBlocking、Occupancy、
 Placement 與存檔契約均未改。
 
+- 第一批 12 件已完成；其餘 35 件在 Orthogonal 仍使用既有 base visual。
+- iso 仍是預設與 rollback；Orthogonal 只由 URL 參數 opt-in。
+- iPhone Safari 真機家具視覺與操作 Gate 仍 pending，自動化 Chrome／Edge 不替代真機。
+- 第二批家具尚未核准，也未開始。
+
 - [實作結果](./docs/V0577_CORE_ORTHOGONAL_FURNITURE_RESULT.md)
 - [驗收紀錄](./docs/V0577_CORE_ORTHOGONAL_FURNITURE_ACCEPTANCE.md)
 - [視覺比較](./docs/V0577_CORE_ORTHOGONAL_FURNITURE_COMPARISON.html)
@@ -56,9 +61,9 @@ playable。存檔 key 與 schema 維持不變；migration 5402 將入口衝突�
 
 ## V0.57.5B 基線（歷史）
 
-V0.57.5-alpha（Build 0575b）在 Zoom/Pan 實機通過（**核心凍結**）後，修正 **`OrthogonalProjection`（正交平面）的房間外殼滿版與入口門比例**（**不重構 Camera、不重畫家具**）：留白根因是房間視覺外殼只畫到邏輯 10×8 Grid，改為把**牆面＋地板視覺外殼畫到超出 Grid**（`ORTHOGONAL_ROOM_RENDER.shell`）延伸至 safe viewport 邊緣，手機首屏外圈房外背景由 ~18px 降至 **~0px**（純視覺、**不新增 placeable cells**、不改 Grid/存檔；以細牆腳線取代粗矩形卡片外框）。**視覺門與邏輯入口分離**：`logicalEntranceZone` 維持兩格 x7-8，新增較小 `visualDoorBounds`（**~1.4 格、123×124 world px、置中 x7-8、x9 牆**），門改為分層繪製（門框＋玻璃格窗＋黃銅門把＋木門扇，非深色黑洞/倉庫門）。**CameraController 核心未改**（`viewCentre`/pan/clamp 凍結，real-browser 拖曳 pan 回歸通過）。**cell 88×120、`customerEntryPoint (8,0)`／staging／舊存檔入口 `(8,7)/(9,7)`／存檔 key `catCafePhaserV0540`（schema/migration 5401）／placeableMask／Grid／Occupancy／Placement／Pathfinding 皆不變。預設仍為 2:1 等角（iso）**；Orthogonal 仍 opt-in、等手機實機驗收。等角家具與門在正交地板仍為 Placeholder/Prototype（正式素材待 `ART-0576`）。
+V0.57.5-alpha（Build 0575b）在 Zoom/Pan 實機通過（**核心凍結**）後，修正 **`OrthogonalProjection`（正交平面）的房間外殼滿版與入口門比例**（**不重構 Camera、不重畫家具**）：留白根因是房間視覺外殼只畫到邏輯 10×8 Grid，改為把**牆面＋地板視覺外殼畫到超出 Grid**（`ORTHOGONAL_ROOM_RENDER.shell`）延伸至 safe viewport 邊緣，手機首屏外圈房外背景由 ~18px 降至 **~0px**（純視覺、**不新增 placeable cells**、不改 Grid/存檔；以細牆腳線取代粗矩形卡片外框）。**視覺門與邏輯入口分離**：`logicalEntranceZone` 維持兩格 x7-8，新增較小 `visualDoorBounds`（**~1.4 格、123×124 world px、置中 x7-8、x9 牆**），門改為分層繪製（門框＋玻璃格窗＋黃銅門把＋木門扇，非深色黑洞/倉庫門）。**CameraController 核心未改**（`viewCentre`/pan/clamp 凍結，real-browser 拖曳 pan 回歸通過）。**cell 88×120、`customerEntryPoint (8,0)`／staging／舊存檔入口 `(8,7)/(9,7)`／存檔 key `catCafePhaserV0540`（當時 migration 5401）／placeableMask／Grid／Occupancy／Placement／Pathfinding 皆不變。預設仍為 2:1 等角（iso）**；Orthogonal 仍 opt-in。當時的家具工作候選編號為 `ART-0576`；後續已由 `ART-0577` 完成第一批 12 件，並非現行待開始任務。
 
-## 投影模式（V0.57.5）
+## 投影模式（現行 V0.57.7）
 
 - 預設（iso）：`index.html` 或 `?projection=iso`
 - **Orthogonal 正交平面**：`?projection=ortho`（別名 `?projection=orthogonal`）

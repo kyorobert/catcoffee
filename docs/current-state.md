@@ -4,11 +4,15 @@
 
 - Orthogonal 第一批 12 件核心家具已改用原創、透明、四方向 PNG。
 - Override 僅屬視覺選擇：ortho 使用 `furniture:ortho:*`，iso／flat 保持既有 texture。
+- 其餘 35 件家具尚未正交重作，仍使用既有 base visual；不得將第一批描述為全 47 件完成。
+- 商店縮圖、FurnitureEntity、Ghost 與旋轉方向共用同一 visual selector。
 - 家具 ID、footprint、`x/y/r`、價格、layer、station/socket、walkBlocking、
   Occupancy、Placement、Grid 10×8、78 playable cells 與入口 `(7,0)/(8,0)` 未變。
 - 存檔 key `catCafePhaserV0540`、scene schema 5401、migration 5402 未變。
 - Chrome／Edge browser smoke、所有投影 URL、HTTP 48 張新 PNG 與回歸測試通過；
   iPhone Safari 真機尚未測試。
+
+### 沿用的 V0576 架構基礎（歷史階段，現行仍有效）
 
 - 正交模式仍為 opt-in；iso 仍是預設／rollback。
 - 家具 context toolbar 已有 44×44 CSS px 以上觸控區；Cancel 會完整清除 selection／InputMode／Camera lock。
@@ -20,7 +24,7 @@
 - `FurnitureDragController.evaluateCandidate()` 統一 preview/commit evaluation；candidate 變動以 signature 失效。
 - CameraController、Grid/Occupancy/Placement、save key/schema、furniture data contract 未改。
 - Chrome 390/393/430 與桌面 smoke 通過；iPhone Safari 真機仍 pending。
-- 結果與證據：[V0576 結果](./V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_RESULT.md)、[驗收](./V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_ACCEPTANCE.md)、`docs/evidence/v0576/`。
+- 歷史結果與證據：[V0576 結果](./V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_RESULT.md)、[驗收](./V0576_ORTHOGONAL_PLAYABLE_AREA_AND_SKIN_ACCEPTANCE.md)、`docs/evidence/v0576/`。
 
 本文件描述 repository 目前可直接查證的狀態，不代表未來產品承諾。決策以 [decisions.md](./decisions.md) 為準。
 
@@ -30,7 +34,7 @@
 |---|---|
 | 版本 | `V0.57.7-alpha｜核心正交家具第一批版` |
 | Build ID | `0577a` |
-| package version | `0.57.5-alpha` |
+| package version | `0.57.7-alpha` |
 | 引擎 | Phaser `3.90.0`，Canvas renderer |
 | 引擎來源 | `assets/vendor/phaser-3.90.0.min.js` |
 | 部署 | GitHub Pages 純靜態相對路徑，不依賴 CDN |
@@ -47,13 +51,13 @@
 - **分區地板底色（V0.57.4 新增）**：`ORTHOGONAL_ROOM_RENDER.zoneFloor` 提供各 zone 暖色底色；`CafeScene.drawRoomOrtho` 依 `zoneAt` 為每格上分區底色（`shadeColor` 逐格二階明暗），使營業區一眼可辨。純視覺、無行為。
 - **Demo Layout**：`assets/js/config/ortho-demo-layout.js` 純資料 fixture（**23 件**現有家具，依 `ortho-room-zones` 分區、連續服務帶＋成組座位＋集中貓咪、地板占用 ~48%），僅 ortho 有效、display-only；**不寫入存檔、不改 `state.items`／inventory／coins、不觸發 save**。
 - **預設仍為 iso**；Orthogonal 尚未成為正式預設，待手機實機再驗收。投影與 demoLayout **不寫入存檔**。家具 `x/y/r`、Occupancy、Placement、Pathfinding、存檔 key／schema 未因投影改變。
-- **Flat A／B／C 已被產品負責人拒絕**（見 [DEC-016 Superseded](./decisions.md)、[DEC-017](./decisions.md)）；正交房間幾何正確，但現有等角家具仍為 Placeholder，**正式家具重作尚未開始**（延後至核心滿版與分區實機通過後，候選 `ART-0574`）。
+- **Flat A／B／C 已被產品負責人拒絕**（見 [DEC-016 Superseded](./decisions.md)、[DEC-017](./decisions.md)）。正交房間幾何維持 opt-in；家具視覺已由 `ART-0577` 完成第一批 12 件 projection-specific override，其餘 35 件仍使用 base visual。
 - **手機取景演進**：
   - `ARCH-0571`（[DEC-018](./decisions.md)）：新增純模組 `core/scene-viewport.js`＋`core/camera-framing.js`＋DOM adapter `ui/viewport-metrics.js`；`CameraController` 對 ortho 改為「以內容 bounds＋safe viewport 計算 fit＋centerOn＋內容 clamp」。
   - `ARCH-0572`（[DEC-019](./decisions.md)）：正交房間比例 cellWidth 104→88／cellHeight 88→120＋整面背牆，房間占 canvas ~44%→~78%；右上角單格入口門、上方連續櫃檯帶；Demo 17 件。
   - `ARCH-0573`（[DEC-020](./decisions.md)）：首屏由「整房 contain」改為「**核心營業區滿版**」。分離 **roomBounds**（整房＝pan/zoom-out 範圍）與 **coreGameplayBounds**（首屏取景＝x1-8＋短牆條）；核心縱向占 safe viewport 96/95/93%、裁切 ~8%。入口改為 **x7-8 兩格視覺門**（x9 留牆；`customerEntryPoint=(8,0)`、staging `(8,1)`；logical 存檔入口 `(8,7)/(9,7)` 不變）。
   - `ARCH-0574`（[DEC-021](./decisions.md)）：**營業區聚焦與分區辨識**。分區地板底色（`zoneAt`＋`zoneFloor`）＋分區收斂 x1-6 乾淨分割＋Demo 加密 23 件（連續設備帶/櫃檯、兩組座位、集中貓咪角，占用 ~28%→~48%）。
-  - **`ARCH-0575A`（[DEC-023](./decisions.md)，本版，Build 0575b）**：**房間視覺外殼滿版化與入口門比例修正**。留白根因為房間外殼只畫到邏輯 Grid；改為把**牆＋地板視覺外殼畫到超出 Grid**（`ORTHOGONAL_ROOM_RENDER.shell`）延伸至 safe viewport 邊緣，手機首屏外圈背景 ~18px→**~0px**（純視覺、**不新增 placeable cells**、不改 Grid/存檔；細牆腳線取代粗卡片外框）。**視覺門與邏輯入口分離**：`logicalEntranceZone` 維持兩格 x7-8，新增較小 `visualDoorBounds`（~1.4 格、123×124 world px、置中 x7-8、x9 牆），門改為分層繪製（門框＋玻璃格窗＋黃銅門把＋木門扇，非深色黑洞）。**Zoom/Pan 核心凍結**（CameraController 未改），real-browser 拖曳 pan 回歸通過。`customerEntryPoint (8,0)`／staging／舊存檔入口 `(8,7)/(9,7)`／cell 88×120 皆不變。real-browser 證據 `docs/evidence/v0575b/`＋`metrics.json`；見 [V0575B 結果](./V0575B_ORTHOGONAL_ROOM_SHELL_RESULT.md)、[驗收](./V0575B_ORTHOGONAL_ROOM_SHELL_ACCEPTANCE.md)、[比較 HTML](./V0575B_ORTHOGONAL_ROOM_SHELL_COMPARISON.html)。手機實機再驗收 pending。
+  - **`ARCH-0575A`（[DEC-023](./decisions.md)，歷史階段，Build 0575b）**：**房間視覺外殼滿版化與入口門比例修正**。留白根因為房間外殼只畫到邏輯 Grid；改為把**牆＋地板視覺外殼畫到超出 Grid**（`ORTHOGONAL_ROOM_RENDER.shell`）延伸至 safe viewport 邊緣，手機首屏外圈背景 ~18px→**~0px**（純視覺、**不新增 placeable cells**、不改 Grid/存檔；細牆腳線取代粗卡片外框）。**視覺門與邏輯入口分離**：`logicalEntranceZone` 維持兩格 x7-8，新增較小 `visualDoorBounds`（~1.4 格、123×124 world px、置中 x7-8、x9 牆），門改為分層繪製（門框＋玻璃格窗＋黃銅門把＋木門扇，非深色黑洞）。**Zoom/Pan 核心凍結**（CameraController 未改），real-browser 拖曳 pan 回歸通過。`customerEntryPoint (8,0)`／staging／舊存檔入口 `(8,7)/(9,7)`／cell 88×120 皆不變。real-browser 證據 `docs/evidence/v0575b/`＋`metrics.json`；見 [V0575B 結果](./V0575B_ORTHOGONAL_ROOM_SHELL_RESULT.md)、[驗收](./V0575B_ORTHOGONAL_ROOM_SHELL_ACCEPTANCE.md)、[比較 HTML](./V0575B_ORTHOGONAL_ROOM_SHELL_COMPARISON.html)。手機實機再驗收 pending。
   - `ARCH-0575`（[DEC-022](./decisions.md)）：**滿版取景、Zoom/Pan 修正與分區視覺清理**。**P0 修好 zoom-in 後平移**（根因：clamp 讀到只在 preRender 更新的過期 `camera.midPoint`；改由即時 `scrollX+width/2` 推導中心 `viewCentre()`）；**清除左右深色直條**（`zoneFloor.outer` 由暗色改中性淺色、全 tint 低對比）；**顯著減少留白**（`marginCss 10→8`、`toolbarReserveCss 78→40`、背牆加高為有家具的背牆 wallHeight 155→260/coreTopStrip 138→220/doorHeight 118→168 ＋ wainscot 護牆板、背景近地板暖色），上下留白 V0574 ~44px → **18/19/26px（390/393/430）**。zoom-in 後 X/Y 皆可 pan（真實拖曳 scrollX 289→880）、四邊 clamp、minZoom 整房、門完整可見。**cell 88×120 不變、未重畫家具、未建第二套 CameraController；門在 x7-8＋88×120 使 portrait 天生 width-constrained，無法在不裁門下 100% 填滿（單件家具未放大）。** real-browser before/after 證據 `docs/evidence/v0575/`＋`metrics.json`；見 [V0575 結果](./V0575_ORTHOGONAL_FULLBLEED_PAN_RESULT.md)、[驗收](./V0575_ORTHOGONAL_FULLBLEED_PAN_ACCEPTANCE.md)、[比較 HTML](./V0575_ORTHOGONAL_FULLBLEED_PAN_COMPARISON.html)。手機實機再驗收 pending。
 
 ## B. 架構地圖
@@ -97,6 +101,8 @@
 | 家具顯示、選取、拖曳、旋轉、收納、出售 | 完成 | 同一 Grid／Occupancy／Placement／Ghost 資料流 |
 | 家具商店與購買 | 完成 | 以 Runtime visual config 顯示 |
 | 家具存檔相容 | 完成 | 固定 ID 與 `catCafePhaserV0540` |
+| 核心 12 件 Orthogonal 家具素材 | 完成 | `ART-0577` 已提供四方向 48 張 PNG；僅 ortho 使用 override |
+| 其餘 35 件 Orthogonal 家具素材 | 未完成 | 仍沿用既有 base visual；第二批尚未核准 |
 | 貓咪顯示、動畫、漫遊與家具避障 | 完成 | 五個 cat ID；BFS、delta movement、休息狀態 |
 | 餵食／梳毛／玩耍照顧流程 | 完成 | 純規則 core + Phaser session + DOM 演出 |
 | 正交房間空間分區（metadata） | 完成（僅空間） | `ortho-room-zones` 純資料；三層服務為空間方向，**無行為邏輯** |
@@ -105,7 +111,7 @@
 | 店員／玩家店長 | 未實作 | 沒有正式角色、AI 或自訂資料模型 |
 | 訂單、料理、送餐、結帳 | 未實作 | 目前數字演出不等於完整訂單流程；工作站邏輯未做 |
 | 任務／故事 | 未實作或僅資料預留 | state 有簡化 task counter；沒有完整任務／故事系統 |
-| 最終角色呈現 | 未完成 | 貓咪已有正式方向；店長、店員與顧客最終美術待定；正交家具重作待 `ART-0574` |
+| 最終角色呈現 | 未完成 | 貓咪已有正式方向；店長、店員與顧客最終美術待定；其餘 35 件家具尚未正交重作 |
 
 ## E. 家具與美術資料流
 
@@ -117,18 +123,19 @@
 - `childrenPlayArea`：可用 `redraw`；陰影邊緣待精修。
 - furniture ID、價格、footprint、rotation 與存檔座標未因重繪或投影改變。
 - Anchor：直立物以腳底中心；平面裝飾以 footprint 中心。
-- **正交地板上的等角家具仍為 Placeholder**（正交透視待 `ART-0574`）。
+- `ART-0577` 第一批 12 件在 ortho 使用 projection-specific visual override；商店縮圖、Entity、Ghost 與旋轉共用同一 selector。
+- 其餘 35 件在 ortho、以及全部家具在 iso／flat，仍使用既有 base visual。
 
 完整逐件紀錄見 [FURNITURE_AUDIT.md](./FURNITURE_AUDIT.md) 與 [PROTOTYPE_REDRAW_RESULT.md](./PROTOTYPE_REDRAW_RESULT.md)。
 
 ## F. 測試狀態
 
-### 本次任務（ARCH-0575A，Build 0575b）實際執行
+### 現行 Runtime（ART-0577，Build 0577a）實際驗證
 
-- `node check.js --deploy`：通過（Build `0575b`、35 DOM IDs、13 nested selectors、**55** JavaScript modules）。
-- `node check.js --dev`：通過（含**本機真實 Chrome** browser smoke：**shell external margin≈0（外殼延伸滿版）**、**door 中央非暗塊（門非黑洞）**、zoom-in 真實指標拖曳後 X/Y scroll 皆改變且四邊 clamp、x0/x9 取樣非暗帶、可 zoom-out 至整房、demo 不寫存檔、invalid 回退 iso）。
-- 個別：`ortho-room-zones`（門幾何：logicalEntranceZone 兩格、visualDoorBounds<2 格/置中 x7-8/x9 牆）、`ortho-projection`（shell 延伸、door leaf 非暗、glass>leaf>frame 層次、doorHeight~124）、`camera-framing`（pan range>0，未改）、`ortho-demo-layout`（23 件）、`grid-projection-compat`（iso/Flat golden 未改）皆通過。
-- 18 張 real-browser 證據（`docs/evidence/v0575b/`）＋`metrics.json`（每張 visualShellBounds/visualDoorBounds/logicalEntranceZone/externalMargin/pan range）＋before(0575a)/after(0575b)＋門 before/after 零 page error。
+- `npm run test:ortho-furniture`：通過（精確 12 個 ID、48 張透明四方向 PNG、視覺 override 不改 gameplay metadata）。
+- `node check.js --deploy`：通過（Build `0577a`；Save key、schema 5401、migration 5402、78 playable cells 與正式入口均維持）。
+- `node check.js --dev`：Chrome／Edge Browser Smoke 通過；root、iso、flat、ortho、orthogonal alias、demo、Art Debug 與 invalid fallback 均無 fatal error。
+- 視覺與指標證據位於 `docs/evidence/v0577/`；結果與驗收見 [V0577 結果](./V0577_CORE_ORTHOGONAL_FURNITURE_RESULT.md) 與 [V0577 驗收](./V0577_CORE_ORTHOGONAL_FURNITURE_ACCEPTANCE.md)。
 
 ### Repository 內已有
 
@@ -139,15 +146,15 @@
 
 ### 尚未驗證
 
-- [V0573 手機實機驗收清單](./V0573_ORTHOGONAL_CORE_FULLBLEED_ACCEPTANCE.md) 的 iPhone Safari、Android Chrome、桌面 Chrome／Edge 尚未勾選。
+- V0577 第一批家具的 iPhone Safari 直式比例、輪廓、anchor、拖曳與旋轉體感尚未真機驗收。
 - [V0552 人工瀏覽器驗收](./V0552_MANUAL_BROWSER_ACCEPTANCE.md) 的實機項目尚未勾選。
-- 未完成外部裝置驗收前，不得宣稱實機通過，也不得開始 `ART-0574`。
+- 自動化 Chrome／Edge 不得替代 iPhone Safari 真機 Gate；真機通過前不得核准或開始第二批家具。
 
 ## G. 已知差距與待決策
 
 - Orthogonal 為 opt-in 原型、尚未設為正式預設；iso 仍為預設與 rollback，待手機實機再驗收後另議。
-- 正交地板上的等角家具仍為 Placeholder；核心 10～12 件正交重作（`ART-0574`）延後至核心滿版與分區實機通過後。
-- 三層服務目前只有空間 metadata；工作站／可到達性／椅桌配對與收銀/製作/送餐/排隊**行為**未做（候選 `ARCH-0574-STATION-REGISTRY`，可用 `ortho-room-zones` 為空間依據）。
+- 第一批 12 件 Orthogonal 家具已由 `ART-0577` 完成；其餘 35 件仍為 base visual，第二批 Task Card 尚未核准。
+- 三層服務目前只有空間 metadata；工作站／可到達性／椅桌配對與收銀/製作/送餐/排隊**行為**未做（未核准，可用 `ortho-room-zones` 為未來空間依據）。
 - 玩家店長未實作；已決定未來代表玩家且可自訂，但資料與視覺規格待定。
 - 完整顧客、店員、訂單、料理、送餐、結帳、任務與故事系統未完成。
 - 貓咪自然移動與照顧已有第一階段，個性、長期關係與更深互動仍待產品規格。

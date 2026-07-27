@@ -1,5 +1,18 @@
 # 開發日誌
 
+## 2026-07-27｜DOC-0577A-STATE-AND-GATE-CONSISTENCY-CLEANUP
+
+- 版本／Build：`V0.57.7-alpha｜核心正交家具第一批版`／`0577a`，**不升版**；package 維持 `0.57.7-alpha`。
+- 範圍：只清理治理文件與 Build Gate 一致性；未修改 Runtime、家具設定、家具 PNG、Save key、schema 或 migration。
+- `docs/current-state.md`：修正 package version；明確記錄第一批 12 件／48 張 Orthogonal PNG 已完成、其餘 35 件仍使用 base visual、iso 預設／rollback、ortho opt-in、iPhone Safari pending、第二批未核准。
+- `docs/roadmap.md`：移除 ART-0576 現行待辦；補齊 Stage 11 `ARCH-0575C`、Stage 12 `ARCH-0576A`、Stage 13 `ART-0577`，並把下一 Gate 固定為 0577a 部署→iPhone Safari 真機→第一批校準判斷→另立第二批 Task Card。
+- `docs/handoffs/V056_PRODUCT_DECISION.md`、`README.md`、`docs/decisions.md`：最新狀態同步至 0577a；舊 ART-0574／ART-0576 僅保留為歷史候選並註明由 ART-0577 接續。既有 DEC-026 未重複新增。
+- `check.js`：在既有 `0576a` 後新增 obsolete `?v=0576b` Gate；`tests/build-consistency.test.js` 同步覆蓋 `0576a`／`0576b`。
+- 修改前 Gate：`npm test`、`test:build`、`test:ortho-furniture`、`check:deploy` 全數通過。
+- 修改後 Gate：`npm test`、`test:build`、`test:ortho-furniture`、`test:entrance`、`test:ortho-area`、`check:deploy`、`check:dev` 全數通過；`check:dev` 含安裝版 Chrome 與 Edge Browser Smoke。
+- 部署包：同 Build 的 `dist/cat_cafe_v0577a_git_deploy/` 與 `cat_cafe_v0577a_git_deploy.zip` 重新建立並重新驗證；未上傳 GitHub Pages。
+- 未完成 Gate：iPhone Safari 真機仍 pending；第二批家具尚未核准、未開始。
+
 ## 2026-07-26：V0.57.6-alpha / ARCH-0576A / Build 0576b
 
 - 基線真實 Chrome 重現：Cancel 中心 `elementFromPoint` 命中按鈕、click count=1，但 selection 不清除；根因為 Scene 公開取消流程只清 drag arm，並非 Canvas／overlay 搶事件。

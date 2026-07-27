@@ -1,8 +1,17 @@
 # V0.56 產品決策交接（給產品負責人）
 
-> **更新（2026-07-26f，V0.57.6-alpha / Build 0576b）**：`ARCH-0576A` 已完成。iPhone 尺寸 context toolbar 的四個動作已用真實 Chrome touch 中心驗證，Cancel 會完整清理 selection/InputMode/Camera；左右／下 shell 已縮至 8–16 CSS px 範圍。正式入口由 `logicalEntranceZone` 唯一產生 `(7,0)/(8,0)` mask，舊底部入口釋放；migration 5402 安全入庫且冪等，Demo 唯讀。CameraController、Grid 幾何、家具資料與 save key 未改。iPhone Safari 真機 Gate 仍 pending；`ART-0577` 未開始。
+> **最新狀態（2026-07-27，V0.57.7-alpha / Build 0577a）**：
+> `ART-0577-CORE-ORTHOGONAL-FURNITURE-PASS-1` 已完成。12 件核心家具已用
+> projection-specific visual override 接入 Orthogonal；商店縮圖、Entity、Ghost
+> 與旋轉共用同一 selector。其餘 35 件仍使用既有 base visual；iso 仍是預設與
+> rollback，Orthogonal 仍為 URL opt-in。家具 ID、footprint、`x/y/r`、玩法
+> metadata、Camera、Grid、正式入口、schema 5401、migration 5402 與 save key
+> 均未改。Chrome／Edge Browser Smoke 已通過；iPhone Safari 真機 Gate 仍
+> pending。第二批家具尚未核准，不得自行開始。
 
-> **更新（2026-07-26e，V0.57.6-alpha / Build 0576a）**：`ARCH-0575C` 已完成。V0575B 的非可玩 shell 不再使用類地板淺色，改為明確 `fixed-architecture` 木作帶；playable cell 視覺直接由既有 placeableMask 驅動。新增 Room Skin foundation，牆／護牆板／收邊／floor palette／door geometry+style／decor anchors 與 Projection 幾何分離。家具 preview/commit 共用 candidate evaluation，1×1/1×2/2×2 邊界測試通過。V0575 zoom/pan/clamp、Grid/Occupancy/Placement、存檔契約未改。Chrome 390/393/430 與 desktop smoke 通過；iPhone 真機仍 pending。請先完成真機 Gate，再決定是否批准 `ART-0576-CORE-ORTHOGONAL-FURNITURE`。
+> **歷史更新（2026-07-26f，V0.57.6-alpha / Build 0576b）**：`ARCH-0576A` 已完成。iPhone 尺寸 context toolbar 的四個動作已用真實 Chrome touch 中心驗證，Cancel 會完整清理 selection/InputMode/Camera；左右／下 shell 已縮至 8–16 CSS px 範圍。正式入口由 `logicalEntranceZone` 唯一產生 `(7,0)/(8,0)` mask，舊底部入口釋放；migration 5402 安全入庫且冪等，Demo 唯讀。CameraController、Grid 幾何、家具資料與 save key 未改。iPhone Safari 真機 Gate 仍 pending；`ART-0577` 在當時尚未開始，後續已完成第一批 12 件。
+
+> **歷史更新（2026-07-26e，V0.57.6-alpha / Build 0576a）**：`ARCH-0575C` 已完成。V0575B 的非可玩 shell 不再使用類地板淺色，改為明確 `fixed-architecture` 木作帶；playable cell 視覺直接由既有 placeableMask 驅動。新增 Room Skin foundation，牆／護牆板／收邊／floor palette／door geometry+style／decor anchors 與 Projection 幾何分離。家具 preview/commit 共用 candidate evaluation，1×1/1×2/2×2 邊界測試通過。V0575 zoom/pan/clamp、Grid/Occupancy/Placement、存檔契約未改。Chrome 390/393/430 與 desktop smoke 通過；iPhone 真機仍 pending。當時的候選編號 `ART-0576-CORE-ORTHOGONAL-FURNITURE` 後續由 `ART-0577` 執行第一批。
 
 - 任務 ID：`ARCH-0560-FLAT-CAFE-AUDIT`
 - 基線：`V0.55.2-alpha` / Build `0552a` / 存檔 key `catCafePhaserV0540`
@@ -23,7 +32,7 @@
 >
 > **更新（2026-07-26c）：滿版取景與 Zoom/Pan 修正已完成。** V0.57.4 於真實 iPhone 未通過：留白太多、**放大後無法平移（P0）**、左右不明深色直條。`ARCH-0575` 已修：**P0 pan**（根因是 clamp 讀到只在 preRender 更新的過期 `camera.midPoint`；改由即時 `scrollX+width/2` 推導中心，zoom-in 後 X/Y 皆可 pan、四邊 clamp、minZoom 整房，未建第二套 CameraController）；**清除深色直條**（外圈改中性淺色）；**留白 ~44px→~18px**（縮牆浪費/去情境列保留/加高有家具的背牆＋wainscot）。**cell 88×120 不變、未重畫家具、存檔契約不變、logical 入口不變。誠實限制**：門在 x7-8＋88×120 使 portrait 天生 width-constrained，無法在不裁門下 100% 填滿；~18px 略高於 8-16 目標；單件家具未放大。正式決策見 [DEC-022](../decisions.md)。實作見 [V0575 結果](../V0575_ORTHOGONAL_FULLBLEED_PAN_RESULT.md)、before/after＋metrics `docs/evidence/v0575/`。通過後才進入核心家具重作。iso 仍為暫時預設與 rollback。
 >
-> **更新（2026-07-26d）：房間外殼滿版與門比例修正已完成（Build 0575b）。** V0575（0575a）實機：**Zoom/Pan 通過（凍結核心）**，但房間外殼滿版與視覺門比例未通過（四周仍見房外背景像卡片、門為近兩格深色矩形）。`ARCH-0575A` 已修（**不重構 Camera、不重畫家具**）：把**牆＋地板視覺外殼畫到超出邏輯 Grid** 到 safe viewport 邊緣（手機外圈背景 ~18px→~0px、純視覺不新增可放置格、細牆腳線取代粗卡片外框）；**兩格 `logicalEntranceZone` 與較小 `visualDoorBounds`(~1.4 格、分層木門：門框/玻璃格窗/門把) 分離**。**CameraController 核心未改；entryPoint(8,0)/staging/x9/舊存檔入口/cell 88×120/存檔契約皆不變。** 正式決策見 [DEC-023](../decisions.md)。實作見 [V0575B 結果](../V0575B_ORTHOGONAL_ROOM_SHELL_RESULT.md)、before/after＋門 before/after `docs/evidence/v0575b/`。**目前產品 Gate**：完成 [V0575B 房間外殼與門比例實機驗收](../V0575B_ORTHOGONAL_ROOM_SHELL_ACCEPTANCE.md)；通過後才進入**核心家具重作 `ART-0576`**。iso 仍為暫時預設與 rollback。
+> **歷史更新（2026-07-26d）：房間外殼滿版與門比例修正已完成（Build 0575b）。** V0575（0575a）實機：**Zoom/Pan 通過（凍結核心）**，但房間外殼滿版與視覺門比例未通過（四周仍見房外背景像卡片、門為近兩格深色矩形）。`ARCH-0575A` 已修（**不重構 Camera、不重畫家具**）：把**牆＋地板視覺外殼畫到超出邏輯 Grid** 到 safe viewport 邊緣（手機外圈背景 ~18px→~0px、純視覺不新增可放置格、細牆腳線取代粗卡片外框）；**兩格 `logicalEntranceZone` 與較小 `visualDoorBounds`(~1.4 格、分層木門：門框/玻璃格窗/門把) 分離**。**CameraController 核心未改；entryPoint(8,0)/staging/x9/舊存檔入口/cell 88×120/存檔契約皆不變。** 正式決策見 [DEC-023](../decisions.md)。實作見 [V0575B 結果](../V0575B_ORTHOGONAL_ROOM_SHELL_RESULT.md)、before/after＋門 before/after `docs/evidence/v0575b/`。當時候選家具任務編號為 `ART-0576`；後續已由 `ART-0577` 完成第一批 12 件。
 
 ---
 
@@ -110,10 +119,4 @@
 
 ## 11. 誠實聲明（尚未完成事項）
 
-`ARCH-0561` 只做了 **Grid／Projection 內部重構**（玩家無可見變化）。以下**仍未完成**：FlatProjection／平面顯示模式、平面化場景、顧客 AI、訂單流程、玩家店長與客製化、招募店員機制、手機瀏覽器／實機驗收。本次未修改 HTML／CSS／素材／存檔格式。[V0552 人工瀏覽器驗收](../V0552_MANUAL_BROWSER_ACCEPTANCE.md) 仍全部 pending。
-> **更新（2026-07-27，V0.57.7-alpha / Build 0577a）**：
-> `ART-0577-CORE-ORTHOGONAL-FURNITURE-PASS-1` 已完成。12 件核心家具以獨立
-> projection-specific visual override 接入 Orthogonal；iso／flat rollback 不變。
-> 家具 ID、footprint、x/y/r、玩法 metadata、Camera、Grid、入口、schema 5401、
-> migration 5402 與 save key 均未改。Chrome／Edge 真實 browser smoke 通過；
-> iPhone Safari 真機仍 pending。第二批家具未開始。
+`ARCH-0561` 只做了 **Grid／Projection 內部重構**（玩家無可見變化）。以下**仍未完成**：完整顧客 AI、訂單流程、玩家店長與客製化、招募店員機制、iPhone Safari 真機驗收，以及其餘 35 件 Orthogonal 家具。FlatProjection 已完成但產品拒絕為正式方向，僅保留回歸；Orthogonal 仍為 opt-in。現行 0577a 狀態以文件最上方「最新狀態」為準。

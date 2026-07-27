@@ -177,6 +177,7 @@ for (const file of formalJs) {
   if (source.includes('?v=0575a')) failures.push(`${relative(root, file)} contains obsolete module query v=0575a`);
   if (source.includes('?v=0575b')) failures.push(`${relative(root, file)} contains obsolete module query v=0575b`);
   if (source.includes('?v=0576a')) failures.push(`${relative(root, file)} contains obsolete module query v=0576a`);
+  if (source.includes('?v=0576b')) failures.push(`${relative(root, file)} contains obsolete module query v=0576b`);
   for (const match of source.matchAll(/(?:from\s*|import\s*)["'](\.{1,2}\/[^"']+\.js)(\?v=[^"']+)?["']/g)) {
     if (match[2] !== '?v=0577a') failures.push(`${relative(root, file)} has inconsistent module query: ${match[0]}`);
   }

@@ -27,6 +27,8 @@ for (const file of runtimeFiles) {
   assert(!source.includes('?v=0542a'), `${file} contains obsolete v0542a`);
   assert(!source.includes('?v=0552a'), `${file} contains obsolete module query v=0552a`);
   assert(!source.includes('?v=0575b'), `${file} contains obsolete module query v=0575b`);
+  assert(!source.includes('?v=0576a'), `${file} contains obsolete module query v=0576a`);
+  assert(!source.includes('?v=0576b'), `${file} contains obsolete module query v=0576b`);
   if (file.endsWith('.js')) {
     for (const match of source.matchAll(/(?:from\s*|import\s*)["'](\.{1,2}\/[^"']+\.js)(\?v=[^"']+)?["']/g)) {
       assert.equal(match[2], '?v=0577a', `${file} has an unversioned or inconsistent import: ${match[0]}`);

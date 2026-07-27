@@ -10,15 +10,19 @@
 - [x] 正交左右／下框架縮為 8–16 CSS px 範圍。
 - [x] 正式入口改由 zone metadata 產生 `(7,0)/(8,0)` mask，底部舊入口釋放。
 - [x] Save migration 5402 與 Demo 唯讀隔離。
-- [ ] iPhone Safari 真機 Gate（自動化 Chrome 已通過，不可替代真機）。
 - [x] `ART-0577-CORE-ORTHOGONAL-FURNITURE-PASS-1`：12 件核心家具四方向
   Orthogonal override、商店縮圖、Ghost 與 runtime 整合完成。
-- [ ] iPhone Safari 真機驗收：Chrome／Edge 自動驗收已通過，真機不得代稱通過。
-- [ ] 第二批家具：尚未排入本版；不得把第一批擴張為全 47 件。
-- [ ] iPhone Safari 真機 pan/pinch/地址列與邊界拖曳驗收。
-- [ ] 產品負責人確認 V0576A/B/C Gate 後，才可開始 `ART-0576-CORE-ORTHOGONAL-FURNITURE`。
+- [x] 第一批以 projection-specific override 接入；iso／flat 維持 base visual，iso 仍是預設／rollback。
+- [ ] iPhone Safari 真機 Gate：家具比例、輪廓、anchor、拖曳／旋轉、pan／pinch 與地址列變化；Chrome／Edge 自動驗收不可替代真機。
+- [ ] 第二批家具：尚未核准；其餘 35 件仍使用 base visual，不得自行接續。
 
-下一步不得把 ART-0576 家具重畫與本架構修正混在同一變更；Room Skin 已提供穩定視覺底座。
+### 下一個 Gate
+
+1. 部署同一 Build `0577a`。
+2. 於真實 iPhone Safari 驗收第一批家具與既有操作。
+3. 判斷第一批是否需要比例、輪廓或 anchor 校準。
+4. 通過後才由產品負責人另立第二批家具 Task Card。
+5. 未核准前不得自行開始其餘 35 件。
 
 > 本路線圖為暫定方向，必須逐階段核准。它不承諾版本號、完成日期或未經評估的實作方案。
 
@@ -43,7 +47,22 @@
 
 ## Phase 2｜核准後的場景可讀性實作
 
-- **進度（2026-07-25）：Orthogonal Reboot 原型階段。** Stage 1（`ARCH-0561`：SpatialGrid + IsoProjection Facade）與 Stage 2（`ARCH-0562`：`FlatProjection` Prototype）已完成。Stage 3（`ARCH-0563`：Flat 構圖 Preset A/B/C 比較）已完成，但**產品負責人拒絕全部 Flat 方案**（見 [DEC-016 Superseded](./decisions.md)）。**Flat Preset 比較階段結束，不再安排 Flat Preset 校準。** Stage 4（`ARCH-0570`：正交平面 `OrthogonalProjection`、正交房間 rendering、非存檔 Demo Layout、Art Debug）已完成。產品負責人 iPhone 驗收**確認正交方向正確**，但 V0.57.0 手機首屏過度放大。Stage 5（`ARCH-0571`：Orthogonal 手機直立取景與 Camera 邊界）已完成。Stage 6（`ARCH-0572`：手機直立**滿版化**與咖啡廳分區——正交房間比例調整 cellWidth 104→88/cellHeight 88→120＋整面背牆使房間占比 ~44%→~78% canvas、右上角顧客入口門、上方連續櫃檯/服務帶、Demo 重排 17 件；Camera framing 邏輯不變）已完成並有 real-browser before/after 證據（`docs/evidence/v0572/`）。Stage 7（`ARCH-0573`：**核心營業區滿版與正式分區 metadata**——分離 roomBounds(pan/zoom-out)／coreGameplayBounds(首屏取景)，手機核心區占 safe viewport 96%/95%/93%、外圈 ~8% 裁切、可 zoom-out 至整房；x7–8 兩格入口門；新增純資料 `ortho-room-zones.js`（門/工作區/櫃檯/服務區/座位/貓咪/主走道/核心區，無行為邏輯）；Demo 重排 18 件）已完成並有 real-browser before/after 證據（`docs/evidence/v0573/`）。已完成並有 real-browser before/after 證據（`docs/evidence/v0573/`）。Stage 8（`ARCH-0574`：**營業區聚焦構圖與分區辨識**——縮短背牆(200→155)減少空牆；新增分區地板底色(`zoneAt`＋`zoneFloor`)使連續服務區/工作側/顧客側/成組座位/集中貓咪一眼可辨；分區收斂為 x1-6 乾淨分割；Demo 加密重排 23 件、占用 ~28%→~48%；首屏 core 仍滿版 94/93/91%、可 zoom-out）已完成並有 real-browser before/after 證據（`docs/evidence/v0574/`）。Stage 9（`ARCH-0575`：**滿版取景、Zoom/Pan 修正與分區視覺清理**——P0 修好 zoom-in 後平移（根因：clamp 讀過期 midPoint，改即時 scrollX 推導 `viewCentre()`）；清除左右深色直條（外圈中性淺色）；縮牆浪費/去情境列保留/加高有家具背牆(wainscot) 把上下留白 ~44px→~18px；zoom-in X/Y 皆可 pan、四邊 clamp、minZoom 整房）已完成並有 real-browser before/after 證據＋metrics（`docs/evidence/v0575/`）。實機驗收：Zoom/Pan 通過（凍結核心），但房間外殼滿版與門比例未通過。Stage 10（`ARCH-0575A`，Build 0575b：**房間視覺外殼滿版化＋門比例修正**——把牆/地板視覺外殼畫到超出邏輯 Grid 到 safe viewport 邊緣（手機外圈背景 ~18px→~0px、純視覺不新增可放置格），兩格 `logicalEntranceZone` 與較小 `visualDoorBounds`(~1.4 格分層木門) 分離；Camera 核心凍結）已完成並有 real-browser 證據＋metrics（`docs/evidence/v0575b/`）。**尚未**設為正式預設；手機實機再驗收與**核心家具 Orthogonal 重作（`ART-0576`，10～12 件，僅在房間外殼與門比例實機通過後）**待辦（見 [DEC-023](./decisions.md)、[V0575B 結果](./V0575B_ORTHOGONAL_ROOM_SHELL_RESULT.md)、[V0575B 驗收](./V0575B_ORTHOGONAL_ROOM_SHELL_ACCEPTANCE.md)）。不再安排 Flat Preset 校準。
+- **進度（截至 2026-07-27）：Stage 1–13 已依序完成；Orthogonal 仍未設為預設。**
+  - Stage 1 `ARCH-0561`：SpatialGrid + IsoProjection Facade。
+  - Stage 2 `ARCH-0562`：`FlatProjection` Prototype。
+  - Stage 3 `ARCH-0563`：Flat Preset A/B/C 比較；三案皆被拒絕，僅保留回歸（[DEC-016 Superseded](./decisions.md)）。
+  - Stage 4 `ARCH-0570`：`OrthogonalProjection`、正交房間、唯讀 Demo 與 Art Debug。
+  - Stage 5 `ARCH-0571`：手機直立取景與 Camera 邊界。
+  - Stage 6 `ARCH-0572`：cell 88×120、整面背牆、滿版化與分區 Demo。
+  - Stage 7 `ARCH-0573`：room/core bounds 分離、核心營業區滿版與 `ortho-room-zones.js`。
+  - Stage 8 `ARCH-0574`：營業區聚焦、分區底色與 23 件 Demo 構圖。
+  - Stage 9 `ARCH-0575`：zoom-in pan 根因修正、四邊 clamp、留白與深色直條清理。
+  - Stage 10 `ARCH-0575A`（Build 0575b，歷史階段）：視覺外殼滿版與入口門比例修正。
+  - Stage 11 `ARCH-0575C`（Build 0576a，歷史階段）：playable area／Room Skin foundation，preview/commit 共用評估。
+  - Stage 12 `ARCH-0576A`（Build 0576b，歷史階段）：context toolbar、窄框架、正式入口 `(7,0)/(8,0)` 與 migration 5402。
+  - Stage 13 `ART-0577`（Build 0577a，現行）：第一批 12 件 Orthogonal 家具與 projection-specific override 完成；其餘 35 件仍使用 base visual。
+
+  上述歷史階段的成果與證據分別保留在 `docs/evidence/v0570/` 至 `docs/evidence/v0577/` 及各版本結果／驗收文件。現行產品 Gate 是 V0577 第一批家具的 iPhone Safari 真機驗收；第二批尚未核准。
 - 目標：依 Phase 1 核准方案改善直立手機的場景平面感與資訊可讀性。
 - 前置：產品核准投影方案、存檔策略、資產策略與驗收畫面。
 - 非目標：同時新增店長、店員、顧客完整 AI 或經濟重做。
