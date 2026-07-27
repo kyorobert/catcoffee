@@ -1,6 +1,6 @@
-import {INPUT_MODE} from '../core/input-state.js?v=0576b';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0576b';
-import {getFurnitureDisplayState} from '../core/furniture-display-state.js?v=0576b';
+import {INPUT_MODE} from '../core/input-state.js?v=0577a';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0577a';
+import {getFurnitureDisplayState} from '../core/furniture-display-state.js?v=0577a';
 
 const DRAG_THRESHOLD_PX = 8;
 
@@ -162,7 +162,9 @@ export class FurnitureDragController {
   createGhost(item, sourceEntity) {
     this.ghost?.destroy();
     const definition = this.furniture[item.type];
-    const display = getFurnitureDisplayState(item.type, item.r || 0, definition);
+    const display = getFurnitureDisplayState(
+      item.type, item.r || 0, definition, this.grid.projectionMode
+    );
     const anchor = this.grid.getAnchor(item.type, item.x, item.y, item.r || 0);
     this.ghost = this.scene.add.image(anchor.x, anchor.y, display.texture)
       .setOrigin(sourceEntity?.originX ?? display.originX, sourceEntity?.originY ?? display.originY)
@@ -181,7 +183,9 @@ export class FurnitureDragController {
   syncGhost() {
     if (!this.drag || !this.ghost) return;
     const item = this.drag.candidate;
-    const display = getFurnitureDisplayState(item.type, item.r || 0, this.furniture[item.type]);
+    const display = getFurnitureDisplayState(
+      item.type, item.r || 0, this.furniture[item.type], this.grid.projectionMode
+    );
     const anchor = this.grid.getAnchor(item.type, item.x, item.y, item.r || 0);
     if(display.texture&&this.ghost.texture.key!==display.texture)this.ghost.setTexture(display.texture);
     this.ghost.setPosition(anchor.x, anchor.y)

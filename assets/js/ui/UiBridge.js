@@ -1,7 +1,7 @@
-import {ToastManager} from '../systems/ToastManager.js?v=0576b';
-import {StorePanel} from './StorePanel.js?v=0576b';
-import {CarePanel} from './CarePanel.js?v=0576b';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0576b';
+import {ToastManager} from '../systems/ToastManager.js?v=0577a';
+import {StorePanel} from './StorePanel.js?v=0577a';
+import {CarePanel} from './CarePanel.js?v=0577a';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0577a';
 
 export class UiBridge {
   constructor(game, saveAdapter, furnitureConfig, {startup = null, dom} = {}) {
@@ -19,7 +19,8 @@ export class UiBridge {
     this.toast = new ToastManager(dom.gameToast);
     this.store = new StorePanel(
       dom.storePanel, furnitureConfig, saveAdapter,
-      type => this.scene()?.startPlacement(type)
+      type => this.scene()?.startPlacement(type),
+      {getProjectionMode: () => this.scene()?.projectionMode || 'iso'}
     );
     this.care = new CarePanel(dom.carePanel, CAT_PROFILES, {
       select: catId => this.scene()?.selectCat(catId),

@@ -330,3 +330,24 @@
   - **iso 暫時仍為預設與 rollback**；Orthogonal 仍 URL opt-in。
 - 實作（本任務 `ARCH-0575A` 完成）：`ortho-room-zones` 新增 `logicalEntranceZone`＋縮小 `visualDoorBounds`（1.4 格、置中）；`OrthogonalProjection.ORTHOGONAL_ROOM_RENDER` 新增 `shell`（side84/top120/bottom132/floorFill）、`playAreaLineWidth`、`doorHeight 168→124`、door 顏色改為 `frame/leaf/glass/glassEdge/handle/panel/matFill`；`CafeScene.drawRoomOrtho` 畫視覺外殼（floor+wall 延伸超出 Grid）、以細收邊取代粗卡片外框、畫較小有層次的門。**未改 CameraController 核心**（clamp/pan/viewCentre 不動）、未改投影軸向/cell 尺寸/placeableMask/Grid/Occupancy/Placement/Pathfinding/存檔 key/schema/logical 入口。新增/更新測試：`ortho-room-zones`（logicalEntranceZone＋visualDoorBounds<2 格/置中/x9 牆）、`ortho-projection`（shell 延伸、door leaf 非暗、glass>leaf>frame 層次、doorHeight ~124）、`browser-smoke`（**shell external margin≈0、door 中央非暗塊、zoom-in pan 仍有效**）。Build 機械升版 0575a→0575b（package 維持 0.57.5-alpha）、`check.js`（Build/APP_VERSION/obsolete `?v=0575a`/protected hash 更新 OrthogonalProjection/ortho-room-zones/GridSystem/flat-presets/viewport-metrics；camera-framing 與 CameraController 未改）。real-browser 證據 `docs/evidence/v0575b/`＋`metrics.json`。細節見 [V0575B 結果](./V0575B_ORTHOGONAL_ROOM_SHELL_RESULT.md)、[驗收](./V0575B_ORTHOGONAL_ROOM_SHELL_ACCEPTANCE.md)、[比較 HTML](./V0575B_ORTHOGONAL_ROOM_SHELL_COMPARISON.html)。
 - 後續（未核准前不執行）：`ART-0576-CORE-ORTHOGONAL-FURNITURE`（僅在房間外殼與門比例實機通過後）；`ARCH-0576-STATION-REGISTRY`（行為本次仍不做）。
+## DEC-026：Orthogonal 核心家具採 projection-specific visual override
+
+- 日期：2026-07-27
+- 狀態：Accepted
+- Task：`ART-0577-CORE-ORTHOGONAL-FURNITURE-PASS-1`
+- 決策：
+  - 第一批只處理 12 個既有 furniture ID，不擴張到 47 件。
+  - 原始家具定義仍是 gameplay 單一來源；Orthogonal config 只能覆寫 texture、
+    direction、scale、origin 與純視覺備註。
+  - `projection=ortho/orthogonal` 使用四方向透明 PNG；iso、flat、非法值與預設路徑
+    繼續使用原視覺，保留 rollback。
+  - FurnitureEntity、Ghost 與 StorePanel 透過同一 selector 取圖，不在 Entity
+    硬編 12 個 ID。
+- 不變契約：ID、footprint、`x/y/r`、價格、layer、station、socket、
+  walkBlocking、Occupancy、Placement、存檔 key/schema/migration、Camera 與 Grid。
+- 驗證：12 ID／48 PNG／四方向／透明角落／HTTP／所有 projection URL／
+  Chrome 與 Edge smoke 均通過；iPhone Safari 真機 pending。
+- 證據：[結果](./V0577_CORE_ORTHOGONAL_FURNITURE_RESULT.md)、
+  [驗收](./V0577_CORE_ORTHOGONAL_FURNITURE_ACCEPTANCE.md)、
+  [比較](./V0577_CORE_ORTHOGONAL_FURNITURE_COMPARISON.html)、
+  `docs/evidence/v0577/`。

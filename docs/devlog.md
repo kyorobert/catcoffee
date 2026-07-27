@@ -271,3 +271,17 @@
 - 驗證：目前沒有該版獨立測試輸出，不回溯宣稱特定裝置通過。
 - 已知限制：舊 DOM/CSS Patch 不屬正式執行路徑。
 - 下一步：手機直立持續作為現行產品優先視角。
+## 2026-07-27：V0.57.7-alpha / ART-0577 / Build 0577a
+
+- 完成 12 件核心正交家具第一批：服務區 6 件、座位區 4 件、貓咪區 2 件；
+  共 48 張透明四方向 PNG，來源為原創生成稿，經固定 chroma 去背與單一批次管線
+  切圖、等比例縮放及底部中心對齊。
+- 新增 `orthogonal-furniture-visuals.js`；`getFurnitureVisualDefinition(id, mode)`
+  僅在 ortho 合併白名單視覺欄位。BootScene 同時預載 base/ortho，
+  FurnitureEntity、Ghost、StorePanel 依目前 projection 選圖。
+- 沒有修改 furniture-config、ID、footprint、`x/y/r`、價格、Occupancy、
+  Placement、Camera 幾何、10×8 mask、入口、schema 5401、migration 5402 或 save key。
+- 新增 `orthogonal-furniture-visuals.test.js`，擴充 HTTP 與 browser smoke；
+  Chrome／Edge 真實瀏覽器驗證所有 projection URL、0 failed request、0 pageerror、
+  170 furniture texture 全載入。證據在 `docs/evidence/v0577/`。
+- iPhone Safari 真機未測試；版本維持 alpha。

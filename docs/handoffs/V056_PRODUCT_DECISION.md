@@ -111,3 +111,9 @@
 ## 11. 誠實聲明（尚未完成事項）
 
 `ARCH-0561` 只做了 **Grid／Projection 內部重構**（玩家無可見變化）。以下**仍未完成**：FlatProjection／平面顯示模式、平面化場景、顧客 AI、訂單流程、玩家店長與客製化、招募店員機制、手機瀏覽器／實機驗收。本次未修改 HTML／CSS／素材／存檔格式。[V0552 人工瀏覽器驗收](../V0552_MANUAL_BROWSER_ACCEPTANCE.md) 仍全部 pending。
+> **更新（2026-07-27，V0.57.7-alpha / Build 0577a）**：
+> `ART-0577-CORE-ORTHOGONAL-FURNITURE-PASS-1` 已完成。12 件核心家具以獨立
+> projection-specific visual override 接入 Orthogonal；iso／flat rollback 不變。
+> 家具 ID、footprint、x/y/r、玩法 metadata、Camera、Grid、入口、schema 5401、
+> migration 5402 與 save key 均未改。Chrome／Edge 真實 browser smoke 通過；
+> iPhone Safari 真機仍 pending。第二批家具未開始。

@@ -1,7 +1,9 @@
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0576b';
-import {FURNITURE_DIRECTIONS,FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0576b';
-import {CAT_PROFILES, FALLBACK_CAT} from '../config/cat-config.js?v=0576b';
-import {hasCompleteCatSheet, registerCatAnimations} from '../systems/CatAnimationSystem.js?v=0576b';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0577a';
+import {FURNITURE_DIRECTIONS,FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0577a';
+import {ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES}
+  from '../config/orthogonal-furniture-visuals.js?v=0577a';
+import {CAT_PROFILES, FALLBACK_CAT} from '../config/cat-config.js?v=0577a';
+import {hasCompleteCatSheet, registerCatAnimations} from '../systems/CatAnimationSystem.js?v=0577a';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -48,6 +50,16 @@ export class BootScene extends Phaser.Scene {
       if (path.endsWith('.svg')) this.load.svg(key, definition.texture);
       else this.load.image(key, definition.texture);
     }
+    // Orthogonal art is preloaded as an additional visual set. Runtime
+    // selection remains projection-specific; iso/flat never select these keys.
+    for (const visual of Object.values(ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES)) {
+      for (const direction of FURNITURE_DIRECTIONS) {
+        this.load.image(
+          visual.textureByDirection[direction],
+          visual.texturePathByDirection[direction]
+        );
+      }
+    }
 
     this.load.spritesheet(FALLBACK_CAT.textureKey, FALLBACK_CAT.spriteSheet, {
       frameWidth: FALLBACK_CAT.frameWidth,
@@ -59,8 +71,8 @@ export class BootScene extends Phaser.Scene {
         frameHeight: profile.frameHeight
       });
     }
-    this.load.image('environment:wall-window', './assets/environment/wall-window.png?v=0576b');
-    this.load.image('environment:menu-board', './assets/environment/menu-board.png?v=0576b');
+    this.load.image('environment:wall-window', './assets/environment/wall-window.png?v=0577a');
+    this.load.image('environment:menu-board', './assets/environment/menu-board.png?v=0577a');
   }
 
   create() {
@@ -72,10 +84,19 @@ export class BootScene extends Phaser.Scene {
       .filter((entry, index, all) => all.findIndex(other => other.key === entry.key) === index);
 
     const failedFurnitureEntries = combined.filter(entry => entry.key.startsWith('furniture:'));
-    const failedFurnitureIds = new Set(failedFurnitureEntries.map(entry => entry.key.split(':')[1]));
+    const failedFurnitureIds = new Set(failedFurnitureEntries.map(entry => {
+      const segments = entry.key.split(':');
+      return segments[1] === 'ortho' ? segments[2] : segments[1];
+    }));
+    const allFurnitureTextureKeys = [
+      ...Object.values(FURNITURE_VISUAL_CONFIG)
+        .flatMap(visual => Object.values(visual.textureByDirection)),
+      ...Object.values(ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES)
+        .flatMap(visual => Object.values(visual.textureByDirection))
+    ];
     this.registry.set('furniture-load-report', {
       total: Object.keys(FURNITURE_CONFIG).length,
-      totalTextures: new Set(Object.values(FURNITURE_VISUAL_CONFIG).flatMap(visual => Object.values(visual.textureByDirection))).size,
+      totalTextures: new Set(allFurnitureTextureKeys).size,
       failed: failedFurnitureEntries,
       fallbackKeys: furnitureFailures.map(entry => entry.key),
       successful: Object.keys(FURNITURE_CONFIG).length - failedFurnitureIds.size
@@ -118,6 +139,22 @@ export class BootScene extends Phaser.Scene {
       for (const record of records) {
         if (this.textures.exists(record.key)) continue;
         missing.push({id, ...record, type:'fallback', error:'texture-missing-after-load'});
+        this.createFurnitureFallbackTexture(record.key);
+      }
+    }
+    for (const [id, visual] of Object.entries(ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES)) {
+      for (const direction of FURNITURE_DIRECTIONS) {
+        const record = {
+          key: visual.textureByDirection[direction],
+          url: visual.texturePathByDirection[direction]
+        };
+        if (this.textures.exists(record.key)) continue;
+        missing.push({
+          id,
+          ...record,
+          type: 'fallback',
+          error: 'orthogonal-texture-missing-after-load'
+        });
         this.createFurnitureFallbackTexture(record.key);
       }
     }

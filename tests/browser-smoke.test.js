@@ -5,7 +5,9 @@ import {existsSync,readFileSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0576b';
+import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0577a';
+import {ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES}
+  from '../assets/js/config/orthogonal-furniture-visuals.js?v=0577a';
 import {CAT_PROFILES,CAT_ANIMATION_LAYOUT,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const root=process.cwd();
@@ -44,7 +46,7 @@ const server=createServer((request,response)=>{
     response.end(readFileSync(file,'utf8').replace('id="careBtn"','id="careBtn-missing"'));return;
   }
   if(relativePath==='index.html'&&requestUrl.searchParams.get('fixture')==='build-mismatch'){
-    response.end(readFileSync(file,'utf8').replace('data-build-id="0576b"','data-build-id="0550-old"'));return;
+    response.end(readFileSync(file,'utf8').replace('data-build-id="0577a"','data-build-id="0550-old"'));return;
   }
   response.end(readFileSync(file));
 });
@@ -139,13 +141,16 @@ try{
         newRaw:localStorage.getItem('catCafePhaserV0540')
       };
     },{
-       expectedFurnitureKeys:[...new Set(Object.values(FURNITURE_VISUAL_CONFIG).flatMap(visual=>Object.values(visual.textureByDirection)))],
+       expectedFurnitureKeys:[...new Set([
+         ...Object.values(FURNITURE_VISUAL_CONFIG).flatMap(visual=>Object.values(visual.textureByDirection)),
+         ...Object.values(ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES).flatMap(visual=>Object.values(visual.textureByDirection))
+       ])],
       expectedCatKeys:[...CAT_PROFILES.map(cat=>cat.textureKey),FALLBACK_CAT.textureKey],
       catIds:CAT_PROFILES.map(cat=>cat.id),states:Object.keys(CAT_ANIMATION_LAYOUT)
     });
     const problems=[];
     if(!state.phaser||!state.game)problems.push('Phaser global or game missing');
-    if(state.htmlBuildId!=='0576b'||state.jsBuildId!=='0576b')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
+    if(state.htmlBuildId!=='0577a'||state.jsBuildId!=='0577a')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
     if(state.gameReady!=='1')problems.push(`gameReady is ${state.gameReady}`);
     if(loadedUrls.some(url=>/\?v=0550a(?:$|[&#])/.test(url)||url.includes('?v=0542a')))problems.push('obsolete runtime cache query loaded');
     if(state.canvasCount!==1||state.canvasWidth<=0||state.canvasHeight<=0)problems.push(`invalid canvas ${state.canvasCount} ${state.canvasWidth}x${state.canvasHeight}`);
@@ -175,7 +180,7 @@ try{
        if(storeIds.length!==47)problems.push(`normal store contains ${storeIds.length} items instead of 47`);
        if(PROTOTYPE_FURNITURE_IDS.some(id=>!storeIds.includes(id)))problems.push('a V0.55.2 redraw is missing from the store');
        const redrawThumbnails=await page.locator(PROTOTYPE_FURNITURE_IDS.map(id=>`.store-card[data-id="${id}"] img`).join(',')).evaluateAll(images=>images.map(image=>({src:image.getAttribute('src'),width:image.naturalWidth,height:image.naturalHeight})));
-       if(redrawThumbnails.length!==25||redrawThumbnails.some(image=>!image.src?.includes('/redrawn/')||!image.src.endsWith('.png?v=0576b')||image.width<=0||image.height<=0))problems.push(`invalid redraw store thumbnails: ${JSON.stringify(redrawThumbnails)}`);
+       if(redrawThumbnails.length!==25||redrawThumbnails.some(image=>!image.src?.includes('/redrawn/')||!image.src.endsWith('.png?v=0577a')||image.width<=0||image.height<=0))problems.push(`invalid redraw store thumbnails: ${JSON.stringify(redrawThumbnails)}`);
        const redrawBefore=await page.evaluate(()=>({coins:window.gameController.getState().coins,count:window.gameController.getState().items.length}));
        await page.click('.store-card[data-id="squareCafeTable"]');
        await page.waitForTimeout(100);
@@ -479,6 +484,13 @@ try{
       const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
       const saved=JSON.parse(localStorage.getItem('catCafePhaserV0540')||'null');
       const cats=[...scene.catEntities.values()].map(entity=>({x:entity.sprite.x,y:entity.sprite.y}));
+      const targetTypes=new Set([
+        'counter','coffeeMachine','oven','washStation','dessert','smartOrder',
+        'pinkTableLong','roundTable','chair','creamSofa','doubleCatTree','scratchPost'
+      ]);
+      const targetEntities=[...scene.entities.values()]
+        .filter(entity=>targetTypes.has(entity.item.type))
+        .map(entity=>({type:entity.item.type,texture:entity.texture.key}));
       const cam=scene.cameras.main;
       const room=scene.cameraController.getRoomBounds();
       const core=scene.cameraController.getCoreBounds();
@@ -490,6 +502,7 @@ try{
         savedLeak:saved?('projection' in saved||'demoLayout' in saved):false,
         catsFinite:cats.length>0&&cats.every(cat=>Number.isFinite(cat.x)&&Number.isFinite(cat.y)),
         artDebug:scene.artDebug?.enabled||false,
+        targetEntities,
         roomSkinId:scene.orthoRoomSkin?.id||null,
         shellRole:scene.orthoRoomSkin?.shell?.role||null,
         canvasRenderer:window.__CAT_CAFE_GAME__.renderer.type===Phaser.CANVAS,
@@ -577,6 +590,9 @@ try{
     if(state.roomSkinId!=='warm-cafe-foundation')problems.push(`Room Skin is ${state.roomSkinId}`);
     if(state.shellRole!=='fixed-architecture')problems.push(`shell role is ${state.shellRole}`);
     if(ortho.demo&&!state.artDebug)problems.push('Art Debug did not enable');
+    if(state.targetEntities.some(entity=>!entity.texture.startsWith(`furniture:ortho:${entity.type}:`))) {
+      problems.push(`an orthogonal core asset used a base texture: ${JSON.stringify(state.targetEntities)}`);
+    }
     if(!state.coreFullyVisible)problems.push('core gameplay region not fully visible at initial framing');
     if(!state.roomWidthCrops)problems.push('outer room columns did not crop (first screen is not full-bleed)');
     if(!state.canZoomOutToRoom)problems.push(`cannot zoom out to the whole room (fit ${state.fitZoom} vs minZoom ${state.minZoom})`);
@@ -586,6 +602,47 @@ try{
     results.push({scenario:ortho.name,viewport:'390x844',...state,pan,edge,shellDoor,problems});
     await context.close();
     if(problems.length)throw new Error(`${ortho.name}: ${problems.join('; ')}`);
+  }
+  // Every documented projection URL must boot independently. Orthogonal store
+  // thumbnails use the override; iso/flat/default keep the base visual paths.
+  for(const projection of [
+    {name:'root',query:'',mode:'iso'},
+    {name:'iso',query:'?projection=iso',mode:'iso'},
+    {name:'flat',query:'?projection=flat',mode:'flat'},
+    {name:'ortho',query:'?projection=ortho',mode:'ortho'},
+    {name:'orthogonal-alias',query:'?projection=orthogonal',mode:'ortho'},
+    {name:'ortho-demo',query:'?projection=ortho&demoLayout=1',mode:'ortho'},
+    {name:'ortho-art-debug',query:'?projection=ortho&artDebug=1',mode:'ortho'},
+    {name:'ortho-demo-art-debug',query:'?projection=ortho&demoLayout=1&artDebug=1',mode:'ortho'}
+  ]){
+    const context=await browser.newContext({viewport:{width:390,height:844}});
+    await context.addInitScript(()=>localStorage.clear());
+    const page=await context.newPage();
+    const failures=[];
+    page.on('pageerror',error=>failures.push(error.message));
+    page.on('requestfailed',request=>failures.push(`${request.url()} ${request.failure()?.errorText||''}`));
+    await page.goto(origin+'/'+projection.query,{waitUntil:'domcontentloaded',timeout:20000});
+    await page.waitForFunction(()=>document.body.dataset.gameReady==='1'&&document.getElementById('bootOverlay')?.classList.contains('hidden'),null,{timeout:20000});
+    await page.click('#openStoreBtn');
+    const state=await page.evaluate(targetIds=>{
+      const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+      const thumbnails=Object.fromEntries(targetIds.map(id=>[
+        id,
+        document.querySelector(`.store-card[data-id="${id}"] img`)?.getAttribute('src')||''
+      ]));
+      return {mode:scene.projectionMode,thumbnails};
+    },[
+      'counter','coffeeMachine','oven','washStation','dessert','smartOrder',
+      'pinkTableLong','roundTable','chair','creamSofa','doubleCatTree','scratchPost'
+    ]);
+    if(state.mode!==projection.mode)failures.push(`mode ${state.mode} !== ${projection.mode}`);
+    for(const [id,path] of Object.entries(state.thumbnails)){
+      const isOrtho=path.includes(`/orthogonal/${id}/`);
+      if((projection.mode==='ortho')!==isOrtho)failures.push(`${id} thumbnail ${path}`);
+    }
+    if(failures.length)throw new Error(`${projection.name}: ${failures.join('; ')}`);
+    results.push({scenario:`projection-${projection.name}`,viewport:'390x844',mode:state.mode,problems:[]});
+    await context.close();
   }
   // Invalid projection value safely falls back to iso.
   {

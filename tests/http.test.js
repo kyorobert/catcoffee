@@ -3,6 +3,8 @@ import {readFileSync,existsSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
 import {FURNITURE_VISUAL_CONFIG} from '../assets/js/config/furniture-visual-config.js';
+import {ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES}
+  from '../assets/js/config/orthogonal-furniture-visuals.js';
 import {CAT_PROFILES,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const root=process.cwd();
@@ -90,7 +92,10 @@ try{
       try{validateSvgXml(new TextDecoder().decode(body),path)}catch(error){failures.push(error.message)}
     }
   }
-  for(const visual of Object.values(FURNITURE_VISUAL_CONFIG)){
+  for(const visual of [
+    ...Object.values(FURNITURE_VISUAL_CONFIG),
+    ...Object.values(ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES)
+  ]){
     for(const texture of Object.values(visual.texturePathByDirection||{})){
       const path=new URL(texture,origin+'/').pathname;
       const response=await fetch(origin+path);
@@ -115,7 +120,7 @@ try{
     if(!signature.every((byte,index)=>body[index]===byte))failures.push(`invalid cat PNG signature ${path}`);
     if(body.length<100)failures.push(`empty cat PNG ${path}`);
   }
-  for(const asset of ['./assets/environment/wall-window.png?v=0576b','./assets/environment/menu-board.png?v=0576b']){
+  for(const asset of ['./assets/environment/wall-window.png?v=0577a','./assets/environment/menu-board.png?v=0577a']){
     const path=new URL(asset,origin+'/').pathname;
     const response=await fetch(origin+path);
     const body=new Uint8Array(await response.arrayBuffer());
@@ -130,4 +135,4 @@ if(failures.length){
   console.error('HTTP resource failures:\n- '+failures.join('\n- '));
   process.exit(1);
 }
-console.log(`HTTP resource test passed: ${visited.size} linked resources, ${Object.keys(FURNITURE_CONFIG).length} furniture textures, 11 cat PNG assets and 2 wall decorations.`);
+console.log(`HTTP resource test passed: ${visited.size} linked resources, ${Object.keys(FURNITURE_CONFIG).length} furniture definitions, 48 orthogonal runtime PNGs, 11 cat PNG assets and 2 wall decorations.`);

@@ -1,6 +1,6 @@
 # 暫定產品與技術路線圖
 
-## 目前 Gate（V0.57.6-alpha / 0576b）
+## 目前 Gate（V0.57.7-alpha / 0577a）
 
 - [x] ARCH-0575C：playable area 與 visual shell 正式分離。
 - [x] Room Skin foundation：wall/trim/floor/door/decor anchors 集中設定。
@@ -11,7 +11,10 @@
 - [x] 正式入口改由 zone metadata 產生 `(7,0)/(8,0)` mask，底部舊入口釋放。
 - [x] Save migration 5402 與 Demo 唯讀隔離。
 - [ ] iPhone Safari 真機 Gate（自動化 Chrome 已通過，不可替代真機）。
-- [ ] `ART-0577-CORE-ORTHOGONAL-FURNITURE`：未核准前不得開始。
+- [x] `ART-0577-CORE-ORTHOGONAL-FURNITURE-PASS-1`：12 件核心家具四方向
+  Orthogonal override、商店縮圖、Ghost 與 runtime 整合完成。
+- [ ] iPhone Safari 真機驗收：Chrome／Edge 自動驗收已通過，真機不得代稱通過。
+- [ ] 第二批家具：尚未排入本版；不得把第一批擴張為全 47 件。
 - [ ] iPhone Safari 真機 pan/pinch/地址列與邊界拖曳驗收。
 - [ ] 產品負責人確認 V0576A/B/C Gate 後，才可開始 `ART-0576-CORE-ORTHOGONAL-FURNITURE`。
 

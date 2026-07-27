@@ -1,4 +1,6 @@
-import {FURNITURE_CONFIG} from './furniture-config.js?v=0576b';
+import {FURNITURE_CONFIG} from './furniture-config.js?v=0577a';
+import {getOrthogonalFurnitureVisualOverride}
+  from './orthogonal-furniture-visuals.js?v=0577a';
 
 // Visual-only metadata. Prices, unlocks, footprints and save data remain owned by
 // furniture-config.js and SaveAdapter; this module never mutates those sources.
@@ -47,7 +49,7 @@ export const PROTOTYPE_FURNITURE_IDS = Object.freeze([
 // Historical audit set: these 25 IDs were the V0.55.1 placeholder SVGs.
 // V0.55.2 preserves IDs and gameplay metadata while replacing only runtime art.
 export const V0552_REDRAW_FURNITURE_IDS = PROTOTYPE_FURNITURE_IDS;
-export const FURNITURE_REDRAW_ASSET_VERSION = '0576b';
+export const FURNITURE_REDRAW_ASSET_VERSION = '0577a';
 export const V0552_REDRAW_BATCHES = Object.freeze({
   P0:Object.freeze(['squareCafeTable','windowHighChair','wallBench','catEarChair','creamSofa','pawSofa','cardboardNest','scratchPost','windowHammock','doubleCatTree']),
   P1:Object.freeze(['catTent','catCastle','coffeeMachine','oven','washStation','smartOrder','pawRug','creamPlaidRug','starNightRug']),
@@ -203,6 +205,28 @@ export const FURNITURE_VISUAL_CONFIG = Object.freeze(Object.fromEntries(
   Object.entries(FURNITURE_CONFIG).map(([id, definition])=>[id,createVisualDefinition(id,definition)])
 ));
 
-export function getFurnitureVisualDefinition(id) {
-  return FURNITURE_VISUAL_CONFIG[id] || null;
+export function getFurnitureVisualDefinition(id, projectionMode = 'iso') {
+  const base = FURNITURE_VISUAL_CONFIG[id] || null;
+  if (!base || projectionMode !== 'ortho') return base;
+
+  const override = getOrthogonalFurnitureVisualOverride(id);
+  if (!override) return base;
+
+  // Only the documented visual fields may replace the base values. Logical
+  // metadata intentionally comes from `base`, preserving the public furniture
+  // and save contracts across projection modes.
+  return Object.freeze({
+    ...base,
+    projection: override.projection,
+    visualScale: override.visualScale,
+    anchor: override.anchor,
+    textureByDirection: override.textureByDirection,
+    texturePathByDirection: override.texturePathByDirection,
+    fallbackTexture: override.fallbackTexture,
+    fallbackDirection: override.fallbackDirection,
+    authoredDirections: override.authoredDirections,
+    mirrorAllowed: override.mirrorAllowed,
+    sourceFormat: override.sourceFormat,
+    notes: override.notes
+  });
 }

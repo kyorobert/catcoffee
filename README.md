@@ -1,7 +1,28 @@
-# 貓咪咖啡廳 V0.57.6-alpha
+# 貓咪咖啡廳 V0.57.7-alpha
 
-版本：`V0.57.6-alpha｜正交互動與入口清理版`  
-Build ID：`0576b`
+版本：`V0.57.7-alpha｜核心正交家具第一批版`  
+Build ID：`0577a`
+
+## V0.57.7-alpha：核心正交家具第一批
+
+`ART-0577` 為 Orthogonal 模式加入第一批 12 件原創四方向家具：
+`counter`、`coffeeMachine`、`oven`、`washStation`、`dessert`、`smartOrder`、
+`pinkTableLong`、`roundTable`、`chair`、`creamSofa`、`doubleCatTree`、
+`scratchPost`。每件皆有 `down-right`、`down-left`、`up-right`、`up-left`
+透明 PNG，並共用底部中心 anchor。
+
+新素材由獨立的
+[`orthogonal-furniture-visuals.js`](./assets/js/config/orthogonal-furniture-visuals.js)
+提供 projection-specific visual override。只有 `?projection=ortho`／
+`?projection=orthogonal` 選用；預設、iso 與 flat 仍使用既有素材。家具 ID、
+footprint、`x/y/r`、價格、layer、station、socket、walkBlocking、Occupancy、
+Placement 與存檔契約均未改。
+
+- [實作結果](./docs/V0577_CORE_ORTHOGONAL_FURNITURE_RESULT.md)
+- [驗收紀錄](./docs/V0577_CORE_ORTHOGONAL_FURNITURE_ACCEPTANCE.md)
+- [視覺比較](./docs/V0577_CORE_ORTHOGONAL_FURNITURE_COMPARISON.html)
+- Chrome 真實瀏覽器證據：`docs/evidence/v0577/`
+- 自動檢查：`npm.cmd run test:ortho-furniture`
 
 ## V0.57.6-alpha：正交互動與入口清理
 

@@ -1,6 +1,6 @@
 {
   "name": "cat-cafe-phaser",
-  "version": "0.57.6-alpha",
+  "version": "0.57.7-alpha",
   "private": true,
   "type": "module",
   "scripts": {
@@ -32,6 +32,7 @@
     ,"test:furniture-footprint": "node ./tests/furniture-footprint-regression.test.js"
     ,"test:furniture-store-reenable": "node ./tests/furniture-store-reenable.test.js"
     ,"test:furniture-save-redraw": "node ./tests/furniture-save-redraw-compatibility.test.js"
+    ,"test:ortho-furniture": "node ./tests/orthogonal-furniture-visuals.test.js"
   },
   "dependencies": {
     "phaser": "3.90.0"

@@ -46,3 +46,11 @@
 - Playwright Core 1.55.0：僅供本機 Smoke Test，Apache License 2.0，不包含於瀏覽器執行路徑。
 
 本版本未加入未授權商業遊戲素材，亦未使用開羅遊戲官方角色素材。
+## V0.57.7 Orthogonal 核心家具第一批
+
+- 資產：12 件家具、四方向，共 48 張透明 PNG。
+- 製作：OpenAI image generation 依專案 Art Bible 與本任務原創設計；未使用、
+  裁切或仿製任何未授權商業遊戲素材。
+- 後製：本地 chroma-key 去背、方向切分、等比例縮放、透明邊界與底部中心校準。
+- Runtime 路徑：`assets/furniture/orthogonal/{id}/{id}-{direction}.png`。
+- 開發來源與處理工具位於 `tools/`，不納入 GitHub Pages 部署 ZIP。

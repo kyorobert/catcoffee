@@ -1,8 +1,8 @@
-import {findPath} from '../core/grid-pathfinder.js?v=0576b';
+import {findPath} from '../core/grid-pathfinder.js?v=0577a';
 import {
   CAT_STATE, createCatBehaviorState, shouldLeaveIdle, chooseCatTarget,
   beginWalking, finishPath, pauseBehavior, resumeBehavior, markLayoutChanged, randomDelay
-} from '../core/cat-behavior-core.js?v=0576b';
+} from '../core/cat-behavior-core.js?v=0577a';
 
 const key = (x, y) => `${x},${y}`;
 

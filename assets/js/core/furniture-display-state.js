@@ -1,10 +1,10 @@
-import {getFurnitureVisualDefinition} from '../config/furniture-visual-config.js?v=0576b';
-import {resolveFurnitureDirection,rotationToDirection} from './furniture-direction.js?v=0576b';
+import {getFurnitureVisualDefinition} from '../config/furniture-visual-config.js?v=0577a';
+import {resolveFurnitureDirection,rotationToDirection} from './furniture-direction.js?v=0577a';
 
 // Pure display description shared by the scene entity and its drag ghost.
 // It contains only JSON-like values and never touches a texture manager or sprite.
-export function getFurnitureDisplayState(type,rotation,definition){
-  const visual=getFurnitureVisualDefinition(type);
+export function getFurnitureDisplayState(type,rotation,definition,projectionMode='iso'){
+  const visual=getFurnitureVisualDefinition(type,projectionMode);
   if(!visual){
     return {
       visual:null,texture:`furniture:${type}`,flipX:Boolean((rotation||0)%2),

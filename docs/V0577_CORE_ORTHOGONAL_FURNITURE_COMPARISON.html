@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>V0.57.7 核心正交家具比較</title>
+  <style>
+    :root{color-scheme:light;--paper:#fffaf1;--ink:#4b3027;--line:#d7ad83;--sage:#789579}
+    *{box-sizing:border-box}
+    body{margin:0;padding:24px;background:#ead8bf;color:var(--ink);font-family:system-ui,-apple-system,sans-serif}
+    main{max-width:1180px;margin:auto;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:22px}
+    h1,h2{margin-top:0} p{line-height:1.65}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    figure{margin:0;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff}
+    img{display:block;width:100%;height:auto;border-radius:9px;background:#f2e1c7}
+    figcaption{padding-top:9px;font-weight:700}
+    .wide{grid-column:1/-1}
+    code{background:#f0e2cf;padding:.15em .35em;border-radius:4px}
+    .status{border-left:5px solid var(--sage);padding:10px 14px;background:#eef3e8}
+    @media(max-width:720px){body{padding:10px}main{padding:14px}.grid{grid-template-columns:1fr}.wide{grid-column:auto}}
+  </style>
+</head>
+<body>
+<main>
+  <h1>V0.57.7-alpha｜核心正交家具第一批</h1>
+  <p class="status">12 個既有 ID 以 projection-specific override 接入；只有 Orthogonal
+    使用新 PNG。iso／flat、Camera、Grid、footprint、存檔均保持原契約。</p>
+  <div class="grid">
+    <figure>
+      <img src="./evidence/v0576b/mobile-390-ortho-demo-initial.png" alt="V0.57.6 正交 Demo">
+      <figcaption>Before｜V0.57.6：核心家具仍混用舊等角視覺</figcaption>
+    </figure>
+    <figure>
+      <img src="./evidence/v0577/mobile-390-ortho-demo.png" alt="V0.57.7 正交 Demo">
+      <figcaption>After｜V0.57.7：第一批正交家具</figcaption>
+    </figure>
+    <figure>
+      <img src="./evidence/v0577/mobile-390-service-zone.png" alt="服務區">
+      <figcaption>服務區｜正面設備與櫃檯</figcaption>
+    </figure>
+    <figure>
+      <img src="./evidence/v0577/mobile-390-seating-zone.png" alt="座位區">
+      <figcaption>座位區｜桌、椅與沙發</figcaption>
+    </figure>
+    <figure>
+      <img src="./evidence/v0577/mobile-390-cat-zone.png" alt="貓咪區">
+      <figcaption>貓咪區｜跳台與抓柱</figcaption>
+    </figure>
+    <figure>
+      <img src="./evidence/v0577/mobile-390-rotated-furniture.png" alt="旋轉方向">
+      <figcaption>四方向｜前後內容與側面寬度可辨</figcaption>
+    </figure>
+    <figure class="wide">
+      <img src="./evidence/v0577/desktop-1440-ortho-demo.png" alt="桌面正交 Demo">
+      <figcaption>1440×900｜同一世界比例，桌面相容</figcaption>
+    </figure>
+  </div>
+  <h2>回歸</h2>
+  <p><code>?projection=iso</code> 仍選用 base visual；
+    <code>?projection=flat</code> 亦不讀 Orthogonal override。完整指標見
+    <a href="./evidence/v0577/metrics.json">metrics.json</a>。</p>
+</main>
+</body>
+</html>

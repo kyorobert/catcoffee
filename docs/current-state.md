@@ -1,6 +1,14 @@
-# V0.57.6-alpha 專案現況
+# V0.57.7-alpha 專案現況
 
-## Build 0576b（ARCH-0576A）
+## Build 0577a（ART-0577）
+
+- Orthogonal 第一批 12 件核心家具已改用原創、透明、四方向 PNG。
+- Override 僅屬視覺選擇：ortho 使用 `furniture:ortho:*`，iso／flat 保持既有 texture。
+- 家具 ID、footprint、`x/y/r`、價格、layer、station/socket、walkBlocking、
+  Occupancy、Placement、Grid 10×8、78 playable cells 與入口 `(7,0)/(8,0)` 未變。
+- 存檔 key `catCafePhaserV0540`、scene schema 5401、migration 5402 未變。
+- Chrome／Edge browser smoke、所有投影 URL、HTTP 48 張新 PNG 與回歸測試通過；
+  iPhone Safari 真機尚未測試。
 
 - 正交模式仍為 opt-in；iso 仍是預設／rollback。
 - 家具 context toolbar 已有 44×44 CSS px 以上觸控區；Cancel 會完整清除 selection／InputMode／Camera lock。
@@ -20,14 +28,14 @@
 
 | 項目 | 現況 |
 |---|---|
-| 版本 | `V0.57.5-alpha｜正交房間外殼與門比例修正版` |
-| Build ID | `0575b` |
+| 版本 | `V0.57.7-alpha｜核心正交家具第一批版` |
+| Build ID | `0577a` |
 | package version | `0.57.5-alpha` |
 | 引擎 | Phaser `3.90.0`，Canvas renderer |
 | 引擎來源 | `assets/vendor/phaser-3.90.0.min.js` |
 | 部署 | GitHub Pages 純靜態相對路徑，不依賴 CDN |
 | 模組載入 | ES Modules，必須由 HTTP server／HTTPS 載入，不使用 `file://` |
-| 存檔 key | `catCafePhaserV0540`（schema 5401、migration 5401，未變） |
+| 存檔 key | `catCafePhaserV0540`（schema 5401、migration 5402，未變） |
 | Legacy save | 只讀 legacy key，原始資料備份至 `catCafeLegacySaveBackupV0532` |
 
 ### A2. 場景投影：正交平面（V0.57.0 → V0.57.3）

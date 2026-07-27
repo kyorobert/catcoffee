@@ -1,10 +1,10 @@
-import {DepthSystem} from '../systems/DepthSystem.js?v=0576b';
-import {getFurnitureDisplayState} from '../core/furniture-display-state.js?v=0576b';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0577a';
+import {getFurnitureDisplayState} from '../core/furniture-display-state.js?v=0577a';
 
 export class FurnitureEntity extends Phaser.GameObjects.Image{
   constructor(scene,item,definition,grid){
     const anchor=grid.getAnchor(item.type,item.x,item.y,item.r||0);
-    const display=getFurnitureDisplayState(item.type,item.r||0,definition);
+    const display=getFurnitureDisplayState(item.type,item.r||0,definition,grid.projectionMode);
     super(scene,anchor.x,anchor.y,display.texture);
     this.item=item;
     this.definition=definition;
@@ -36,7 +36,9 @@ export class FurnitureEntity extends Phaser.GameObjects.Image{
   sync(){
     const rotation=this.item.r||0;
     const anchor=this.grid.getAnchor(this.item.type,this.item.x,this.item.y,rotation);
-    const display=getFurnitureDisplayState(this.item.type,rotation,this.definition);
+    const display=getFurnitureDisplayState(
+      this.item.type,rotation,this.definition,this.grid.projectionMode
+    );
     this.setPosition(anchor.x,anchor.y);
     if(display.texture&&this.texture.key!==display.texture)this.setTexture(display.texture);
     this.setOrigin(display.originX,display.originY).setFlipX(display.flipX);
