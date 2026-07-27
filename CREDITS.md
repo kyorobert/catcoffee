@@ -54,3 +54,10 @@
 - 後製：本地 chroma-key 去背、方向切分、等比例縮放、透明邊界與底部中心校準。
 - Runtime 路徑：`assets/furniture/orthogonal/{id}/{id}-{direction}.png`。
 - 開發來源與處理工具位於 `tools/`，不納入 GitHub Pages 部署 ZIP。
+
+### V0577B 木椅方向校準
+
+- 保留暖木、奶油坐墊、貓耳椅背與貓頭鏤空的專案原創設定，以 OpenAI image
+  generation 編修為四個真正 3/4 正交方向。
+- 本地工具負責棋盤去背、方向切分、92×126 runtime 尺寸、透明角落與共同接地線。
+- 未使用外部遊戲截圖、商業遊戲素材或開羅遊戲官方素材。

@@ -1,7 +1,22 @@
 # 貓咪咖啡廳 V0.57.7-alpha
 
-版本：`V0.57.7-alpha｜核心正交家具第一批版`  
-Build ID：`0577a`
+版本：`V0.57.7-alpha｜第一批家具旋轉與方向校正版`  
+Build ID：`0577b`
+
+## Build 0577b：第一批旋轉與方向校準
+
+`ART-0577B` 修正 12 件 Orthogonal override 家具的旋轉視覺 pivot。原問題是
+1×2／2×1 footprint 在相同 `x/y` 旋轉後，`GridSystem.getAnchor()` 會切換到另一個
+底邊中心，使 sprite 看起來被搬動。現在 projection-specific `calibration` 與
+`getFurnitureVisualPosition()` 讓 Entity、拖曳 Ghost、旋轉預覽和正式 commit
+共用同一視覺 pivot；footprint、Occupancy、Placement、`x/y/r` 與存檔契約不變。
+
+木椅四張 PNG 已改為真正四個 3/4 正交方向，左右方向可辨識椅背厚度、椅面深度及
+前後腳。iso／flat 仍使用 base visual；Orthogonal 仍只由 URL opt-in。其餘 35 件
+未開始，iPhone Safari 真機 Gate 仍 pending。
+
+- [0577B 實作與貓咪 × 家具稽核](./docs/V0577B_FIRST_BATCH_ROTATION_AND_DIRECTION_RESULT.md)
+- [0577B 驗收紀錄](./docs/V0577B_FIRST_BATCH_ROTATION_AND_DIRECTION_ACCEPTANCE.md)
 
 ## V0.57.7-alpha：核心正交家具第一批
 

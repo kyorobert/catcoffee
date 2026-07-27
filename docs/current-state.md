@@ -1,8 +1,12 @@
 # V0.57.7-alpha 專案現況
 
-## Build 0577a（ART-0577）
+## Build 0577b（ART-0577B）
 
 - Orthogonal 第一批 12 件核心家具已改用原創、透明、四方向 PNG。
+- `ART-0577B` 已完成第一批旋轉校準：Entity、拖曳 Ghost 與放置預覽共用
+  `getFurnitureVisualPosition()`；非正方形 footprint 旋轉時保留同一視覺 pivot，
+  gameplay footprint／Occupancy／Placement 仍照原方向旋轉。
+- 木椅已補成真正四個正交 3/4 方向，左右可辨識椅背厚度、椅面深度與前後腳。
 - Override 僅屬視覺選擇：ortho 使用 `furniture:ortho:*`，iso／flat 保持既有 texture。
 - 其餘 35 件家具尚未正交重作，仍使用既有 base visual；不得將第一批描述為全 47 件完成。
 - 商店縮圖、FurnitureEntity、Ghost 與旋轉方向共用同一 visual selector。
@@ -32,8 +36,8 @@
 
 | 項目 | 現況 |
 |---|---|
-| 版本 | `V0.57.7-alpha｜核心正交家具第一批版` |
-| Build ID | `0577a` |
+| 版本 | `V0.57.7-alpha｜第一批家具旋轉與方向校正版` |
+| Build ID | `0577b` |
 | package version | `0.57.7-alpha` |
 | 引擎 | Phaser `3.90.0`，Canvas renderer |
 | 引擎來源 | `assets/vendor/phaser-3.90.0.min.js` |
@@ -87,7 +91,7 @@
 | `ortho-room-zones`（純） | 正交房間空間分區的純格座標矩形＋純 helper（無 world pixel／引擎／行為） |
 | `DepthSystem` | 依接地 `worldY + layerBias` 統一排序 |
 | `SaveAdapter` | 新／舊存檔載入、正規化、一次性遷移、inventory archive 與寫回現行 key |
-| `FurnitureEntity` | texture／origin／hit area／世界位置／depth／選取顯示 |
+| `FurnitureEntity` | texture／origin／hit area／世界位置／depth／選取顯示；Ortho Entity 與 Ghost 共用視覺 pivot 校準 |
 | `CatEntity` | sprite、動畫、方向、移動顯示、depth、選取和值班徽章 |
 | `StorePanel` | DOM 商店清單、購買入口與面板生命週期 |
 | `CarePanel` | DOM 選貓、照顧方式、演出、結果與取消流程 |
@@ -98,10 +102,10 @@
 |---|---|---|
 | Phaser 啟動與錯誤遮罩 | 完成 | 有 timeout、error UI、fallback 與 Build consistency |
 | Camera pan／pinch／wheel／resize | 完成 | 單一 Main Camera；ortho 首屏核心滿版、可 zoom-out 至整房；外部裝置仍需人工驗收 |
-| 家具顯示、選取、拖曳、旋轉、收納、出售 | 完成 | 同一 Grid／Occupancy／Placement／Ghost 資料流 |
+| 家具顯示、選取、拖曳、旋轉、收納、出售 | 完成 | 同一 Grid／Occupancy／Placement／Ghost 資料流；第一批 ortho 旋轉視覺 pivot 已校準 |
 | 家具商店與購買 | 完成 | 以 Runtime visual config 顯示 |
 | 家具存檔相容 | 完成 | 固定 ID 與 `catCafePhaserV0540` |
-| 核心 12 件 Orthogonal 家具素材 | 完成 | `ART-0577` 已提供四方向 48 張 PNG；僅 ortho 使用 override |
+| 核心 12 件 Orthogonal 家具素材 | 完成 | `ART-0577` 提供四方向 48 張 PNG；`ART-0577B` 修正旋轉 pivot 並補齊木椅真四向 |
 | 其餘 35 件 Orthogonal 家具素材 | 未完成 | 仍沿用既有 base visual；第二批尚未核准 |
 | 貓咪顯示、動畫、漫遊與家具避障 | 完成 | 五個 cat ID；BFS、delta movement、休息狀態 |
 | 餵食／梳毛／玩耍照顧流程 | 完成 | 純規則 core + Phaser session + DOM 演出 |
@@ -124,16 +128,20 @@
 - furniture ID、價格、footprint、rotation 與存檔座標未因重繪或投影改變。
 - Anchor：直立物以腳底中心；平面裝飾以 footprint 中心。
 - `ART-0577` 第一批 12 件在 ortho 使用 projection-specific visual override；商店縮圖、Entity、Ghost 與旋轉共用同一 selector。
+- `ART-0577B` 在 override 中加入集中式 `calibration`；不把方向 offset 散落到 Scene。
+  所有 12 件以 rotation 0 的底部中心作穩定視覺 pivot，方向 PNG 仍依 `r` 切換，
+  footprint cells／polygon／驗證維持原邏輯。
 - 其餘 35 件在 ortho、以及全部家具在 iso／flat，仍使用既有 base visual。
 
 完整逐件紀錄見 [FURNITURE_AUDIT.md](./FURNITURE_AUDIT.md) 與 [PROTOTYPE_REDRAW_RESULT.md](./PROTOTYPE_REDRAW_RESULT.md)。
 
 ## F. 測試狀態
 
-### 現行 Runtime（ART-0577，Build 0577a）實際驗證
+### 現行 Runtime（ART-0577B，Build 0577b）實際驗證
 
-- `npm run test:ortho-furniture`：通過（精確 12 個 ID、48 張透明四方向 PNG、視覺 override 不改 gameplay metadata）。
-- `node check.js --deploy`：通過（Build `0577a`；Save key、schema 5401、migration 5402、78 playable cells 與正式入口均維持）。
+- `npm run test:ortho-furniture`：通過（精確 12 個 ID、48 張透明四方向 PNG、
+  12 件四向 pivot 穩定、木椅側面 silhouette 差異、視覺 override 不改 gameplay metadata）。
+- `node check.js --deploy`：通過（Build `0577b`；Save key、schema 5401、migration 5402、78 playable cells 與正式入口均維持）。
 - `node check.js --dev`：Chrome／Edge Browser Smoke 通過；root、iso、flat、ortho、orthogonal alias、demo、Art Debug 與 invalid fallback 均無 fatal error。
 - 視覺與指標證據位於 `docs/evidence/v0577/`；結果與驗收見 [V0577 結果](./V0577_CORE_ORTHOGONAL_FURNITURE_RESULT.md) 與 [V0577 驗收](./V0577_CORE_ORTHOGONAL_FURNITURE_ACCEPTANCE.md)。
 
@@ -146,7 +154,7 @@
 
 ### 尚未驗證
 
-- V0577 第一批家具的 iPhone Safari 直式比例、輪廓、anchor、拖曳與旋轉體感尚未真機驗收。
+- V0577B 第一批家具的 iPhone Safari 直式比例、輪廓、anchor、拖曳與旋轉體感尚未真機驗收。
 - [V0552 人工瀏覽器驗收](./V0552_MANUAL_BROWSER_ACCEPTANCE.md) 的實機項目尚未勾選。
 - 自動化 Chrome／Edge 不得替代 iPhone Safari 真機 Gate；真機通過前不得核准或開始第二批家具。
 
@@ -154,6 +162,10 @@
 
 - Orthogonal 為 opt-in 原型、尚未設為正式預設；iso 仍為預設與 rollback，待手機實機再驗收後另議。
 - 第一批 12 件 Orthogonal 家具已由 `ART-0577` 完成；其餘 35 件仍為 base visual，第二批 Task Card 尚未核准。
+- 貓咪目前只把家具 occupancy 當阻擋格，尚未消費 seat／cat-rest／cat-play
+  interaction socket，也沒有 approach point、家具狀態占用或對應動畫；完整稽核見
+  [V0577B 結果](./V0577B_FIRST_BATCH_ROTATION_AND_DIRECTION_RESULT.md)，建議另立
+  `ARCH-0578-CAT-FURNITURE-INTERACTION-AUDIT`，本 Build 未實作互動。
 - 三層服務目前只有空間 metadata；工作站／可到達性／椅桌配對與收銀/製作/送餐/排隊**行為**未做（未核准，可用 `ortho-room-zones` 為未來空間依據）。
 - 玩家店長未實作；已決定未來代表玩家且可自訂，但資料與視覺規格待定。
 - 完整顧客、店員、訂單、料理、送餐、結帳、任務與故事系統未完成。

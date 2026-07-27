@@ -1,5 +1,29 @@
 # 開發日誌
 
+## 2026-07-28｜ART-0577B-FIRST-BATCH-ROTATION-AND-DIRECTION-CALIBRATION
+
+- 版本／Build：`V0.57.7-alpha｜第一批家具旋轉與方向校正版`／`0577b`；
+  package 維持 `0.57.7-alpha`。
+- 根因：非正方形 footprint 在相同 `x/y` 旋轉時，`GridSystem.getAnchor()` 依旋轉後
+  footprint 重新取底邊中心；例如 2×1 在 ortho 的偶／奇方向 anchor 明顯不同，
+  Entity 與 Ghost 因而出現「未拖曳卻被搬動」的視覺跳動。
+- 修正：Orthogonal override 加入集中式 `calibration`，新增共用
+  `getFurnitureVisualPosition()`；FurnitureEntity、Drag Ghost 與 snapping 全部走
+  同一路徑。Grid／footprint／Occupancy／Placement／save `x/y/r` 未改。
+- 美術：木椅保留木色、奶油坐墊與貓耳椅背，重作真四向 3/4 PNG；加入左右／前後
+  silhouette 差異回歸，仍為 92×126 透明 RGBA、共同接地基線。
+- 文件：新增 0577B 結果與驗收；更新 current-state、roadmap、README、handoff，
+  並把「貓咪 × 家具不匹配」整理為下一張
+  `ARCH-0578-CAT-FURNITURE-INTERACTION-AUDIT` 的輸入。本卡未修改貓咪 Runtime。
+- 保護契約：CameraController 行為、10×8 Grid、78 playable cells、入口、
+  `catCafePhaserV0540`、schema 5401、migration 5402、其餘 35 件家具均未改。
+- 測試：`npm test`、`test:build`、`test:ortho-furniture`、`test:entrance`、
+  `test:ortho-area`、`check:deploy`、`check:dev` 全數通過；Chrome／Edge Smoke
+  另以 390×844 Scene 驗證四件代表家具的四次 toolbar rotate commit。
+- 部署包：`dist/cat_cafe_v0577b_git_deploy/` 與
+  `cat_cafe_v0577b_git_deploy.zip` 重建並以 ZIP Gate 驗證；未部署、未執行 Git。
+- iPhone Safari 真機仍 pending；第二批家具未核准、未開始。
+
 ## 2026-07-27｜DOC-0577A-STATE-AND-GATE-CONSISTENCY-CLEANUP
 
 - 版本／Build：`V0.57.7-alpha｜核心正交家具第一批版`／`0577a`，**不升版**；package 維持 `0.57.7-alpha`。

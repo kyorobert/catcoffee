@@ -2,19 +2,19 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-// Import via the same `?v=0577a` specifier the runtime uses so `instanceof` resolves
+// Import via the same `?v=0577b` specifier the runtime uses so `instanceof` resolves
 // against the same module instance GridSystem composes internally.
-import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0577a';
-import {FlatProjection, FLAT_PROJECTION_PARAMS} from '../assets/js/systems/FlatProjection.js?v=0577a';
-import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0577a';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0577a';
-import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0577a';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0577a';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0577a';
+import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0577b';
+import {FlatProjection, FLAT_PROJECTION_PARAMS} from '../assets/js/systems/FlatProjection.js?v=0577b';
+import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0577b';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0577b';
+import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0577b';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0577b';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0577b';
 import {
   FLAT_PRESETS, FLAT_PRESET_IDS, FLAT_PRESET_QUERY_KEY, DEFAULT_FLAT_PRESET_ID,
   resolveFlatPreset, getFlatPreset, flatPresetFromSearch
-} from '../assets/js/config/flat-projection-presets.js?v=0577a';
+} from '../assets/js/config/flat-projection-presets.js?v=0577b';
 
 const approx = (a, b, eps = 1e-9) => Math.abs(a - b) <= eps;
 const {cols, rows, worldWidth: W = ROOM_CONFIG.worldWidth} = ROOM_CONFIG.floor;

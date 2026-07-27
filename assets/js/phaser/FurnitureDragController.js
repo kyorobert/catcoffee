@@ -1,6 +1,9 @@
-import {INPUT_MODE} from '../core/input-state.js?v=0577a';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0577a';
-import {getFurnitureDisplayState} from '../core/furniture-display-state.js?v=0577a';
+import {INPUT_MODE} from '../core/input-state.js?v=0577b';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0577b';
+import {
+  getFurnitureDisplayState,
+  getFurnitureVisualPosition
+} from '../core/furniture-display-state.js?v=0577b';
 
 const DRAG_THRESHOLD_PX = 8;
 
@@ -148,7 +151,12 @@ export class FurnitureDragController {
       y: world.y + (this.drag.grabOffsetWorld?.y || 0)
     };
     const referenceCenter = this.grid.getCellCenter(0, 0);
-    const referenceAnchor = this.grid.getAnchor(item.type, 0, 0, item.r || 0);
+    const display = getFurnitureDisplayState(
+      item.type, item.r || 0, this.furniture[item.type], this.grid.projectionMode
+    );
+    const referenceAnchor = getFurnitureVisualPosition(
+      this.grid, item.type, 0, 0, item.r || 0, display
+    );
     const snapped = this.grid.snapWorldToGrid(
       desiredAnchor.x - (referenceAnchor.x - referenceCenter.x),
       desiredAnchor.y - (referenceAnchor.y - referenceCenter.y)
@@ -165,7 +173,9 @@ export class FurnitureDragController {
     const display = getFurnitureDisplayState(
       item.type, item.r || 0, definition, this.grid.projectionMode
     );
-    const anchor = this.grid.getAnchor(item.type, item.x, item.y, item.r || 0);
+    const anchor = getFurnitureVisualPosition(
+      this.grid, item.type, item.x, item.y, item.r || 0, display
+    );
     this.ghost = this.scene.add.image(anchor.x, anchor.y, display.texture)
       .setOrigin(sourceEntity?.originX ?? display.originX, sourceEntity?.originY ?? display.originY)
       .setAlpha(.64)
@@ -186,7 +196,9 @@ export class FurnitureDragController {
     const display = getFurnitureDisplayState(
       item.type, item.r || 0, this.furniture[item.type], this.grid.projectionMode
     );
-    const anchor = this.grid.getAnchor(item.type, item.x, item.y, item.r || 0);
+    const anchor = getFurnitureVisualPosition(
+      this.grid, item.type, item.x, item.y, item.r || 0, display
+    );
     if(display.texture&&this.ghost.texture.key!==display.texture)this.ghost.setTexture(display.texture);
     this.ghost.setPosition(anchor.x, anchor.y)
       .setOrigin(display.originX,display.originY)

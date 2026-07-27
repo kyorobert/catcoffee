@@ -1,6 +1,13 @@
 # V0.56 產品決策交接（給產品負責人）
 
-> **最新狀態（2026-07-27，V0.57.7-alpha / Build 0577a）**：
+> **最新狀態（2026-07-28，V0.57.7-alpha / Build 0577b）**：
+> `ART-0577B-FIRST-BATCH-ROTATION-AND-DIRECTION-CALIBRATION` 已完成。12 件
+> Orthogonal override 透過集中式 calibration 共用穩定旋轉 pivot；木椅補齊
+> 真正四個 3/4 方向。footprint／Occupancy／Placement／`x/y/r`／save contract
+> 不變。貓咪 × 家具僅完成比例、站位與互動節點稽核，未新增 Runtime 互動。
+> iPhone Safari 真機仍 pending；第二批 35 件未核准、未開始。
+>
+> **歷史狀態（2026-07-27，V0.57.7-alpha / Build 0577a）**：
 > `ART-0577-CORE-ORTHOGONAL-FURNITURE-PASS-1` 已完成。12 件核心家具已用
 > projection-specific visual override 接入 Orthogonal；商店縮圖、Entity、Ghost
 > 與旋轉共用同一 selector。其餘 35 件仍使用既有 base visual；iso 仍是預設與
@@ -119,4 +126,4 @@
 
 ## 11. 誠實聲明（尚未完成事項）
 
-`ARCH-0561` 只做了 **Grid／Projection 內部重構**（玩家無可見變化）。以下**仍未完成**：完整顧客 AI、訂單流程、玩家店長與客製化、招募店員機制、iPhone Safari 真機驗收，以及其餘 35 件 Orthogonal 家具。FlatProjection 已完成但產品拒絕為正式方向，僅保留回歸；Orthogonal 仍為 opt-in。現行 0577a 狀態以文件最上方「最新狀態」為準。
+`ARCH-0561` 只做了 **Grid／Projection 內部重構**（玩家無可見變化）。以下**仍未完成**：完整顧客 AI、訂單流程、玩家店長與客製化、招募店員機制、iPhone Safari 真機驗收，以及其餘 35 件 Orthogonal 家具。FlatProjection 已完成但產品拒絕為正式方向，僅保留回歸；Orthogonal 仍為 opt-in。現行狀態以文件最上方「最新狀態」為準。

@@ -5,9 +5,9 @@ import {existsSync,readFileSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0577a';
+import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0577b';
 import {ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES}
-  from '../assets/js/config/orthogonal-furniture-visuals.js?v=0577a';
+  from '../assets/js/config/orthogonal-furniture-visuals.js?v=0577b';
 import {CAT_PROFILES,CAT_ANIMATION_LAYOUT,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const root=process.cwd();
@@ -46,7 +46,7 @@ const server=createServer((request,response)=>{
     response.end(readFileSync(file,'utf8').replace('id="careBtn"','id="careBtn-missing"'));return;
   }
   if(relativePath==='index.html'&&requestUrl.searchParams.get('fixture')==='build-mismatch'){
-    response.end(readFileSync(file,'utf8').replace('data-build-id="0577a"','data-build-id="0550-old"'));return;
+    response.end(readFileSync(file,'utf8').replace('data-build-id="0577b"','data-build-id="0550-old"'));return;
   }
   response.end(readFileSync(file));
 });
@@ -150,7 +150,7 @@ try{
     });
     const problems=[];
     if(!state.phaser||!state.game)problems.push('Phaser global or game missing');
-    if(state.htmlBuildId!=='0577a'||state.jsBuildId!=='0577a')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
+    if(state.htmlBuildId!=='0577b'||state.jsBuildId!=='0577b')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
     if(state.gameReady!=='1')problems.push(`gameReady is ${state.gameReady}`);
     if(loadedUrls.some(url=>/\?v=0550a(?:$|[&#])/.test(url)||url.includes('?v=0542a')))problems.push('obsolete runtime cache query loaded');
     if(state.canvasCount!==1||state.canvasWidth<=0||state.canvasHeight<=0)problems.push(`invalid canvas ${state.canvasCount} ${state.canvasWidth}x${state.canvasHeight}`);
@@ -491,6 +491,30 @@ try{
       const targetEntities=[...scene.entities.values()]
         .filter(entity=>targetTypes.has(entity.item.type))
         .map(entity=>({type:entity.item.type,texture:entity.texture.key}));
+      const rotationCalibration={};
+      for(const type of ['pinkTableLong','counter','chair','dessert']){
+        let entity=[...scene.entities.values()].find(candidate=>candidate.item.type===type);
+        let temporary=false;
+        if(!entity){
+          const item={id:`rotation-smoke-${type}`,type,x:3,y:3,r:0};
+          scene.addFurnitureEntity(item);
+          entity=scene.entities.get(item.id);
+          temporary=true;
+        }
+        const original=entity.item.r||0;
+        rotationCalibration[type]=[];
+        for(let rotation=0;rotation<4;rotation++){
+          entity.item.r=rotation;entity.sync();
+          rotationCalibration[type].push({
+            rotation,x:entity.x,y:entity.y,texture:entity.texture.key
+          });
+        }
+        entity.item.r=original;entity.sync();
+        if(temporary){
+          entity.destroy();
+          scene.entities.delete(entity.item.id);
+        }
+      }
       const cam=scene.cameras.main;
       const room=scene.cameraController.getRoomBounds();
       const core=scene.cameraController.getCoreBounds();
@@ -503,6 +527,7 @@ try{
         catsFinite:cats.length>0&&cats.every(cat=>Number.isFinite(cat.x)&&Number.isFinite(cat.y)),
         artDebug:scene.artDebug?.enabled||false,
         targetEntities,
+        rotationCalibration,
         roomSkinId:scene.orthoRoomSkin?.id||null,
         shellRole:scene.orthoRoomSkin?.shell?.role||null,
         canvasRenderer:window.__CAT_CAFE_GAME__.renderer.type===Phaser.CANVAS,
@@ -593,6 +618,20 @@ try{
     if(state.targetEntities.some(entity=>!entity.texture.startsWith(`furniture:ortho:${entity.type}:`))) {
       problems.push(`an orthogonal core asset used a base texture: ${JSON.stringify(state.targetEntities)}`);
     }
+    if(ortho.demo){
+      for(const [type,frames] of Object.entries(state.rotationCalibration)){
+        const first=frames[0];
+        if(frames.some(frame=>frame.x!==first.x||frame.y!==first.y)){
+          problems.push(`${type} visual pivot jumped during rotation: ${JSON.stringify(frames)}`);
+        }
+        if(new Set(frames.map(frame=>frame.texture)).size!==4){
+          problems.push(`${type} did not select four authored rotation textures`);
+        }
+      }
+      if(Object.keys(state.rotationCalibration).length!==4){
+        problems.push(`rotation calibration fixtures missing: ${JSON.stringify(state.rotationCalibration)}`);
+      }
+    }
     if(!state.coreFullyVisible)problems.push('core gameplay region not fully visible at initial framing');
     if(!state.roomWidthCrops)problems.push('outer room columns did not crop (first screen is not full-bleed)');
     if(!state.canZoomOutToRoom)problems.push(`cannot zoom out to the whole room (fit ${state.fitZoom} vs minZoom ${state.minZoom})`);
@@ -602,6 +641,57 @@ try{
     results.push({scenario:ortho.name,viewport:'390x844',...state,pan,edge,shellDoor,problems});
     await context.close();
     if(problems.length)throw new Error(`${ortho.name}: ${problems.join('; ')}`);
+  }
+  // ART-0577B: exercise the same Scene rotate commit used by the toolbar for
+  // the four acceptance fixtures. The logical x/y and rendered pivot must stay
+  // fixed through a complete four-click cycle while r and texture advance.
+  {
+    const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+    await context.addInitScript(()=>localStorage.clear());
+    const page=await context.newPage();
+    await page.goto(origin+'/?projection=ortho',{waitUntil:'domcontentloaded',timeout:20000});
+    await page.waitForFunction(()=>document.body.dataset.gameReady==='1',null,{timeout:20000});
+    const calibration=await page.evaluate(()=>{
+      const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+      scene.catBehaviorController.pause('rotation-smoke');
+      const output={};
+      for(const type of ['pinkTableLong','counter','chair','dessert']){
+        for(const entity of scene.entities.values())entity.destroy();
+        scene.entities.clear();
+        scene.state.items.length=0;
+        scene.occupancy.build([]);
+        const item={id:`toolbar-rotation-${type}`,type,x:3,y:3,r:0};
+        scene.state.items.push(item);
+        scene.occupancy.addItem(item);
+        scene.addFurnitureEntity(item);
+        scene.selectItem(item.id);
+        const entity=scene.entities.get(item.id);
+        output[type]=[];
+        for(let click=0;click<4;click++){
+          output[type].push({
+            click,x:item.x,y:item.y,r:item.r,xWorld:entity.x,yWorld:entity.y,
+            texture:entity.texture.key
+          });
+          scene.rotateSelection();
+        }
+        output[type].push({
+          click:4,x:item.x,y:item.y,r:item.r,xWorld:entity.x,yWorld:entity.y,
+          texture:entity.texture.key
+        });
+      }
+      return output;
+    });
+    for(const [type,steps] of Object.entries(calibration)){
+      const first=steps[0];
+      if(steps.some(step=>step.x!==3||step.y!==3||step.xWorld!==first.xWorld||step.yWorld!==first.yWorld)){
+        throw new Error(`${type} toolbar rotate moved logical/visual position: ${JSON.stringify(steps)}`);
+      }
+      if(steps.at(-1).r!==0||new Set(steps.slice(0,4).map(step=>step.texture)).size!==4){
+        throw new Error(`${type} toolbar rotate direction cycle failed: ${JSON.stringify(steps)}`);
+      }
+    }
+    results.push({scenario:'ortho-toolbar-rotation-calibration',viewport:'390x844',calibration,problems:[]});
+    await context.close();
   }
   // Every documented projection URL must boot independently. Orthogonal store
   // thumbnails use the override; iso/flat/default keep the base visual paths.

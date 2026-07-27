@@ -1,6 +1,6 @@
 # 暫定產品與技術路線圖
 
-## 目前 Gate（V0.57.7-alpha / 0577a）
+## 目前 Gate（V0.57.7-alpha / 0577b）
 
 - [x] ARCH-0575C：playable area 與 visual shell 正式分離。
 - [x] Room Skin foundation：wall/trim/floor/door/decor anchors 集中設定。
@@ -13,16 +13,20 @@
 - [x] `ART-0577-CORE-ORTHOGONAL-FURNITURE-PASS-1`：12 件核心家具四方向
   Orthogonal override、商店縮圖、Ghost 與 runtime 整合完成。
 - [x] 第一批以 projection-specific override 接入；iso／flat 維持 base visual，iso 仍是預設／rollback。
+- [x] `ART-0577B-FIRST-BATCH-ROTATION-AND-DIRECTION-CALIBRATION`：12 件共用
+  stable visual pivot；木椅補齊真四方向；Preview／Entity／Ghost 一致。
 - [ ] iPhone Safari 真機 Gate：家具比例、輪廓、anchor、拖曳／旋轉、pan／pinch 與地址列變化；Chrome／Edge 自動驗收不可替代真機。
 - [ ] 第二批家具：尚未核准；其餘 35 件仍使用 base visual，不得自行接續。
 
 ### 下一個 Gate
 
-1. 部署同一 Build `0577a`。
-2. 於真實 iPhone Safari 驗收第一批家具與既有操作。
-3. 判斷第一批是否需要比例、輪廓或 anchor 校準。
-4. 通過後才由產品負責人另立第二批家具 Task Card。
-5. 未核准前不得自行開始其餘 35 件。
+1. 部署 Build `0577b`。
+2. 於真實 iPhone Safari 驗收奶油粉餐桌、咖啡吧台、木椅、櫃類的連續旋轉，
+   以及木椅四方向可讀性。
+3. 判斷 0577B 的比例／輪廓／anchor 校準是否通過。
+4. 貓咪 × 家具互動只先另立 `ARCH-0578-CAT-FURNITURE-INTERACTION-AUDIT`
+   規格卡，不在家具美術卡偷做。
+5. 通過後才由產品負責人另立第二批家具 Task Card；未核准前不得開始其餘 35 件。
 
 > 本路線圖為暫定方向，必須逐階段核准。它不承諾版本號、完成日期或未經評估的實作方案。
 
@@ -60,9 +64,11 @@
   - Stage 10 `ARCH-0575A`（Build 0575b，歷史階段）：視覺外殼滿版與入口門比例修正。
   - Stage 11 `ARCH-0575C`（Build 0576a，歷史階段）：playable area／Room Skin foundation，preview/commit 共用評估。
   - Stage 12 `ARCH-0576A`（Build 0576b，歷史階段）：context toolbar、窄框架、正式入口 `(7,0)/(8,0)` 與 migration 5402。
-  - Stage 13 `ART-0577`（Build 0577a，現行）：第一批 12 件 Orthogonal 家具與 projection-specific override 完成；其餘 35 件仍使用 base visual。
+  - Stage 13 `ART-0577`（Build 0577a）：第一批 12 件 Orthogonal 家具與 projection-specific override 完成。
+  - Stage 14 `ART-0577B`（Build 0577b，現行）：第一批旋轉視覺 pivot 校準；
+    木椅真正四方向；貓咪 × 家具只完成稽核，不含互動 Runtime。其餘 35 件仍使用 base visual。
 
-  上述歷史階段的成果與證據分別保留在 `docs/evidence/v0570/` 至 `docs/evidence/v0577/` 及各版本結果／驗收文件。現行產品 Gate 是 V0577 第一批家具的 iPhone Safari 真機驗收；第二批尚未核准。
+  上述歷史階段的成果與證據分別保留在 `docs/evidence/v0570/` 至 `docs/evidence/v0577/` 及各版本結果／驗收文件。現行產品 Gate 是 V0577B 第一批旋轉／方向的 iPhone Safari 真機驗收；第二批尚未核准。
 - 目標：依 Phase 1 核准方案改善直立手機的場景平面感與資訊可讀性。
 - 前置：產品核准投影方案、存檔策略、資產策略與驗收畫面。
 - 非目標：同時新增店長、店員、顧客完整 AI 或經濟重做。

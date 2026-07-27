@@ -1,5 +1,23 @@
 # 專案決策紀錄
 
+## DEC-027：Orthogonal 家具旋轉以穩定視覺 pivot 校準，邏輯 footprint 不變
+
+- 日期：2026-07-28
+- 狀態：Accepted
+- Task：`ART-0577B-FIRST-BATCH-ROTATION-AND-DIRECTION-CALIBRATION`
+- 決策：
+  - 第一批 Orthogonal override 可攜帶集中式純視覺 `calibration` metadata。
+  - 同一 `x/y` 的方向切換以 base rotation 的底部中心作穩定視覺 pivot；
+    Entity、Ghost、snapping 與正式 commit 必須共用 `getFurnitureVisualPosition()`。
+  - 方向仍由 `r` 選擇四張 authored texture；邏輯 footprint cells／polygon、
+    Occupancy 與 Placement 仍依旋轉結果計算，不以視覺校準改玩法。
+  - 木椅必須保有四個可辨識 3/4 方向，不允許回退為前／後各重複兩張。
+- 不變：CameraController、10×8 Grid、家具 ID／footprint／`x/y/r`、價格、
+  save key `catCafePhaserV0540`、schema 5401、migration 5402、iso／flat base visual。
+- 後續：貓咪 × 家具只完成稽核；若核准，另立
+  `ARCH-0578-CAT-FURNITURE-INTERACTION-AUDIT`，不得在本美術校準卡內擴張。
+- Gate：Chrome／Edge 自動回歸可驗證 pivot 與 texture；iPhone Safari 真機仍 pending。
+
 ## DEC-025：正交入口由 zone metadata 產生唯一 mask，框架維持窄建築帶
 
 - 日期：2026-07-26

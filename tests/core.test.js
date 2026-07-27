@@ -28,12 +28,14 @@ for(const [type,x,y,rotation] of [['plant',4,3,0],['woodTable',2,2,0],['woodTabl
   assert.deepEqual(grid.getAnchor(type,x,y,rotation),expected,`${type} anchor uses the footprint bottom-edge midpoint`);
 }
 const furnitureEntitySource=readFileSync(new URL('../assets/js/entities/FurnitureEntity.js',import.meta.url),'utf8');
+const furnitureDisplaySource=readFileSync(new URL('../assets/js/core/furniture-display-state.js',import.meta.url),'utf8');
 const cafeSceneSource=readFileSync(new URL('../assets/js/scenes/CafeScene.js',import.meta.url),'utf8');
 const furnitureDragSource=readFileSync(new URL('../assets/js/phaser/FurnitureDragController.js',import.meta.url),'utf8');
 const catEntitySource=readFileSync(new URL('../assets/js/entities/CatEntity.js',import.meta.url),'utf8');
 const catAnimationSource=readFileSync(new URL('../assets/js/systems/CatAnimationSystem.js',import.meta.url),'utf8');
-assert.match(furnitureEntitySource,/grid\.getAnchor\(/,'formal furniture uses GridSystem.getAnchor');
-assert.match(furnitureDragSource,/this\.grid\.getAnchor\(/,'ghost uses GridSystem.getAnchor');
+assert.match(furnitureEntitySource,/getFurnitureVisualPosition\(/,'formal furniture uses the shared visual pivot');
+assert.match(furnitureDragSource,/getFurnitureVisualPosition\(/,'ghost uses the shared visual pivot');
+assert.match(furnitureDisplaySource,/grid\.getAnchor\(/,'shared visual pivot remains sourced from GridSystem.getAnchor');
 assert.equal(CAT_PROFILES.length,5,'all existing cat IDs remain configured');
 assert.deepEqual(Object.keys(CAT_CONFIG),['bean','coal','snow','latte','hana']);
 assert.deepEqual(Object.keys(CAT_ANIMATION_LAYOUT),['idle','walk','sit','sleep','happy','serve']);

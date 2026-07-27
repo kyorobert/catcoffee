@@ -3,7 +3,7 @@
 // override footprints, prices, placement rules, sockets, layers, save fields,
 // occupancy, inventory or migration data.
 
-export const ORTHOGONAL_FURNITURE_ASSET_VERSION = '0577a';
+export const ORTHOGONAL_FURNITURE_ASSET_VERSION = '0577b';
 
 export const ORTHOGONAL_CORE_FURNITURE_IDS = Object.freeze([
   'counter',
@@ -27,6 +27,13 @@ export const ORTHOGONAL_FURNITURE_DIRECTIONS = Object.freeze([
   'up-left'
 ]);
 
+const ZERO_NUDGE_BY_DIRECTION = Object.freeze(Object.fromEntries(
+  ORTHOGONAL_FURNITURE_DIRECTIONS.map(direction => [
+    direction,
+    Object.freeze({x: 0, y: 0})
+  ])
+));
+
 function createOverride(id) {
   const textureByDirection = Object.fromEntries(
     ORTHOGONAL_FURNITURE_DIRECTIONS.map(direction => [
@@ -45,6 +52,14 @@ function createOverride(id) {
     projection: 'ortho',
     visualScale: 1,
     anchor: Object.freeze({x: 0.5, y: 1}),
+    // V0577B: rotate artwork around the original placement pivot. Grid and
+    // footprint rules still rotate normally; only the rendered bottom-center
+    // stays visually stable when a non-square footprint changes orientation.
+    calibration: Object.freeze({
+      rotationAnchor: 'base-rotation',
+      baseRotation: 0,
+      perDirectionNudge: ZERO_NUDGE_BY_DIRECTION
+    }),
     textureByDirection: Object.freeze(textureByDirection),
     texturePathByDirection: Object.freeze(texturePathByDirection),
     fallbackTexture: textureByDirection['down-right'],

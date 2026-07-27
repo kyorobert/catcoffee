@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ORTHO_ROOM_ZONES as Z, zoneCells, rectContainsCell, rectContainsRect, rectsOverlap, rectInsideGrid,
   zoneAt, ORTHO_ZONE_KEYS}
-  from '../assets/js/config/ortho-room-zones.js?v=0577a';
+  from '../assets/js/config/ortho-room-zones.js?v=0577b';
 import {DEFAULT_ORTHOGONAL_ROOM_SKIN as ROOM_SKIN}
-  from '../assets/js/config/ortho-room-skin.js?v=0577a';
+  from '../assets/js/config/ortho-room-skin.js?v=0577b';
 
 // --- pure helpers behave ---
 assert.deepEqual(zoneCells({x: 2, y: 3, w: 2, h: 2}), [

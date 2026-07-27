@@ -2,20 +2,20 @@ import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {existsSync, readFileSync, readdirSync, statSync} from 'node:fs';
 import {join, relative} from 'node:path';
-import {APP_VERSION, BUILD_ID, SAVE_KEY} from './assets/js/config/build-info.js?v=0577a';
-import {REQUIRED_DOM_IDS, REQUIRED_NESTED_SELECTORS} from './assets/js/ui/dom-contract.js?v=0577a';
+import {APP_VERSION, BUILD_ID, SAVE_KEY} from './assets/js/config/build-info.js?v=0577b';
+import {REQUIRED_DOM_IDS, REQUIRED_NESTED_SELECTORS} from './assets/js/ui/dom-contract.js?v=0577b';
 import {FURNITURE_CONFIG} from './assets/js/config/furniture-config.js';
-import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS,V0552_REDRAW_FURNITURE_IDS} from './assets/js/config/furniture-visual-config.js?v=0577a';
+import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS,V0552_REDRAW_FURNITURE_IDS} from './assets/js/config/furniture-visual-config.js?v=0577b';
 import {
   ORTHOGONAL_CORE_FURNITURE_IDS,
   ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES
-} from './assets/js/config/orthogonal-furniture-visuals.js?v=0577a';
-import {getPurchasableFurniture} from './assets/js/core/furniture-catalog-selector.js?v=0577a';
-import {validateFurnitureVisualConfig} from './assets/js/core/furniture-visual-validator.js?v=0577a';
-import {summarizeFurnitureAssetValidation,validateFurnitureAssetRecord} from './assets/js/core/furniture-asset-validator.js?v=0577a';
+} from './assets/js/config/orthogonal-furniture-visuals.js?v=0577b';
+import {getPurchasableFurniture} from './assets/js/core/furniture-catalog-selector.js?v=0577b';
+import {validateFurnitureVisualConfig} from './assets/js/core/furniture-visual-validator.js?v=0577b';
+import {summarizeFurnitureAssetValidation,validateFurnitureAssetRecord} from './assets/js/core/furniture-asset-validator.js?v=0577b';
 import {CAT_CONFIG, CAT_PROFILES, FALLBACK_CAT} from './assets/js/config/cat-config.js';
-import {ROOM_CONFIG} from './assets/js/config/room-config.js?v=0577a';
-import {CURRENT_KEY, MIGRATION_COMPLETED_VERSION} from './assets/js/systems/SaveAdapter.js?v=0577a';
+import {ROOM_CONFIG} from './assets/js/config/room-config.js?v=0577b';
+import {CURRENT_KEY, MIGRATION_COMPLETED_VERSION} from './assets/js/systems/SaveAdapter.js?v=0577b';
 import {inspectRgbaPng} from './tests/helpers/png.js';
 
 const root = process.cwd();
@@ -45,6 +45,8 @@ const required = [
   'docs/V0577_CORE_ORTHOGONAL_FURNITURE_RESULT.md',
   'docs/V0577_CORE_ORTHOGONAL_FURNITURE_ACCEPTANCE.md',
   'docs/V0577_CORE_ORTHOGONAL_FURNITURE_COMPARISON.html',
+  'docs/V0577B_FIRST_BATCH_ROTATION_AND_DIRECTION_RESULT.md',
+  'docs/V0577B_FIRST_BATCH_ROTATION_AND_DIRECTION_ACCEPTANCE.md',
   'docs/evidence/v0577/metrics.json',
   'docs/evidence/v0577/mobile-390-ortho-demo.png',
   'docs/evidence/v0577/mobile-393-ortho-demo.png',
@@ -104,8 +106,8 @@ if (packageJson.scripts?.['check:deploy'] !== 'node ./check.js --deploy') failur
 if (packageJson.scripts?.['check:dev'] !== 'node ./check.js --dev') failures.push('check:dev script is inconsistent');
 if (JSON.stringify(packageJson.scripts).includes('skip-browser')) failures.push('ambiguous --skip-browser remains in package scripts');
 
-if (APP_VERSION !== 'V0.57.7-alpha｜核心正交家具第一批版') failures.push('APP_VERSION is incorrect');
-if (BUILD_ID !== '0577a') failures.push('BUILD_ID is incorrect');
+if (APP_VERSION !== 'V0.57.7-alpha｜第一批家具旋轉與方向校正版') failures.push('APP_VERSION is incorrect');
+if (BUILD_ID !== '0577b') failures.push('BUILD_ID is incorrect');
 if (SAVE_KEY !== 'catCafePhaserV0540') failures.push('SAVE_KEY changed');
 if (CURRENT_KEY !== 'catCafePhaserV0540') failures.push('SaveAdapter CURRENT_KEY changed');
 if (MIGRATION_COMPLETED_VERSION !== 5402) failures.push('migrationCompletedVersion must be 5402');
@@ -115,19 +117,19 @@ if (ROOM_CONFIG.floor.placeableMask[7][8] !== true || ROOM_CONFIG.floor.placeabl
 
 const protectedHashes = {
   'assets/js/config/furniture-config.js': '87a3bbcdf4cb9417c12f2eb4948b7e3ade15416e6c160475183aa51b3aab2de7',
-  'assets/js/config/room-config.js': '41211c4acadcb69e46dba4c83766ef458bb79d799b383fbe97e28b13e25d3fbf',
-  'assets/js/systems/GridSystem.js': '5fd8529997909a669bde19b7a63fdc0b3004b8f9c117d218b8441e17bf01d59b',
+  'assets/js/config/room-config.js': 'f184350902646c796fb4e77ab3fa21a29b46f8d3051a181984e1ddd7928b728c',
+  'assets/js/systems/GridSystem.js': 'dd0a1f1405bc7b3d248c893b42486edf2786e9d12895a81fea1b303289c1b1e2',
   'assets/js/systems/SpatialGrid.js': '548a9418a3d921a025a2d35bf8b38f130320dcc7980c7cbde999c2ab91f22583',
   'assets/js/systems/IsoProjection.js': '7b24bdc46630ae043d34bb5b5c3090f662407a512d8e14de0b3599c9545f3a9a',
   'assets/js/systems/FlatProjection.js': '6afcb2ee4a4e05fc9aaf7cb4cd89799465f17a9743e6ba69ae98bceb9e79ac94',
   'assets/js/systems/OrthogonalProjection.js': 'd24de09f55841b7f18ef29de1dd16c5c92a1cb8a89ca4b0ef2c73bff7eea41f6',
   'assets/js/config/ortho-room-zones.js': '350b8a4de7d43c419cf795ffe7cb579b694e254339c905380e75c63e8ba3d7ee',
   'assets/js/core/projection-mode.js': 'ec491ed4dd148942d7520b9b36dcc5c94dc07d69f2ec714d36f0f03499a2ad91',
-  'assets/js/config/flat-projection-presets.js': 'a9dc6d9f6ce2735a0ebbc2746ca5dae40e28245e922f488dff065742948a66fa',
+  'assets/js/config/flat-projection-presets.js': '9dbf75b0de57a6e83fcb362df53126fa5725fc55aec931b371f866c38b8c0f7b',
   'assets/js/core/scene-viewport.js': '7835d2b5af146561bc5eabc0563df7d71a25e3c4d585b63f59fa672b8a6f6495',
   'assets/js/core/camera-framing.js': '01530af6e7db0c4234ae92076c4889837999c45e996ada08bcfa4561c6b7ea0c',
-  'assets/js/ui/viewport-metrics.js': 'b84b23582ec76641e2777cea8e1014d185953666f9f02ac00ed6d6cc051f929d',
-  'assets/js/systems/CameraController.js': '5650beef509f8b7f960dce595627b5b052c072b1ac348de2452aae324af14ce0',
+  'assets/js/ui/viewport-metrics.js': '0c2277891b5d7c33f860a70f2d4f81a3d305f2166e05a3ee089951682dc8e78a',
+  'assets/js/systems/CameraController.js': 'ba3a4a444f8bf09137be3cd3753b50b91b620c7ba159d97c4d0a5b08b67f0631',
   'assets/js/systems/SaveAdapter.js': '524e807b986f11adddba207772cfcc2b7d12304ffa6f3a43783a8f4335879fbf',
   'assets/js/systems/OccupancySystem.js': 'c185588cbcba29ec46ec9d173c781faf0fe8bd69f56218ec9bee19992e25c511',
   'assets/js/systems/PlacementSystem.js': 'fecfccaa2178f7e88f6b044bc3e6964db8cda549137c42008ef18ffe6bae37f6',
@@ -141,10 +143,10 @@ for (const [file, hash] of Object.entries(protectedHashes)) {
 }
 
 const html = read('index.html');
-if (!html.includes('data-build-id="0577a"')) failures.push('HTML Build ID is missing');
-if (!html.includes("window.__CAT_CAFE_HTML_BUILD_ID__ = '0577a'")) failures.push('early HTML Build ID is missing');
-if (!html.includes('./assets/vendor/phaser-3.90.0.min.js?v=0577a')) failures.push('versioned local Phaser path is missing');
-if (!html.includes('./assets/js/main.js?v=0577a')) failures.push('versioned entry module is missing');
+if (!html.includes('data-build-id="0577b"')) failures.push('HTML Build ID is missing');
+if (!html.includes("window.__CAT_CAFE_HTML_BUILD_ID__ = '0577b'")) failures.push('early HTML Build ID is missing');
+if (!html.includes('./assets/vendor/phaser-3.90.0.min.js?v=0577b')) failures.push('versioned local Phaser path is missing');
+if (!html.includes('./assets/js/main.js?v=0577b')) failures.push('versioned entry module is missing');
 if (!html.includes('window.addEventListener(\'error\'')) failures.push('early window error handler is missing');
 if (!html.includes('window.addEventListener(\'unhandledrejection\'')) failures.push('early unhandledrejection handler is missing');
 if (!html.includes('data-boot-refresh')) failures.push('cache refresh button is missing');
@@ -179,7 +181,7 @@ for (const file of formalJs) {
   if (source.includes('?v=0576a')) failures.push(`${relative(root, file)} contains obsolete module query v=0576a`);
   if (source.includes('?v=0576b')) failures.push(`${relative(root, file)} contains obsolete module query v=0576b`);
   for (const match of source.matchAll(/(?:from\s*|import\s*)["'](\.{1,2}\/[^"']+\.js)(\?v=[^"']+)?["']/g)) {
-    if (match[2] !== '?v=0577a') failures.push(`${relative(root, file)} has inconsistent module query: ${match[0]}`);
+    if (match[2] !== '?v=0577b') failures.push(`${relative(root, file)} has inconsistent module query: ${match[0]}`);
   }
 }
 
@@ -460,6 +462,8 @@ if (zipFlag >= 0) {
       'docs/V0577_CORE_ORTHOGONAL_FURNITURE_RESULT.md',
       'docs/V0577_CORE_ORTHOGONAL_FURNITURE_ACCEPTANCE.md',
       'docs/V0577_CORE_ORTHOGONAL_FURNITURE_COMPARISON.html',
+      'docs/V0577B_FIRST_BATCH_ROTATION_AND_DIRECTION_RESULT.md',
+      'docs/V0577B_FIRST_BATCH_ROTATION_AND_DIRECTION_ACCEPTANCE.md',
       'docs/evidence/v0577/metrics.json'
     ]) if (!names.includes(file)) failures.push(`ZIP missing ${file}`);
     for (const id of PROTOTYPE_FURNITURE_IDS) {
