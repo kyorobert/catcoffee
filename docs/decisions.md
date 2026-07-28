@@ -1,5 +1,31 @@
 # 專案決策紀錄
 
+## DEC-030：Orthogonal 家具視覺採 cardinal v1 規格，第一階段重畫四件核心家具
+
+- 日期：2026-07-28
+- 狀態：Accepted
+- Task：`ART-0577E-ORTHOGONAL-FURNITURE-VISUAL-REDESIGN-PHASE1`
+- 背景：0577d 已完成固定編輯包絡、最小位移與 `fixed/axis2/cardinal4` 旋轉政策，
+  但 `pinkTableLong` 兩軸素材、`chair` 四向，以及 `counter`／`dessert` 的
+  顧客面、店員面、展示面與背面仍缺乏清楚的正交空間語意；問題屬於視覺素材，
+  不應再以旋轉數學或 gameplay offset 補救。
+- 決策：
+  - 採用 [`ORTHOGONAL_FURNITURE_VISUAL_SPEC_V1.md`](./ORTHOGONAL_FURNITURE_VISUAL_SPEC_V1.md)
+    作為正交家具主要可視面、cardinal 方位、接地線、比例與像素密度基準。
+  - `r0 South / r1 West / r2 North / r3 East` 及順時針契約不變；視覺檔對應為
+    `down-right / down-left / up-left / up-right`。
+  - 第一階段只重畫 `pinkTableLong`、`chair`、`counter`、`dessert`，共 16 張
+    Orthogonal override PNG；其餘第一批 8 件及第二批 35 件不動。
+  - `pinkTableLong` 維持 `axis2`，水平與垂直必須是同系列真正兩軸桌面；
+    `chair`、`counter`、`dessert` 維持 `cardinal4`，四向必須有可辨識空間語意。
+  - Runtime 仍只透過既有 projection-specific selector 選圖；0577d resolver、
+    edit-session envelope、Preview／Ghost／commit／Occupancy 資料流不變。
+- 不變：家具 ID、footprint、`x/y/r`、價格與玩法 metadata、Camera、Grid、Room、
+  Placement、Occupancy、Pathfinding、save key `catCafePhaserV0540`、schema 5401、
+  migration 5402、iso 預設與 flat／invalid fallback。
+- Gate：Chrome Browser Smoke 與自動回歸可提供桌面／模擬手機證據，但不能取代
+  iPhone Safari 真機驗收；第二批 35 件仍未核准。
+
 ## DEC-029：Orthogonal 旋轉採固定編輯包絡、最小位移與家具旋轉政策
 
 - 日期：2026-07-28

@@ -1,4 +1,4 @@
-import {DepthSystem} from '../systems/DepthSystem.js?v=0577d';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0577e';
 
 export class CustomerEntity extends Phaser.GameObjects.Container{
   constructor(scene,id,position,color=0x7fa6b8){

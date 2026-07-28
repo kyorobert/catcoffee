@@ -5,9 +5,9 @@ import {existsSync,readFileSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0577d';
+import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0577e';
 import {ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES}
-  from '../assets/js/config/orthogonal-furniture-visuals.js?v=0577d';
+  from '../assets/js/config/orthogonal-furniture-visuals.js?v=0577e';
 import {CAT_PROFILES,CAT_ANIMATION_LAYOUT,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const root=process.cwd();
@@ -46,7 +46,7 @@ const server=createServer((request,response)=>{
     response.end(readFileSync(file,'utf8').replace('id="careBtn"','id="careBtn-missing"'));return;
   }
   if(relativePath==='index.html'&&requestUrl.searchParams.get('fixture')==='build-mismatch'){
-    response.end(readFileSync(file,'utf8').replace('data-build-id="0577d"','data-build-id="0550-old"'));return;
+    response.end(readFileSync(file,'utf8').replace('data-build-id="0577e"','data-build-id="0550-old"'));return;
   }
   response.end(readFileSync(file));
 });
@@ -150,7 +150,7 @@ try{
     });
     const problems=[];
     if(!state.phaser||!state.game)problems.push('Phaser global or game missing');
-    if(state.htmlBuildId!=='0577d'||state.jsBuildId!=='0577d')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
+    if(state.htmlBuildId!=='0577e'||state.jsBuildId!=='0577e')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
     if(state.gameReady!=='1')problems.push(`gameReady is ${state.gameReady}`);
     if(loadedUrls.some(url=>/\?v=0550a(?:$|[&#])/.test(url)||url.includes('?v=0542a')))problems.push('obsolete runtime cache query loaded');
     if(state.canvasCount!==1||state.canvasWidth<=0||state.canvasHeight<=0)problems.push(`invalid canvas ${state.canvasCount} ${state.canvasWidth}x${state.canvasHeight}`);

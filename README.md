@@ -1,9 +1,33 @@
 # 貓咪咖啡廳 V0.57.7-alpha
 
-版本：`V0.57.7-alpha｜家具旋轉體驗重構版`  
-Build ID：`0577d`
+版本：`V0.57.7-alpha｜正交家具視覺重構第一階段`  
+Build ID：`0577e`
 
-## Build 0577d：家具旋轉體驗重構
+## Build 0577e：正交家具視覺重構第一階段
+
+`ART-0577E` 保留 0577d 的 rotation policy、固定 edit-session envelope 與單一
+resolver，只處理玩家實際看到的 authored visual：
+
+- `pinkTableLong`：重作真正水平／垂直兩軸長桌，桌面成為主要視覺面。
+- `chair`：重作 `front / right / back / left` 真 cardinal 四方向。
+- `counter`：顧客封閉面、店員開放層架與左右側面可辨。
+- `dessert`：玻璃展示面、服務背面與左右側面可辨。
+- 四件共 16 張 Orthogonal override PNG；其餘第一批 8 件維持 0577a/0577b
+  素材，第二批 35 件未核准、未開始。
+
+方向仍為 `r0 South / r1 West / r2 North / r3 East` 順時針；Preview、Ghost、
+已放置 Entity 與正式 commit 仍共用既有 selector／resolver。家具 ID、footprint、
+`x/y/r`、價格、玩法 metadata、Camera、Grid、Room、Placement、Occupancy、
+Pathfinding、save key `catCafePhaserV0540`、schema 5401 與 migration 5402 均未改。
+iso 仍是預設／rollback，flat／invalid fallback 不變，Orthogonal 仍由 URL opt-in。
+iPhone Safari 真機 Gate 仍 pending。
+
+- [正交家具視覺規格 v1](./docs/ORTHOGONAL_FURNITURE_VISUAL_SPEC_V1.md)
+- [0577e 實作結果](./docs/V0577E_ORTHOGONAL_FURNITURE_VISUAL_RESULT.md)
+- [0577e 驗收紀錄](./docs/V0577E_ORTHOGONAL_FURNITURE_VISUAL_ACCEPTANCE.md)
+- [0577e 視覺比較](./docs/V0577E_ORTHOGONAL_FURNITURE_VISUAL_COMPARISON.html)
+
+## 歷史 Build 0577d：家具旋轉體驗重構
 
 `FIX-0577D` 接手並稽核 0577c 工作樹後，保留單一 cardinal resolver 與底列
 編輯工具列，但以固定 edit-session envelope、最小位移和集中式旋轉 policy

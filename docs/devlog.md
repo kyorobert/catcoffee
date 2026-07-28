@@ -1,5 +1,38 @@
 # 開發日誌
 
+## 2026-07-28｜ART-0577E-ORTHOGONAL-FURNITURE-VISUAL-REDESIGN-PHASE1
+
+- 版本／Build：`V0.57.7-alpha｜正交家具視覺重構第一階段`／`0577e`；
+  package 維持 `0.57.7-alpha`。
+- 備份：修改前完整備份至
+  `C:\Users\rober\Desktop\貓咪咖啡廳_backup_v0577d_before_0577e`，未覆寫既有備份。
+- 根因：0577d 旋轉資料流正確，但 `pinkTableLong` 的兩個 axis2 texture 都呈橫桌、
+  `chair` 是斜角 3/4 方向，`counter`／`dessert` 的側面與前後功能面辨識不足；
+  玩家看到的「旋轉不對」主要是 authored visual，而不是 resolver 或存檔座標。
+- 規格：新增 `ORTHOGONAL_FURNITURE_VISUAL_SPEC_V1.md`，固定主要可視面、
+  `South/West/North/East` 方位語意、接地線、陰影、1×1／2×1／1×2 比例與貓咪尺度。
+- 美術：只重畫 `pinkTableLong`、`chair`、`counter`、`dessert` 四件，共 16 張
+  Orthogonal PNG。長桌有真正水平／垂直桌面；木椅為真 cardinal 四向；吧台可分
+  顧客封閉面與店員開放層架；甜點櫃可分玻璃展示面與服務背面。
+- Runtime：只更新 Build／cache query、Orthogonal asset version 與說明；
+  0577d 的 `fixed/axis2/cardinal4`、固定 edit-session envelope、resolver、
+  visual selector、Preview／Ghost／commit／Occupancy 均未改寫。
+- 驗收：新增桌軸向、雙桌並排、木椅四向環、吧台／甜點櫃四向與整體 demo layout
+  證據，位於 `docs/evidence/v0577e/`；另有 contact sheet 與 comparison HTML。
+- 不變：Camera、10×8 Grid、78 playable cells、入口 `(7,0)/(8,0)`、Room、
+  Placement、Occupancy、Pathfinding、家具 ID／footprint／`x/y/r`、save key
+  `catCafePhaserV0540`、schema 5401、migration 5402、iso／flat／invalid fallback。
+- 測試：`npm test`、`test:build`、`test:ortho-furniture`、`test:ortho-rotation`、
+  `test:rotation-state`、`test:entrance`、`test:ortho-area`、`test:http`、
+  `check:deploy`、`check:dev`、Browser Smoke 與 rotation-browser 均通過；
+  root 與部署資料夾測試皆通過，pageerror／failed request 為 0／0。
+- 部署：重建 `dist/cat_cafe_v0577e_git_deploy/` 與
+  `cat_cafe_v0577e_git_deploy.zip`；ZIP 648 entries、路徑全用 `/`，不含
+  node_modules／legacy／tools／dist／`.git`／其他 ZIP。最終 bytes 與 SHA-256
+  以本次交付回報及重建後 ZIP 為準。
+- 限制：iPhone Safari 真機仍 pending；其餘第一批 8 件未於本階段重畫；
+  第二批 35 件未核准、未開始；未執行 Git 或遠端部署。
+
 ## 2026-07-28｜FIX-0577D-ROTATION-UX-ENVELOPE-AND-HANDOFF-COMPLETION
 
 - 版本／Build：`V0.57.7-alpha｜家具旋轉體驗重構版`／`0577d`；package 維持

@@ -1,6 +1,6 @@
-import {FURNITURE_CONFIG} from './furniture-config.js?v=0577d';
+import {FURNITURE_CONFIG} from './furniture-config.js?v=0577e';
 import {getOrthogonalFurnitureVisualOverride}
-  from './orthogonal-furniture-visuals.js?v=0577d';
+  from './orthogonal-furniture-visuals.js?v=0577e';
 
 // Visual-only metadata. Prices, unlocks, footprints and save data remain owned by
 // furniture-config.js and SaveAdapter; this module never mutates those sources.

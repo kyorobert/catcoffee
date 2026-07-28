@@ -6,7 +6,7 @@ import {
 import {extname, normalize, resolve} from 'node:path';
 
 const root=process.cwd();
-const evidence=resolve(root,'docs/evidence/v0577d');
+const evidence=resolve(root,'docs/evidence/v0577e');
 mkdirSync(evidence,{recursive:true});
 const candidates=[
   'C:/Program Files/Google/Chrome/Application/chrome.exe',
@@ -40,7 +40,7 @@ const server=createServer((request,response)=>{
 await new Promise(done=>server.listen(0,'127.0.0.1',done));
 const origin=`http://127.0.0.1:${server.address().port}`;
 const metrics={
-  build:'0577d',
+  build:'0577e',
   browser:executablePath,
   cases:[],
   pointerCases:[],
@@ -238,23 +238,54 @@ try{
       type:'pinkTableLong',id:'table',steps:2,
       names:['table-axis-horizontal.png','table-axis-vertical.png','table-axis-roundtrip.png']
     });
+    await page.evaluate(()=>{
+      const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+      scene.selectItem(null);
+      const pair={id:'table-pair',type:'pinkTableLong',x:5,y:3,r:0};
+      scene.state.items.push(pair);
+      scene.occupancy.addItem(pair);
+      scene.addFurnitureEntity(pair).sync();
+    });
+    await screenshot(page,'table-pair-horizontal.png');
 
     await fixture(page,{type:'chair',id:'chair'});
     await rotationSequence(page,{
       type:'chair',id:'chair',steps:4,
       names:['chair-south.png','chair-west.png','chair-north.png','chair-east.png','chair-roundtrip.png']
     });
+    await page.evaluate(()=>{
+      const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+      scene.selectItem(null);
+      scene.entities.forEach(entity=>entity.destroy());
+      scene.entities.clear();
+      scene.state.items.length=0;
+      scene.occupancy.build([]);
+      const ring=[
+        {id:'chair-ring-south',type:'chair',x:4,y:3,r:0},
+        {id:'chair-ring-west',type:'chair',x:5,y:4,r:1},
+        {id:'chair-ring-north',type:'chair',x:4,y:5,r:2},
+        {id:'chair-ring-east',type:'chair',x:3,y:4,r:3}
+      ];
+      for(const item of ring){
+        scene.state.items.push(item);
+        scene.occupancy.addItem(item);
+        scene.addFurnitureEntity(item).sync();
+      }
+    });
+    await screenshot(page,'chair-cardinal-ring.png');
 
     await fixture(page,{type:'counter',id:'counter'});
     await rotationSequence(page,{
       type:'counter',id:'counter',steps:4,
-      names:[null,null,null,null,'counter-roundtrip.png']
+      names:['counter-south.png','counter-west.png','counter-north.png',
+        'counter-east.png','counter-roundtrip.png']
     });
 
     await fixture(page,{type:'dessert',id:'dessert'});
     await rotationSequence(page,{
       type:'dessert',id:'dessert',steps:4,
-      names:[null,null,null,null,'dessert-roundtrip.png']
+      names:['dessert-south.png','dessert-west.png','dessert-north.png',
+        'dessert-east.png','dessert-roundtrip.png']
     });
 
     await fixture(page,{
@@ -378,6 +409,7 @@ try{
   }
 
   for(const projection of [
+    {query:'?projection=ortho&demoLayout=1',name:'orthogonal-demo-layout.png',mode:'ortho'},
     {query:'?projection=ortho&artDebug=1&artDebugFocus=chair',name:'art-debug-focused.png',mode:'ortho'},
     {query:'?projection=iso',name:'iso-regression.png',mode:'iso'},
     {query:'?projection=flat',name:'flat-regression.png',mode:'flat'}

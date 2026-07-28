@@ -1,6 +1,16 @@
 # V0.56 產品決策交接（給產品負責人）
 
-> **最新狀態（2026-07-28，V0.57.7-alpha / Build 0577d）**：
+> **最新狀態（2026-07-28，V0.57.7-alpha / Build 0577e）**：
+> `ART-0577E-ORTHOGONAL-FURNITURE-VISUAL-REDESIGN-PHASE1` 已完成。
+> 0577d 的單一 resolver、固定 edit-session envelope 與
+> `fixed/axis2/cardinal4` 政策不變；本階段只重畫 `pinkTableLong`、`chair`、
+> `counter`、`dessert` 的 16 張 Orthogonal override。長桌已具真正水平／垂直
+> 桌面，木椅為真 cardinal 四向，吧台與甜點櫃可辨識顧客／店員及展示／服務面。
+> 第一批其餘 8 件維持既有 Orthogonal 素材，其餘 35 件仍為 base visual；
+> iso 預設／rollback、ortho opt-in。家具與存檔資料契約均未改。
+> iPhone Safari 真機仍 pending；第二批 35 件未核准、未開始。
+>
+> **歷史狀態（2026-07-28，V0.57.7-alpha / Build 0577d）**：
 > `FIX-0577D-ROTATION-UX-ENVELOPE-AND-HANDOFF-COMPLETION` 已完成。Orthogonal
 > 家具旋轉維持單一 resolver，改採固定 edit-session envelope、最小位移及
 > `fixed/axis2/cardinal4` 政策；`r0 South / r1 West / r2 North / r3 East`

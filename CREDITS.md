@@ -61,3 +61,20 @@
   generation 編修為四個真正 3/4 正交方向。
 - 本地工具負責棋盤去背、方向切分、92×126 runtime 尺寸、透明角落與共同接地線。
 - 未使用外部遊戲截圖、商業遊戲素材或開羅遊戲官方素材。
+
+### V0577E 正交家具視覺重構第一階段
+
+- 資產：`pinkTableLong`、`chair`、`counter`、`dessert` 四件家具，各四方向，
+  共 16 張透明 PNG。
+- 作者／來源：本專案原創；以 OpenAI image generation 依既有角色設定及
+  `ORTHOGONAL_FURNITURE_VISUAL_SPEC_V1.md` 產生四份 source sheet，再由本地
+  工具去除 chroma-key、取主要 alpha 元件、最近鄰縮放、底部置中與加入柔和接地影。
+- 設計重點：真正水平／垂直奶油粉長桌、真 cardinal 木椅、可辨識顧客面／店員面
+  的吧台，以及可辨識玻璃展示面／服務背面的甜點櫃。
+- 開發來源：`tools/v0577e-generated-sources/`；
+  透明中間稿：`tools/v0577e-transparent-sources/`；
+  處理器：`tools/process-v0577e-orthogonal-furniture.py`。上述開發工具與中間稿
+  不納入 GitHub Pages 部署 ZIP。
+- Runtime 路徑：
+  `assets/furniture/orthogonal/{pinkTableLong,chair,counter,dessert}/*.png`。
+- 授權：隨本專案使用；未使用外部遊戲截圖、未授權商業素材或開羅遊戲官方素材。

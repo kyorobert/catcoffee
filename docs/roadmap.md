@@ -1,6 +1,6 @@
 # 暫定產品與技術路線圖
 
-## 目前 Gate（V0.57.7-alpha / 0577d）
+## 目前 Gate（V0.57.7-alpha / 0577e）
 
 - [x] ARCH-0575C：playable area 與 visual shell 正式分離。
 - [x] Room Skin foundation：wall/trim/floor/door/decor anchors 集中設定。
@@ -18,15 +18,19 @@
 - [x] `FIX-0577D-ROTATION-UX-ENVELOPE-AND-HANDOFF-COMPLETION`：以固定
   edit-session envelope、最小位移與 `fixed/axis2/cardinal4` 政策取代
   0577c corner-pivot UX；無效旋轉零正式副作用。
+- [x] `ART-0577E-ORTHOGONAL-FURNITURE-VISUAL-REDESIGN-PHASE1`：建立
+  Orthogonal 視覺規格 v1，重畫 `pinkTableLong/chair/counter/dessert` 16 張
+  cardinal PNG；其餘第一批 8 件與其餘 35 件均未擴張。
 - [ ] iPhone Safari 真機 Gate：家具比例、輪廓、anchor、拖曳／旋轉、pan／pinch 與地址列變化；Chrome／Edge 自動驗收不可替代真機。
 - [ ] 第二批家具：尚未核准；其餘 35 件仍使用 base visual，不得自行接續。
 
 ### 下一個 Gate
 
-1. 部署 Build `0577d`。
+1. 部署 Build `0577e`。
 2. 於真實 iPhone Safari 驗收 fixed／axis2／cardinal4 的連續旋轉、無效紅色
    preview、底列 Rotate／Cancel／Store、pan／pinch 與地址列變化。
-3. 判斷 0577d 的比例／輪廓／包絡位移與觸控手感是否通過。
+3. 判斷 0577e 的長桌主視覺、木椅 cardinal、counter/dessert 正反側語意、
+   比例／輪廓與 0577d 包絡觸控手感是否通過。
 4. 貓咪 × 家具互動只先另立 `ARCH-0578-CAT-FURNITURE-INTERACTION-AUDIT`
    規格卡，不在家具美術卡偷做。
 5. 通過後才由產品負責人另立第二批家具 Task Card；未核准前不得開始其餘 35 件。
@@ -70,12 +74,14 @@
   - Stage 13 `ART-0577`（Build 0577a）：第一批 12 件 Orthogonal 家具與 projection-specific override 完成。
   - Stage 14 `ART-0577B`（Build 0577b，歷史階段）：第一批旋轉視覺 pivot 校準；
     木椅真正四方向；貓咪 × 家具只完成稽核，不含互動 Runtime。其餘 35 件仍使用 base visual。
-  - Stage 15 `ARCH-0577C` → `FIX-0577D`（Build 0577c→0577d，現行）：
+  - Stage 15 `ARCH-0577C` → `FIX-0577D`（Build 0577c→0577d）：
     單一 cardinal resolver、底列編輯模式與 Art Debug；最終以固定 edit-session
     envelope、最小位移與集中旋轉 policy 取代 corner-pivot。
+  - Stage 16 `ART-0577E`（Build 0577e，現行）：建立 Orthogonal 視覺規格 v1；
+    重畫長桌、木椅、吧台、甜點櫃 16 張 PNG，rotation resolver 與資料契約不變。
 
   上述歷史階段的成果與證據分別保留在 `docs/evidence/` 及各版本結果／驗收文件。
-  現行產品 Gate 是 0577d 旋轉包絡與第一批家具的 iPhone Safari 真機驗收；
+  現行產品 Gate 是 0577e Phase 1 視覺與 0577d 旋轉包絡的 iPhone Safari 真機驗收；
   第二批尚未核准。
 - 目標：依 Phase 1 核准方案改善直立手機的場景平面感與資訊可讀性。
 - 前置：產品核准投影方案、存檔策略、資產策略與驗收畫面。

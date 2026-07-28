@@ -20,7 +20,9 @@ import {
   effectiveRotationForPolicy,
   createRotationEditSession,
   advanceRotationEditSession,
-  resolveNextOrthogonalRotation
+  resolveNextOrthogonalRotation,
+  orthogonalRotationToCardinal,
+  orthogonalRotationToTextureDirection
 } from '../assets/js/core/orthogonal-furniture-rotation.js';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {GridSystem} from '../assets/js/systems/GridSystem.js';
@@ -143,6 +145,95 @@ function silhouetteDistance(first, second) {
   }
   return changed;
 }
+function visibleBounds(frame) {
+  let minX = frame.width;
+  let minY = frame.height;
+  let maxX = -1;
+  let maxY = -1;
+  for (let y = 0; y < frame.height; y += 1) {
+    for (let x = 0; x < frame.width; x += 1) {
+      const alpha = frame.rgba[(y * frame.width + x) * 4 + 3];
+      if (alpha <= 16) continue;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  }
+  return {
+    width: maxX >= minX ? maxX - minX + 1 : 0,
+    height: maxY >= minY ? maxY - minY + 1 : 0
+  };
+}
+
+// ART-0577E: the cardinal contract is visible art, not merely direction labels.
+assert.deepEqual(
+  [0, 1, 2, 3].map(rotation => ({
+    cardinal: orthogonalRotationToCardinal(rotation),
+    texture: orthogonalRotationToTextureDirection(rotation)
+  })),
+  [
+    {cardinal: 'south', texture: 'down-right'},
+    {cardinal: 'west', texture: 'down-left'},
+    {cardinal: 'north', texture: 'up-left'},
+    {cardinal: 'east', texture: 'up-right'}
+  ],
+  'cardinal rotation is a perceptible clockwise quarter-turn'
+);
+
+const phaseOneFrames = Object.fromEntries(
+  ['pinkTableLong', 'chair', 'counter', 'dessert'].map(id => [
+    id,
+    Object.fromEntries(FURNITURE_DIRECTIONS.map(direction => [
+      direction,
+      decodeRgbaPng(
+        `./assets/furniture/orthogonal/${id}/${id}-${direction}.png`
+      )
+    ]))
+  ])
+);
+
+const horizontalTable = visibleBounds(phaseOneFrames.pinkTableLong['down-right']);
+const verticalTable = visibleBounds(phaseOneFrames.pinkTableLong['down-left']);
+assert.ok(
+  horizontalTable.width >= verticalTable.width * 2.2,
+  'pinkTableLong axis2 must visibly switch wide horizontal -> narrow vertical'
+);
+assert.ok(
+  horizontalTable.width >= 160 && verticalTable.width <= 75,
+  'pinkTableLong tabletop dominates each authored axis'
+);
+assert.equal(
+  getFurnitureDisplayState(
+    'pinkTableLong', 0, FURNITURE_CONFIG.pinkTableLong, 'ortho'
+  ).texture,
+  'furniture:ortho:pinkTableLong:down-right'
+);
+assert.equal(
+  getFurnitureDisplayState(
+    'pinkTableLong', 1, FURNITURE_CONFIG.pinkTableLong, 'ortho'
+  ).texture,
+  'furniture:ortho:pinkTableLong:down-left'
+);
+
+for (const id of ['counter', 'dessert']) {
+  const frames = phaseOneFrames[id];
+  const front = visibleBounds(frames['down-right']);
+  const right = visibleBounds(frames['down-left']);
+  const back = visibleBounds(frames['up-left']);
+  const left = visibleBounds(frames['up-right']);
+  assert.ok(front.width > right.width * 1.45, `${id}: front must read wider than side`);
+  assert.ok(back.width > left.width * 1.45, `${id}: back must read wider than side`);
+  assert.ok(
+    silhouetteDistance(frames['down-right'], frames['up-left']) > 600,
+    `${id}: customer/display front and staff/service back must differ`
+  );
+  assert.ok(
+    silhouetteDistance(frames['down-left'], frames['up-right']) > 150,
+    `${id}: west/east side views must be separately authored`
+  );
+}
+
 assert.ok(
   silhouetteDistance(chairFrames['down-right'], chairFrames['down-left']) > 500,
   'chair: down-left/right must be genuinely distinct side silhouettes'

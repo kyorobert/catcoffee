@@ -1,5 +1,5 @@
-import {FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0577d';
-import {resolveOrthogonalRotationPlacement} from '../core/orthogonal-furniture-rotation.js?v=0577d';
+import {FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0577e';
+import {resolveOrthogonalRotationPlacement} from '../core/orthogonal-furniture-rotation.js?v=0577e';
 
 // ARCH-0577C: read-only overlay. It never writes save state and never intercepts
 // pointer input. In artDebug=1 mode it draws geometry (sprite bounds, footprint

@@ -1,11 +1,11 @@
-import {createGameConfig} from './config/game-config.js?v=0577d';
-import {FURNITURE_CONFIG} from './config/furniture-config.js?v=0577d';
-import {APP_VERSION, BUILD_ID, assertBuildConsistency} from './config/build-info.js?v=0577d';
-import {resolveDomContract} from './ui/dom-contract.js?v=0577d';
-import {SaveAdapter} from './systems/SaveAdapter.js?v=0577d';
-import {StartupController} from './systems/StartupController.js?v=0577d';
-import {UiBridge} from './ui/UiBridge.js?v=0577d';
-import {isDemoLayoutRequested} from './config/ortho-demo-layout.js?v=0577d';
+import {createGameConfig} from './config/game-config.js?v=0577e';
+import {FURNITURE_CONFIG} from './config/furniture-config.js?v=0577e';
+import {APP_VERSION, BUILD_ID, assertBuildConsistency} from './config/build-info.js?v=0577e';
+import {resolveDomContract} from './ui/dom-contract.js?v=0577e';
+import {SaveAdapter} from './systems/SaveAdapter.js?v=0577e';
+import {StartupController} from './systems/StartupController.js?v=0577e';
+import {UiBridge} from './ui/UiBridge.js?v=0577e';
+import {isDemoLayoutRequested} from './config/ortho-demo-layout.js?v=0577e';
 
 window.__CAT_CAFE_JS_BUILD_ID__ = BUILD_ID;
 

@@ -1,6 +1,33 @@
 # V0.57.7-alpha 專案現況
 
-## Build 0577d（FIX-0577D）— 現行
+## Build 0577e（ART-0577E）— 現行
+
+- **正交家具視覺規格 v1** 已落檔，固定 South/front → West/right →
+  North/back → East/left 的順時針 cardinal 語意、主視覺面、接地線、陰影、
+  footprint 尺度與貓咪比例基準。
+- 第一批 12 件中的 4 件完成 Phase 1 重畫：
+  - `pinkTableLong`：axis2 真正水平 2×1／垂直 1×2，桌面為主視覺。
+  - `chair`：front/right/back/left 真四向，側面不再是斜 3/4 翻版。
+  - `counter`：顧客封閉面、店員開放層架與左右窄端面。
+  - `dessert`：甜點展示面、後方服務門與左右玻璃端面。
+- 16 張新 PNG 沿用既有檔名、texture key、畫布、透明背景與 `(0.5,1)`
+  底部中心；其餘第一批 8 件維持 ART-0577 素材，其餘 35 件仍為 base visual。
+- 0577d 的單一 resolver、固定 edit-session envelope、最小位移、
+  `fixed/axis2/cardinal4`、Preview／Ghost／Entity／commit／Occupancy 同候選
+  全部保留；只更新 projection-specific 視覺與 cache query。
+- 不變：家具 ID／price／footprint／`x/y/r`、入口 `(7,0)(8,0)`、10×8 Grid／
+  78 cells、save key `catCafePhaserV0540`、schema 5401、migration 5402、
+  CameraController、iso／flat。
+- package 維持 `0.57.7-alpha`；正式 module query 為 `?v=0577e`。
+- 真實 Chrome 已驗證 8 種 viewport、四向旋轉、兩張長桌並排、木椅四向環、
+  demo layout、fresh／legacy save、全部投影 URL，pageerror／failed request 均為 0。
+- **iPhone Safari 實機仍 pending；第二批 35 件未核准、未開始。**
+- 詳見 [視覺規格](./ORTHOGONAL_FURNITURE_VISUAL_SPEC_V1.md)、
+  [結果](./V0577E_ORTHOGONAL_FURNITURE_VISUAL_RESULT.md)、
+  [驗收](./V0577E_ORTHOGONAL_FURNITURE_VISUAL_ACCEPTANCE.md)、
+  [比較](./V0577E_ORTHOGONAL_FURNITURE_VISUAL_COMPARISON.html)。
+
+## Build 0577d（FIX-0577D）— 歷史基線，旋轉 UX 仍沿用
 
 - **家具旋轉 UX 採固定 edit-session envelope**：唯一純資料 resolver 同時計算
   resolved x/y/r、policy、footprint cells/polygon、visual anchor、movement delta 與
@@ -16,7 +43,8 @@
   `x/y/r`、Occupancy、save、coins 均不變，不自動找替代格。Cancel 精確回復進入
   編輯時的原始狀態。
 - 0577c 的底列就地編輯工具列與精簡 Art Debug 保留；fixed 家具 Rotate disabled。
-- 第一批 12 件、48 張 Orthogonal PNG 未重畫；其餘 35 件仍使用 base visual。
+- 當時第一批 12 件、48 張 Orthogonal PNG 未重畫；0577e 後續只更新其中 4 件。
+  其餘 35 件仍使用 base visual。
   iso 仍預設／rollback，ortho 仍 URL opt-in。
 - 不變：家具 ID／price／footprint／入口 `(7,0)(8,0)`／10×8 Grid／78 cells／
   save key `catCafePhaserV0540`／schema 5401／migration 5402／CameraController／
@@ -72,8 +100,8 @@
 
 | 項目 | 現況 |
 |---|---|
-| 版本 | `V0.57.7-alpha｜家具旋轉體驗重構版` |
-| Build ID | `0577d` |
+| 版本 | `V0.57.7-alpha｜正交家具視覺重構第一階段` |
+| Build ID | `0577e` |
 | package version | `0.57.7-alpha` |
 | 引擎 | Phaser `3.90.0`，Canvas renderer |
 | 引擎來源 | `assets/vendor/phaser-3.90.0.min.js` |
@@ -141,7 +169,7 @@
 | 家具顯示、選取、拖曳、旋轉、收納、出售 | 完成 | 同一 resolver／Grid／Occupancy／Placement／Ghost 資料流；第一批 ortho 旋轉採固定 edit-session envelope |
 | 家具商店與購買 | 完成 | 以 Runtime visual config 顯示 |
 | 家具存檔相容 | 完成 | 固定 ID 與 `catCafePhaserV0540` |
-| 核心 12 件 Orthogonal 家具素材 | 完成 | `ART-0577` 提供四方向 48 張 PNG；0577d 不重畫素材，只重構旋轉 UX |
+| 核心 12 件 Orthogonal 家具素材 | 完成（分階段精修） | `ART-0577` 提供 48 張；0577e 重畫 `pinkTableLong/chair/counter/dessert` 16 張，其餘 8 件沿用第一批素材 |
 | 其餘 35 件 Orthogonal 家具素材 | 未完成 | 仍沿用既有 base visual；第二批尚未核准 |
 | 貓咪顯示、動畫、漫遊與家具避障 | 完成 | 五個 cat ID；BFS、delta movement、休息狀態 |
 | 餵食／梳毛／玩耍照顧流程 | 完成 | 純規則 core + Phaser session + DOM 演出 |
@@ -173,7 +201,7 @@
 
 ## F. 測試狀態
 
-### 現行 Runtime（FIX-0577D，Build 0577d）實際驗證
+### 現行 Runtime（ART-0577E，Build 0577e）實際驗證
 
 - `npm run test:ortho-rotation`／`test:rotation-state`：通過（policy、17 種非方形
   footprint、最小位移、可逆回圈、無效狀態零副作用）。
@@ -181,8 +209,8 @@
   pointer、invalid preview、resize 與投影回歸通過。
 - `node check.js --deploy`／`--dev`：Build、Save key、schema、migration、78 cells、
   入口、48 張 PNG、Chrome／Edge Browser Smoke 均受 Gate 保護。
-- 證據位於 `docs/evidence/v0577d/`；見 [0577d 結果](./V0577D_ROTATION_UX_RESULT.md)
-  與 [0577d 驗收](./V0577D_ROTATION_UX_ACCEPTANCE.md)。
+- 證據位於 `docs/evidence/v0577e/`；見 [0577e 結果](./V0577E_ORTHOGONAL_FURNITURE_VISUAL_RESULT.md)
+  與 [0577e 驗收](./V0577E_ORTHOGONAL_FURNITURE_VISUAL_ACCEPTANCE.md)。
 
 ### Repository 內已有
 
@@ -200,7 +228,9 @@
 ## G. 已知差距與待決策
 
 - Orthogonal 為 opt-in 原型、尚未設為正式預設；iso 仍為預設與 rollback，待手機實機再驗收後另議。
-- 第一批 12 件 Orthogonal 家具已由 `ART-0577` 完成；其餘 35 件仍為 base visual，第二批 Task Card 尚未核准。
+- 第一批 12 件 Orthogonal 家具已由 `ART-0577` 完成；0577e 只重畫其中 4 件，
+  其餘第一批 8 件仍待同規格的後續校準。其餘 35 件仍為 base visual，第二批
+  Task Card 尚未核准。
 - 貓咪目前只把家具 occupancy 當阻擋格，尚未消費 seat／cat-rest／cat-play
   interaction socket，也沒有 approach point、家具狀態占用或對應動畫；完整稽核見
   [V0577B 結果](./V0577B_FIRST_BATCH_ROTATION_AND_DIRECTION_RESULT.md)，建議另立

@@ -3,7 +3,7 @@
 // override footprints, prices, placement rules, sockets, layers, save fields,
 // occupancy, inventory or migration data.
 
-export const ORTHOGONAL_FURNITURE_ASSET_VERSION = '0577c';
+export const ORTHOGONAL_FURNITURE_ASSET_VERSION = '0577e';
 
 export const ORTHOGONAL_CORE_FURNITURE_IDS = Object.freeze([
   'counter',
@@ -58,7 +58,12 @@ function createOverride(id) {
     authoredDirections: ORTHOGONAL_FURNITURE_DIRECTIONS,
     mirrorAllowed: false,
     sourceFormat: 'png',
-    notes: 'ART-0577 original four-view orthogonal PNG override; gameplay metadata remains in the base furniture definition.'
+    notes: [
+      'ART-0577 projection-specific orthogonal PNG override.',
+      'ART-0577E redraws pinkTableLong, chair, counter and dessert to the',
+      'cardinal visual specification; gameplay metadata remains in the base',
+      'furniture definition.'
+    ].join(' ')
   });
 }
 
