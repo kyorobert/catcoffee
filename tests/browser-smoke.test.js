@@ -5,9 +5,9 @@ import {existsSync,readFileSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0577b';
+import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0577d';
 import {ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES}
-  from '../assets/js/config/orthogonal-furniture-visuals.js?v=0577b';
+  from '../assets/js/config/orthogonal-furniture-visuals.js?v=0577d';
 import {CAT_PROFILES,CAT_ANIMATION_LAYOUT,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const root=process.cwd();
@@ -46,7 +46,7 @@ const server=createServer((request,response)=>{
     response.end(readFileSync(file,'utf8').replace('id="careBtn"','id="careBtn-missing"'));return;
   }
   if(relativePath==='index.html'&&requestUrl.searchParams.get('fixture')==='build-mismatch'){
-    response.end(readFileSync(file,'utf8').replace('data-build-id="0577b"','data-build-id="0550-old"'));return;
+    response.end(readFileSync(file,'utf8').replace('data-build-id="0577d"','data-build-id="0550-old"'));return;
   }
   response.end(readFileSync(file));
 });
@@ -150,7 +150,7 @@ try{
     });
     const problems=[];
     if(!state.phaser||!state.game)problems.push('Phaser global or game missing');
-    if(state.htmlBuildId!=='0577b'||state.jsBuildId!=='0577b')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
+    if(state.htmlBuildId!=='0577d'||state.jsBuildId!=='0577d')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
     if(state.gameReady!=='1')problems.push(`gameReady is ${state.gameReady}`);
     if(loadedUrls.some(url=>/\?v=0550a(?:$|[&#])/.test(url)||url.includes('?v=0542a')))problems.push('obsolete runtime cache query loaded');
     if(state.canvasCount!==1||state.canvasWidth<=0||state.canvasHeight<=0)problems.push(`invalid canvas ${state.canvasCount} ${state.canvasWidth}x${state.canvasHeight}`);
@@ -279,6 +279,28 @@ try{
       const catsAfter=await page.evaluate(()=>[...window.__CAT_CAFE_GAME__.scene.getScene('CafeScene').catEntities].map(([id,entity])=>[id,entity.sprite.x,entity.sprite.y]));
       if(!catsAfter.some((entry,index)=>Math.hypot(entry[1]-catsBefore[index][1],entry[2]-catsBefore[index][2])>1))problems.push('no cat moved during the 7-second browser observation');
 
+      // ARCH-0577C: the furniture edit bar REPLACES the bottom nav in-place. While
+      // an item is selected the nav must be gone (not a second floating bar over the
+      // Canvas), and the real cancel button must restore the nav so it can be used.
+      const editReplace=await page.evaluate(()=>{
+        const bar=document.getElementById('gameBottomBar');
+        const nav=bar.querySelector('.bottom-nav');
+        const selection=document.getElementById('selectionBar');
+        return {
+          mode:bar.dataset.mode,
+          navHidden:!nav||nav.offsetParent===null,
+          editVisible:!selection.classList.contains('hidden')&&selection.offsetParent!==null,
+          navInsideBar:bar.contains(nav),editInsideBar:bar.contains(selection)
+        };
+      });
+      if(editReplace.mode!=='edit'||!editReplace.navHidden||!editReplace.editVisible||!editReplace.navInsideBar||!editReplace.editInsideBar)problems.push(`edit mode did not replace bottom nav in-place: ${JSON.stringify(editReplace)}`);
+      await page.click('#cancelPlacementBtn');
+      const navRestored=await page.evaluate(()=>{
+        const bar=document.getElementById('gameBottomBar');
+        const nav=bar.querySelector('.bottom-nav');
+        return {mode:bar.dataset.mode,navVisible:nav&&nav.offsetParent!==null,selected:window.__CAT_CAFE_GAME__.scene.getScene('CafeScene').selectedId};
+      });
+      if(navRestored.mode!=='nav'||!navRestored.navVisible||navRestored.selected!==null)problems.push(`bottom nav did not return after cancel: ${JSON.stringify(navRestored)}`);
       const careBefore=await page.evaluate(()=>{
         const state=window.gameController.getState();
         return {energy:state.energy,satiety:state.catStats.bean.satiety,care:state.tasks.care||0};
@@ -620,12 +642,9 @@ try{
     }
     if(ortho.demo){
       for(const [type,frames] of Object.entries(state.rotationCalibration)){
-        const first=frames[0];
-        if(frames.some(frame=>frame.x!==first.x||frame.y!==first.y)){
-          problems.push(`${type} visual pivot jumped during rotation: ${JSON.stringify(frames)}`);
-        }
-        if(new Set(frames.map(frame=>frame.texture)).size!==4){
-          problems.push(`${type} did not select four authored rotation textures`);
+        const expectedDirections=type==='pinkTableLong'?2:4;
+        if(new Set(frames.map(frame=>frame.texture)).size!==expectedDirections){
+          problems.push(`${type} policy texture count is wrong: ${JSON.stringify(frames)}`);
         }
       }
       if(Object.keys(state.rotationCalibration).length!==4){
@@ -642,51 +661,63 @@ try{
     await context.close();
     if(problems.length)throw new Error(`${ortho.name}: ${problems.join('; ')}`);
   }
-  // ART-0577B: exercise the same Scene rotate commit used by the toolbar for
-  // the four acceptance fixtures. The logical x/y and rendered pivot must stay
-  // fixed through a complete four-click cycle while r and texture advance.
+  // FIX-0577D: drive the REAL #rotateBtn. axis2 returns in two clicks; cardinal4
+  // returns in four. Each intermediate state is the shared envelope candidate,
+  // and the final state returns to the exact original x/y/r/world position.
   {
     const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
     await context.addInitScript(()=>localStorage.clear());
     const page=await context.newPage();
     await page.goto(origin+'/?projection=ortho',{waitUntil:'domcontentloaded',timeout:20000});
     await page.waitForFunction(()=>document.body.dataset.gameReady==='1',null,{timeout:20000});
-    const calibration=await page.evaluate(()=>{
-      const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
-      scene.catBehaviorController.pause('rotation-smoke');
-      const output={};
-      for(const type of ['pinkTableLong','counter','chair','dessert']){
+    const calibration={};
+    for(const type of ['pinkTableLong','counter','chair','dessert']){
+      await page.evaluate(fixtureType=>{
+        const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+        scene.catBehaviorController.pause('rotation-smoke');
         for(const entity of scene.entities.values())entity.destroy();
         scene.entities.clear();
         scene.state.items.length=0;
         scene.occupancy.build([]);
-        const item={id:`toolbar-rotation-${type}`,type,x:3,y:3,r:0};
+        const item={id:`toolbar-rotation-${fixtureType}`,type:fixtureType,x:3,y:3,r:0};
         scene.state.items.push(item);
         scene.occupancy.addItem(item);
-        scene.addFurnitureEntity(item);
+        scene.addFurnitureEntity(item).sync();
         scene.selectItem(item.id);
+      },type);
+      const read=()=>page.evaluate(fixtureType=>{
+        const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+        const item=scene.state.items.find(entry=>entry.id===`toolbar-rotation-${fixtureType}`);
         const entity=scene.entities.get(item.id);
-        output[type]=[];
-        for(let click=0;click<4;click++){
-          output[type].push({
-            click,x:item.x,y:item.y,r:item.r,xWorld:entity.x,yWorld:entity.y,
-            texture:entity.texture.key
-          });
-          scene.rotateSelection();
-        }
-        output[type].push({
-          click:4,x:item.x,y:item.y,r:item.r,xWorld:entity.x,yWorld:entity.y,
-          texture:entity.texture.key
-        });
+        const resolved=entity.resolvedPlacement;
+        const last=scene.lastRotationCandidate;
+        return {
+          x:item.x,y:item.y,r:item.r||0,xWorld:entity.x,yWorld:entity.y,
+          anchorX:resolved?.visualPosition.x,anchorY:resolved?.visualPosition.y,
+          texture:entity.texture.key,policy:resolved?.rotationPolicy,
+          delta:last?.resolved?.movementDelta||{x:0,y:0},
+          signature:last?.resolved?.signature||resolved?.signature||''
+        };
+      },type);
+      const steps=[await read()];
+      const clickCount=type==='pinkTableLong'?2:4;
+      for(let click=0;click<clickCount;click++){
+        await page.click('#rotateBtn');
+        await page.waitForTimeout(40);
+        steps.push(await read());
       }
-      return output;
-    });
+      calibration[type]=steps;
+    }
     for(const [type,steps] of Object.entries(calibration)){
-      const first=steps[0];
-      if(steps.some(step=>step.x!==3||step.y!==3||step.xWorld!==first.xWorld||step.yWorld!==first.yWorld)){
-        throw new Error(`${type} toolbar rotate moved logical/visual position: ${JSON.stringify(steps)}`);
+      if(steps.some(step=>Math.abs(step.xWorld-step.anchorX)>0.01||Math.abs(step.yWorld-step.anchorY)>0.01)){
+        throw new Error(`${type} sprite left the shared gameplay anchor: ${JSON.stringify(steps)}`);
       }
-      if(steps.at(-1).r!==0||new Set(steps.slice(0,4).map(step=>step.texture)).size!==4){
+      const start=steps[0],end=steps[steps.length-1];
+      if(end.r!==start.r||end.x!==start.x||end.y!==start.y||end.xWorld!==start.xWorld||end.yWorld!==start.yWorld){
+        throw new Error(`${type} policy cycle drifted from the origin: ${JSON.stringify(steps)}`);
+      }
+      const expectedDirections=type==='pinkTableLong'?2:4;
+      if(new Set(steps.slice(0,-1).map(step=>step.texture)).size!==expectedDirections){
         throw new Error(`${type} toolbar rotate direction cycle failed: ${JSON.stringify(steps)}`);
       }
     }

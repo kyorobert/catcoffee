@@ -2,13 +2,13 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0577b';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0577b';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0577b';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0577d';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0577d';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0577d';
 import {ORTHO_DEMO_LAYOUT, ORTHO_DEMO_ENTRANCE, buildOrthoDemoItems, isDemoLayoutRequested}
-  from '../assets/js/config/ortho-demo-layout.js?v=0577b';
+  from '../assets/js/config/ortho-demo-layout.js?v=0577d';
 import {ORTHO_ROOM_ZONES as Z, rectContainsCell, zoneCells}
-  from '../assets/js/config/ortho-room-zones.js?v=0577b';
+  from '../assets/js/config/ortho-room-zones.js?v=0577d';
 
 const {cols, rows} = ROOM_CONFIG.floor;
 

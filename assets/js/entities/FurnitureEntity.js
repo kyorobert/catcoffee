@@ -1,8 +1,11 @@
-import {DepthSystem} from '../systems/DepthSystem.js?v=0577b';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0577d';
 import {
   getFurnitureDisplayState,
   getFurnitureVisualPosition
-} from '../core/furniture-display-state.js?v=0577b';
+} from '../core/furniture-display-state.js?v=0577d';
+import {
+  resolveOrthogonalRotationPlacement
+} from '../core/orthogonal-furniture-rotation.js?v=0577d';
 
 export class FurnitureEntity extends Phaser.GameObjects.Image{
   constructor(scene,item,definition,grid){
@@ -38,12 +41,20 @@ export class FurnitureEntity extends Phaser.GameObjects.Image{
     this.input.cursor='pointer';
     scene.input.setDraggable(this);
   }
-  sync(){
+  sync(resolvedCandidate=null){
     const rotation=this.item.r||0;
     const display=getFurnitureDisplayState(
       this.item.type,rotation,this.definition,this.grid.projectionMode
     );
-    const anchor=getFurnitureVisualPosition(
+    const resolved=resolvedCandidate
+      ||((this.grid.projectionMode||'iso')==='ortho'
+        ?resolveOrthogonalRotationPlacement({
+          grid:this.grid,type:this.item.type,definition:this.definition,
+          x:this.item.x,y:this.item.y,rotation,
+          policy:display.rotationPolicy
+        })
+        :null);
+    const anchor=resolved?.visualPosition||getFurnitureVisualPosition(
       this.grid,this.item.type,this.item.x,this.item.y,rotation,display
     );
     this.setPosition(anchor.x,anchor.y);
@@ -51,10 +62,12 @@ export class FurnitureEntity extends Phaser.GameObjects.Image{
     this.setOrigin(display.originX,display.originY).setFlipX(display.flipX);
     this.direction=display.direction;
     this.missingDirection=Boolean(display.missingDirection);
+    this.resolvedPlacement=resolved;
     this.setDepth(DepthSystem.for(this.definition.layer||'floorObject',anchor.y));
   }
-  setGridPosition(x,y,rotation=this.item.r||0){
-    this.item.x=x;this.item.y=y;this.item.r=rotation;this.sync();return this;
+  setGridPosition(x,y,rotation=this.item.r||0,resolvedCandidate=null){
+    this.item.x=x;this.item.y=y;this.item.r=rotation;
+    this.sync(resolvedCandidate);return this;
   }
   updateWorldPosition(){this.sync();return this}
   updateDepth(){
@@ -67,6 +80,7 @@ export class FurnitureEntity extends Phaser.GameObjects.Image{
       id:this.item.id,type:this.item.type,direction:this.direction,
       texture:this.texture.key,sizeFallback:this.usesSizeFallback,
       missingDirection:this.missingDirection,visual:this.visual
+      ,resolvedPlacement:this.resolvedPlacement||null
     };
   }
   destroy(fromScene){this.scene?.input?.setDraggable(this,false);super.destroy(fromScene)}

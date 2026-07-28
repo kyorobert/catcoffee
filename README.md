@@ -1,22 +1,34 @@
 # 貓咪咖啡廳 V0.57.7-alpha
 
-版本：`V0.57.7-alpha｜第一批家具旋轉與方向校正版`  
-Build ID：`0577b`
+版本：`V0.57.7-alpha｜家具旋轉體驗重構版`  
+Build ID：`0577d`
 
-## Build 0577b：第一批旋轉與方向校準
+## Build 0577d：家具旋轉體驗重構
 
-`ART-0577B` 修正 12 件 Orthogonal override 家具的旋轉視覺 pivot。原問題是
-1×2／2×1 footprint 在相同 `x/y` 旋轉後，`GridSystem.getAnchor()` 會切換到另一個
-底邊中心，使 sprite 看起來被搬動。現在 projection-specific `calibration` 與
-`getFurnitureVisualPosition()` 讓 Entity、拖曳 Ghost、旋轉預覽和正式 commit
-共用同一視覺 pivot；footprint、Occupancy、Placement、`x/y/r` 與存檔契約不變。
+`FIX-0577D` 接手並稽核 0577c 工作樹後，保留單一 cardinal resolver 與底列
+編輯工具列，但以固定 edit-session envelope、最小位移和集中式旋轉 policy
+取代 corner-pivot UX：
 
-木椅四張 PNG 已改為真正四個 3/4 正交方向，左右方向可辨識椅背厚度、椅面深度及
-前後腳。iso／flat 仍使用 base visual；Orthogonal 仍只由 URL opt-in。其餘 35 件
-未開始，iPhone Safari 真機 Gate 仍 pending。
+- `fixed`：對稱家具不改正式 rotation。
+- `axis2`：長桌等家具只在水平／垂直之間切換。
+- `cardinal4`：`r0 South / r1 West / r2 North / r3 East` 順時針。
+- Entity、Ghost、Preview、Placement、commit、Occupancy 與 Art Debug 使用同一
+  resolved candidate。
+- 衝突、越界與入口保留只顯示紅色 preview；正式 `x/y/r`、Occupancy、save、
+  coins 均不變，也不自動搜尋附近格。
+- Cancel 恢復進入編輯時的原始狀態。
 
-- [0577B 實作與貓咪 × 家具稽核](./docs/V0577B_FIRST_BATCH_ROTATION_AND_DIRECTION_RESULT.md)
-- [0577B 驗收紀錄](./docs/V0577B_FIRST_BATCH_ROTATION_AND_DIRECTION_ACCEPTANCE.md)
+第一批 12 件／48 張 Orthogonal PNG 未重畫；其餘 35 件仍使用 base visual。
+iso 仍預設／rollback，Orthogonal 仍由 URL opt-in。iPhone Safari 真機 Gate
+仍 pending，第二批未核准。
+
+- [0577d 強制交接稽核](./docs/V0577D_FORCED_HANDOFF_AUDIT.md)
+- [0577d 實作結果](./docs/V0577D_ROTATION_UX_RESULT.md)
+- [0577d 驗收紀錄](./docs/V0577D_ROTATION_UX_ACCEPTANCE.md)
+- [0577d 視覺比較](./docs/V0577D_ROTATION_UX_COMPARISON.html)
+
+0577b 的初版 pivot 校準與木椅真四向、0577c 的 corner-pivot 架構仍保留於歷史
+文件；現行決策以 DEC-029 為準。
 
 ## V0.57.7-alpha：核心正交家具第一批
 

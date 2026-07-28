@@ -14,6 +14,14 @@ import {
   getFurnitureDisplayState,
   getFurnitureVisualPosition
 } from '../assets/js/core/furniture-display-state.js';
+import {
+  ROTATION_POLICY,
+  getOrthogonalRotationPolicy,
+  effectiveRotationForPolicy,
+  createRotationEditSession,
+  advanceRotationEditSession,
+  resolveNextOrthogonalRotation
+} from '../assets/js/core/orthogonal-furniture-rotation.js';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {GridSystem} from '../assets/js/systems/GridSystem.js';
 import {decodeRgbaPng, inspectRgbaPng} from './helpers/png.js';
@@ -34,7 +42,7 @@ for (const id of expectedIds) {
   assert.ok(definition, `${id}: missing gameplay definition`);
   assert.ok(ortho, `${id}: missing orthogonal visual`);
   assert.equal(ortho.projection, 'ortho', `${id}: projection marker`);
-  assert.equal(ortho.calibration?.rotationAnchor, 'base-rotation', `${id}: rotation pivot calibration`);
+  assert.equal(ortho.calibration, null, `${id}: V0577C retires the base-rotation pivot calibration`);
   assert.deepEqual(ortho.footprint, base.footprint, `${id}: footprint changed`);
   assert.equal(ortho.stationType, base.stationType, `${id}: station type changed`);
   assert.deepEqual(ortho.interactionSockets, base.interactionSockets, `${id}: sockets changed`);
@@ -48,6 +56,11 @@ for (const id of expectedIds) {
     assert.ok(display.texture.startsWith(`furniture:ortho:${id}:`), `${id}: ortho texture`);
     assert.equal(display.usedFallback, false, `${id}: rotation ${rotation} fallback`);
     assert.equal(display.flipX, false, `${id}: rotation ${rotation} flip`);
+    assert.equal(
+      display.displayRotation,
+      effectiveRotationForPolicy(rotation,display.rotationPolicy),
+      `${id}: policy-aware display rotation`
+    );
   }
 
   for (const direction of FURNITURE_DIRECTIONS) {
@@ -60,19 +73,47 @@ for (const id of expectedIds) {
   }
 }
 
+// FIX-0577D contract: a formal state still draws on its actual gameplay anchor,
+// while rotation candidates move through the shared minimum-displacement envelope.
 const orthoGrid = new GridSystem(ROOM_CONFIG, FURNITURE_CONFIG, {mode: 'ortho'});
 for (const id of expectedIds) {
   const definition = FURNITURE_CONFIG[id];
+  const policy=getOrthogonalRotationPolicy(id,definition);
   const positions = Array.from({length: 4}, (_, rotation) => {
     const display = getFurnitureDisplayState(id, rotation, definition, 'ortho');
-    return getFurnitureVisualPosition(orthoGrid, id, 3, 3, rotation, display);
+    const visual = getFurnitureVisualPosition(orthoGrid, id, 3, 3, rotation, display);
+    const gameplayAnchor = orthoGrid.getAnchor(
+      id, 3, 3, effectiveRotationForPolicy(rotation,policy)
+    );
+    assert.deepEqual(
+      visual, {x: gameplayAnchor.x, y: gameplayAnchor.y},
+      `${id}: rotation ${rotation} visual must share the gameplay anchor (no fixed pivot)`
+    );
+    return visual;
   });
-  for (const position of positions.slice(1)) {
-    assert.deepEqual(position, positions[0], `${id}: rotation changed visual pivot`);
+  if(policy===ROTATION_POLICY.FIXED){
+    assert.ok(positions.every(position=>JSON.stringify(position)===JSON.stringify(positions[0])));
+  }else if(policy===ROTATION_POLICY.AXIS2){
+    assert.deepEqual(positions[2],positions[0],`${id}: legacy r2 visually equals r0`);
+    assert.deepEqual(positions[3],positions[1],`${id}: legacy r3 visually equals r1`);
   }
+  let session=createRotationEditSession({
+    type:id,definition,x:3,y:3,rotation:0,policy
+  });
+  let current={x:3,y:3,r:0};
+  const steps=policy===ROTATION_POLICY.FIXED?1:policy===ROTATION_POLICY.AXIS2?2:4;
+  for(let index=0;index<steps;index++){
+    const resolved=resolveNextOrthogonalRotation({
+      grid:orthoGrid,type:id,definition,...current,rotation:current.r,
+      policy,editSession:session
+    });
+    current={x:resolved.resolvedX,y:resolved.resolvedY,r:resolved.resolvedRotation};
+    session=advanceRotationEditSession(session,resolved);
+  }
+  assert.deepEqual(current,{x:3,y:3,r:0},`${id}: policy cycle round-trip`);
 }
 
-for (const id of ['pinkTableLong', 'counter', 'chair', 'dessert']) {
+for (const id of ['counter', 'chair', 'dessert']) {
   const definition = FURNITURE_CONFIG[id];
   const textures = [];
   for (let rotation = 0; rotation < 4; rotation += 1) {
@@ -80,6 +121,13 @@ for (const id of ['pinkTableLong', 'counter', 'chair', 'dessert']) {
     textures.push(display.texture);
   }
   assert.equal(new Set(textures).size, 4, `${id}: rotate must select four authored textures`);
+}
+{
+  const definition=FURNITURE_CONFIG.pinkTableLong;
+  const textures=[0,1,2,3].map(rotation=>
+    getFurnitureDisplayState('pinkTableLong',rotation,definition,'ortho').texture
+  );
+  assert.equal(new Set(textures).size,2,'pinkTableLong axis2 uses two visual axes');
 }
 
 const chairFrames = Object.fromEntries(FURNITURE_DIRECTIONS.map(direction => [

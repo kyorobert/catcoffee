@@ -1,32 +1,39 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0577b';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0577b';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0577b';
-import {GridSystem} from '../systems/GridSystem.js?v=0577b';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0577b';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0577b';
-import {CameraController} from '../systems/CameraController.js?v=0577b';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0577b';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0577b';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0577b';
-import {CatEntity} from '../entities/CatEntity.js?v=0577b';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0577b';
-import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0577b';
-import {AmbientEffects} from '../entities/AmbientEffects.js?v=0577b';
-import {INPUT_MODE} from '../core/input-state.js?v=0577b';
-import {InputModeController} from '../phaser/InputModeController.js?v=0577b';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0577b';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0577b';
-import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0577b';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0577b';
-import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0577b';
-import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0577b';
-import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0577b';
-import {ORTHO_ROOM_ZONES,zoneAt} from '../config/ortho-room-zones.js?v=0577b';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0577d';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0577d';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0577d';
+import {GridSystem} from '../systems/GridSystem.js?v=0577d';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0577d';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0577d';
+import {CameraController} from '../systems/CameraController.js?v=0577d';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0577d';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0577d';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0577d';
+import {CatEntity} from '../entities/CatEntity.js?v=0577d';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0577d';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0577d';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0577d';
+import {INPUT_MODE} from '../core/input-state.js?v=0577d';
+import {InputModeController} from '../phaser/InputModeController.js?v=0577d';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0577d';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0577d';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0577d';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0577d';
+import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0577d';
+import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0577d';
+import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0577d';
+import {ORTHO_ROOM_ZONES,zoneAt} from '../config/ortho-room-zones.js?v=0577d';
 import {DEFAULT_ORTHOGONAL_ROOM_SKIN,getOrthogonalCellAppearance}
-  from '../config/ortho-room-skin.js?v=0577b';
-import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0577b';
-import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0577b';
-import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0577b';
+  from '../config/ortho-room-skin.js?v=0577d';
+import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0577d';
+import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0577d';
+import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0577d';
+import {
+  ROTATION_POLICY,
+  createRotationEditSession,
+  advanceRotationEditSession,
+  getOrthogonalRotationPolicy,
+  resolveNextOrthogonalRotation
+} from '../core/orthogonal-furniture-rotation.js?v=0577d';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -69,6 +76,8 @@ export class CafeScene extends Phaser.Scene{
     this.catEntities=new Map();
     this.selectedId=null;
     this.selectedCatId=null;
+    this.rotationEditSession=null;
+    this.lastRotationCandidate=null;
   }
   initializeGrid(){
     const search=typeof location!=='undefined'?location.search:'';
@@ -120,7 +129,10 @@ export class CafeScene extends Phaser.Scene{
       inputMode:this.inputMode,furnitureDragController:this.furnitureDragController,
       catBehaviorController:this.catBehaviorController,cameraController:this.cameraController
     });
-    this.artDebug=new ArtDebugRenderer(this,{grid:this.grid,entities:this.entities,definitions:FURNITURE_CONFIG});
+    this.artDebug=new ArtDebugRenderer(this,{
+      grid:this.grid,entities:this.entities,definitions:FURNITURE_CONFIG,
+      getRotationCandidate:()=>this.lastRotationCandidate
+    });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{
       this.careInteractionController?.destroy();
       this.cameraController?.destroy();
@@ -489,26 +501,144 @@ export class CafeScene extends Phaser.Scene{
     // owns clearing a selected-but-not-dragging item. Keeping both steps here makes
     // Cancel idempotent across touch, mouse, pointercancel and interrupted drags.
     this.furnitureDragController?.cancel('ui-cancel');
+    this.restoreSelectionEditOrigin();
     this.selectItem(null);
     this.cameraController?.setEnabled(true);
     this.inputMode?.releaseToStable();
     return true;
   }
   selectItem(itemId){
+    const previousId=this.selectedId;
+    if(previousId&&previousId!==itemId){
+      this.rotationEditSession=null;
+      this.lastRotationCandidate=null;
+      this.furnitureDragController?.clearRotationPreview();
+    }
     this.selectedId=itemId;
     this.entities.forEach((entity,id)=>entity.setSelected(id===itemId));
     const item=this.state.items.find(entry=>entry.id===itemId);
-    this.game.events.emit('selection-changed',item?{item,definition:FURNITURE_CONFIG[item.type],placing:false}:null);
+    if(item&&(!this.rotationEditSession||this.rotationEditSession.itemId!==item.id)){
+      this.rotationEditSession=this.createSelectionRotationSession(item);
+    }else if(!item){
+      this.rotationEditSession=null;
+      this.lastRotationCandidate=null;
+      this.furnitureDragController?.clearRotationPreview();
+    }
+    const definition=item?FURNITURE_CONFIG[item.type]:null;
+    this.game.events.emit('selection-changed',item?{
+      item,definition,placing:false,
+      rotationPolicy:this.projectionMode===PROJECTION_MODE.ORTHO
+        ?getOrthogonalRotationPolicy(item.type,definition)
+        :null
+    }:null);
+  }
+  createSelectionRotationSession(item,original=null){
+    if(this.projectionMode!==PROJECTION_MODE.ORTHO)return null;
+    const definition=FURNITURE_CONFIG[item.type];
+    return {
+      itemId:item.id,
+      ...createRotationEditSession({
+        type:item.type,definition,x:item.x,y:item.y,rotation:item.r||0,
+        policy:getOrthogonalRotationPolicy(item.type,definition),
+        original
+      })
+    };
+  }
+  onFurniturePlacementCommitted(item){
+    if(!item||this.projectionMode!==PROJECTION_MODE.ORTHO)return;
+    const original=this.rotationEditSession?.itemId===item.id
+      ?this.rotationEditSession.original
+      :null;
+    this.rotationEditSession=this.createSelectionRotationSession(item,original);
+    this.lastRotationCandidate=null;
+  }
+  validateResolvedRotation(item,resolved){
+    const result=this.placement.validatePlacement({
+      ...resolved.validityInput,movingItemId:item.id
+    });
+    if(!result.valid)return result;
+    if(
+      FURNITURE_CONFIG[item.type]?.layer!=='floorDecoration'
+      &&this.catBehaviorController.isAnyCatInCells(resolved.footprintCells)
+    )return {
+      valid:false,blockingReason:'character-occupied',
+      message:'這裡有貓咪，請換個位置',warnings:result.warnings||[]
+    };
+    return result;
+  }
+  restoreSelectionEditOrigin(){
+    const session=this.rotationEditSession;
+    if(!session)return false;
+    const item=this.state.items.find(entry=>entry.id===session.itemId);
+    if(!item)return false;
+    const original=session.original;
+    if(item.x===original.x&&item.y===original.y&&(item.r||0)===original.r)return false;
+    Object.assign(item,{x:original.x,y:original.y,r:original.r});
+    this.occupancy.updateItem(item);
+    this.entities.get(item.id)?.setGridPosition(item.x,item.y,item.r);
+    this.saveAdapter.save();
+    this.catBehaviorController?.onFurnitureLayoutChanged();
+    return true;
   }
   rotateSelection(){
     if(this.furnitureDragController?.isDragging()){this.furnitureDragController.rotateCandidate();return}
     const item=this.state.items.find(entry=>entry.id===this.selectedId);
     if(!item)return;
-    this.occupancy.removeItem(item.id);
-    const next={...item,r:((item.r||0)+1)%4};
-    const result=this.placement.validatePlacement({type:next.type,x:next.x,y:next.y,rotation:next.r,movingItemId:item.id});
-    if(result.valid){Object.assign(item,next);this.occupancy.addItem(item);this.entities.get(item.id)?.sync();this.saveAdapter.save()}
-    else{this.occupancy.addItem(item);this.game.events.emit('toast',{message:result.message,key:'rotate-invalid',priority:2})}
+    if(this.projectionMode!==PROJECTION_MODE.ORTHO){
+      this.occupancy.removeItem(item.id);
+      const next={...item,r:((item.r||0)+1)%4};
+      const result=this.placement.validatePlacement({type:next.type,x:next.x,y:next.y,rotation:next.r,movingItemId:item.id});
+      if(result.valid){Object.assign(item,next);this.occupancy.addItem(item);this.entities.get(item.id)?.sync();this.saveAdapter.save()}
+      else{this.occupancy.addItem(item);this.game.events.emit('toast',{message:result.message,key:'rotate-invalid',priority:2})}
+      return;
+    }
+    const definition=FURNITURE_CONFIG[item.type];
+    const session=this.rotationEditSession?.itemId===item.id
+      ?this.rotationEditSession
+      :this.createSelectionRotationSession(item);
+    const resolved=resolveNextOrthogonalRotation({
+      grid:this.grid,type:item.type,definition,
+      x:item.x,y:item.y,rotation:item.r||0,
+      policy:session.policy,editSession:session
+    });
+    if(session.policy===ROTATION_POLICY.FIXED){
+      this.lastRotationCandidate={itemId:item.id,resolved,result:{valid:true},committed:false,noOp:true};
+      this.furnitureDragController?.clearRotationPreview();
+      return;
+    }
+    const result=this.validateResolvedRotation(item,resolved);
+    this.lastRotationCandidate={itemId:item.id,resolved,result,committed:false,noOp:false};
+    if(!result.valid){
+      this.furnitureDragController?.showRotationPreview(
+        {...item,x:resolved.resolvedX,y:resolved.resolvedY,r:resolved.resolvedRotation},
+        resolved,result,this.entities.get(item.id)
+      );
+      this.game.events.emit('toast',{
+        message:this.furnitureDragController?.friendlyMessage(
+          result.blockingReason,result.message
+        )||result.message,
+        key:`rotate-${result.blockingReason}`,priority:2,cooldown:1200
+      });
+      return;
+    }
+    Object.assign(item,{
+      x:resolved.resolvedX,y:resolved.resolvedY,r:resolved.resolvedRotation
+    });
+    this.occupancy.updateItem(item);
+    this.entities.get(item.id)?.setGridPosition(
+      item.x,item.y,item.r,resolved
+    );
+    this.rotationEditSession={
+      itemId:item.id,
+      ...advanceRotationEditSession(session,resolved)
+    };
+    this.lastRotationCandidate={itemId:item.id,resolved,result,committed:true,noOp:false};
+    this.furnitureDragController?.clearRotationPreview();
+    this.saveAdapter.save();
+    this.catBehaviorController?.onFurnitureLayoutChanged();
+    this.game.events.emit('selection-changed',{
+      item,definition,placing:false,rotationPolicy:session.policy
+    });
   }
   storeSelection(){
     if(this.furnitureDragController?.isDragging()){
@@ -521,6 +651,8 @@ export class CafeScene extends Phaser.Scene{
     this.state.inventory[item.type]=(this.state.inventory[item.type]||0)+1;
     this.occupancy.removeItem(item.id);
     this.entities.get(item.id)?.destroy();this.entities.delete(item.id);
+    this.rotationEditSession=null;this.lastRotationCandidate=null;
+    this.furnitureDragController?.clearRotationPreview();
     this.selectedId=null;this.inputMode?.releaseToStable();this.saveAdapter.save();this.emitState();
     this.game.events.emit('selection-changed',null);
   }
@@ -535,6 +667,8 @@ export class CafeScene extends Phaser.Scene{
     this.state.coins+=Math.floor((FURNITURE_CONFIG[item.type].price||0)*.5);
     this.occupancy.removeItem(item.id);
     this.entities.get(item.id)?.destroy();this.entities.delete(item.id);
+    this.rotationEditSession=null;this.lastRotationCandidate=null;
+    this.furnitureDragController?.clearRotationPreview();
     this.selectedId=null;this.inputMode?.releaseToStable();this.saveAdapter.save();this.emitState();
     this.game.events.emit('selection-changed',null);
   }

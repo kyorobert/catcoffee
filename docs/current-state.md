@@ -1,5 +1,41 @@
 # V0.57.7-alpha 專案現況
 
+## Build 0577d（FIX-0577D）— 現行
+
+- **家具旋轉 UX 採固定 edit-session envelope**：唯一純資料 resolver 同時計算
+  resolved x/y/r、policy、footprint cells/polygon、visual anchor、movement delta 與
+  tie-break；Entity、Ghost、Preview、Placement、commit、Occupancy、Art Debug 與
+  Browser evidence 全部消費同一候選。
+- **最小位移且可逆**：非方形 footprint 以固定包絡中心挑選最近整數格；同距用
+  `clockwise-envelope-edge-order`。不得依合法性搜尋更遠格，故 Rotate 不會偷偷
+  變成搬動。多週期精確歸位、零累積漂移。
+- **集中旋轉政策**：`fixed / axis2 / cardinal4`。第一批中
+  `pinkTableLong=axis2`、`roundTable/scratchPost=fixed`，其餘九件為
+  `cardinal4`；方位固定 `r0 South / r1 West / r2 North / r3 East`、順時針。
+- **無效旋轉安全**：衝突、越界或入口保留只顯示紅色 Ghost／footprint；正式
+  `x/y/r`、Occupancy、save、coins 均不變，不自動找替代格。Cancel 精確回復進入
+  編輯時的原始狀態。
+- 0577c 的底列就地編輯工具列與精簡 Art Debug 保留；fixed 家具 Rotate disabled。
+- 第一批 12 件、48 張 Orthogonal PNG 未重畫；其餘 35 件仍使用 base visual。
+  iso 仍預設／rollback，ortho 仍 URL opt-in。
+- 不變：家具 ID／price／footprint／入口 `(7,0)(8,0)`／10×8 Grid／78 cells／
+  save key `catCafePhaserV0540`／schema 5401／migration 5402／CameraController／
+  iso・flat。
+- package 維持 `0.57.7-alpha`；正式 module query 為 `?v=0577d`。
+- 自動化含真實 Rotate／Cancel／Store 點擊、390／393／430 touch pointer 與
+  conflict／boundary／entrance／projection 回歸；證據在 `docs/evidence/v0577d/`。
+- **iPhone Safari 實機仍 pending；第二批 35 件未核准、未開始。**
+- 詳見 [強制交接稽核](./V0577D_FORCED_HANDOFF_AUDIT.md)、
+  [結果](./V0577D_ROTATION_UX_RESULT.md)、
+  [驗收](./V0577D_ROTATION_UX_ACCEPTANCE.md)。
+
+## Build 0577c（ARCH-0577C）— 歷史方案，已由 DEC-029／0577d 取代
+
+- 0577c 建立單一 resolver、cardinal 方位、底列就地編輯工具列與精簡 Art Debug。
+- 當時採 corner-pivot；雖修正 Sprite／Ghost／footprint 不同源，非方形家具的
+  Rotate 仍有可見位移，因此該 UX 已被 0577d 固定包絡取代。
+- 歷史證據保留於 `docs/evidence/v0577c/` 與 V0577C 稽核／結果／驗收文件。
+
 ## Build 0577b（ART-0577B）
 
 - Orthogonal 第一批 12 件核心家具已改用原創、透明、四方向 PNG。
@@ -36,8 +72,8 @@
 
 | 項目 | 現況 |
 |---|---|
-| 版本 | `V0.57.7-alpha｜第一批家具旋轉與方向校正版` |
-| Build ID | `0577b` |
+| 版本 | `V0.57.7-alpha｜家具旋轉體驗重構版` |
+| Build ID | `0577d` |
 | package version | `0.57.7-alpha` |
 | 引擎 | Phaser `3.90.0`，Canvas renderer |
 | 引擎來源 | `assets/vendor/phaser-3.90.0.min.js` |
@@ -102,10 +138,10 @@
 |---|---|---|
 | Phaser 啟動與錯誤遮罩 | 完成 | 有 timeout、error UI、fallback 與 Build consistency |
 | Camera pan／pinch／wheel／resize | 完成 | 單一 Main Camera；ortho 首屏核心滿版、可 zoom-out 至整房；外部裝置仍需人工驗收 |
-| 家具顯示、選取、拖曳、旋轉、收納、出售 | 完成 | 同一 Grid／Occupancy／Placement／Ghost 資料流；第一批 ortho 旋轉視覺 pivot 已校準 |
+| 家具顯示、選取、拖曳、旋轉、收納、出售 | 完成 | 同一 resolver／Grid／Occupancy／Placement／Ghost 資料流；第一批 ortho 旋轉採固定 edit-session envelope |
 | 家具商店與購買 | 完成 | 以 Runtime visual config 顯示 |
 | 家具存檔相容 | 完成 | 固定 ID 與 `catCafePhaserV0540` |
-| 核心 12 件 Orthogonal 家具素材 | 完成 | `ART-0577` 提供四方向 48 張 PNG；`ART-0577B` 修正旋轉 pivot 並補齊木椅真四向 |
+| 核心 12 件 Orthogonal 家具素材 | 完成 | `ART-0577` 提供四方向 48 張 PNG；0577d 不重畫素材，只重構旋轉 UX |
 | 其餘 35 件 Orthogonal 家具素材 | 未完成 | 仍沿用既有 base visual；第二批尚未核准 |
 | 貓咪顯示、動畫、漫遊與家具避障 | 完成 | 五個 cat ID；BFS、delta movement、休息狀態 |
 | 餵食／梳毛／玩耍照顧流程 | 完成 | 純規則 core + Phaser session + DOM 演出 |
@@ -128,22 +164,25 @@
 - furniture ID、價格、footprint、rotation 與存檔座標未因重繪或投影改變。
 - Anchor：直立物以腳底中心；平面裝飾以 footprint 中心。
 - `ART-0577` 第一批 12 件在 ortho 使用 projection-specific visual override；商店縮圖、Entity、Ghost 與旋轉共用同一 selector。
-- `ART-0577B` 在 override 中加入集中式 `calibration`；不把方向 offset 散落到 Scene。
-  所有 12 件以 rotation 0 的底部中心作穩定視覺 pivot，方向 PNG 仍依 `r` 切換，
-  footprint cells／polygon／驗證維持原邏輯。
+- 0577d 以集中式 `fixed / axis2 / cardinal4` policy 與 edit-session envelope
+  取代 0577b 固定 r0 visual pivot、0577c corner-pivot；不把方向 offset 散落到 Scene。
+  方向 PNG、footprint cells／polygon、驗證與正式 commit 共用同一 resolver candidate。
 - 其餘 35 件在 ortho、以及全部家具在 iso／flat，仍使用既有 base visual。
 
 完整逐件紀錄見 [FURNITURE_AUDIT.md](./FURNITURE_AUDIT.md) 與 [PROTOTYPE_REDRAW_RESULT.md](./PROTOTYPE_REDRAW_RESULT.md)。
 
 ## F. 測試狀態
 
-### 現行 Runtime（ART-0577B，Build 0577b）實際驗證
+### 現行 Runtime（FIX-0577D，Build 0577d）實際驗證
 
-- `npm run test:ortho-furniture`：通過（精確 12 個 ID、48 張透明四方向 PNG、
-  12 件四向 pivot 穩定、木椅側面 silhouette 差異、視覺 override 不改 gameplay metadata）。
-- `node check.js --deploy`：通過（Build `0577b`；Save key、schema 5401、migration 5402、78 playable cells 與正式入口均維持）。
-- `node check.js --dev`：Chrome／Edge Browser Smoke 通過；root、iso、flat、ortho、orthogonal alias、demo、Art Debug 與 invalid fallback 均無 fatal error。
-- 視覺與指標證據位於 `docs/evidence/v0577/`；結果與驗收見 [V0577 結果](./V0577_CORE_ORTHOGONAL_FURNITURE_RESULT.md) 與 [V0577 驗收](./V0577_CORE_ORTHOGONAL_FURNITURE_ACCEPTANCE.md)。
+- `npm run test:ortho-rotation`／`test:rotation-state`：通過（policy、17 種非方形
+  footprint、最小位移、可逆回圈、無效狀態零副作用）。
+- `npm run test:rotation-browser`：真實 Rotate／Cancel／Store、390／393／430
+  pointer、invalid preview、resize 與投影回歸通過。
+- `node check.js --deploy`／`--dev`：Build、Save key、schema、migration、78 cells、
+  入口、48 張 PNG、Chrome／Edge Browser Smoke 均受 Gate 保護。
+- 證據位於 `docs/evidence/v0577d/`；見 [0577d 結果](./V0577D_ROTATION_UX_RESULT.md)
+  與 [0577d 驗收](./V0577D_ROTATION_UX_ACCEPTANCE.md)。
 
 ### Repository 內已有
 

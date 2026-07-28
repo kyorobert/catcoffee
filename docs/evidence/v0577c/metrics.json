@@ -1,0 +1,168 @@
+{
+  "build": "0577c",
+  "generatedFor": "ARCH-0577C",
+  "viewport": "390x844",
+  "cases": {
+    "editModeNav": {
+      "mode": "nav",
+      "navVisible": true,
+      "editHidden": true
+    },
+    "editModeEdit": {
+      "mode": "edit",
+      "navHidden": true,
+      "editVisible": true,
+      "editInsideBar": true
+    },
+    "rotateHitTarget": {
+      "width": 74,
+      "height": 50,
+      "safe": true
+    },
+    "rotation": [
+      {
+        "r": 0,
+        "x": 3,
+        "y": 3,
+        "xWorld": 692,
+        "yWorld": 560,
+        "anchorX": 692,
+        "anchorY": 560,
+        "visualEqualsAnchor": true,
+        "texture": "furniture:ortho:counter:down-right",
+        "cells": [
+          {
+            "x": 3,
+            "y": 3
+          },
+          {
+            "x": 4,
+            "y": 3
+          }
+        ],
+        "mode": "edit"
+      },
+      {
+        "r": 1,
+        "x": 3,
+        "y": 3,
+        "xWorld": 648,
+        "yWorld": 680,
+        "anchorX": 648,
+        "anchorY": 680,
+        "visualEqualsAnchor": true,
+        "texture": "furniture:ortho:counter:down-left",
+        "cells": [
+          {
+            "x": 3,
+            "y": 3
+          },
+          {
+            "x": 3,
+            "y": 4
+          }
+        ],
+        "mode": "edit"
+      },
+      {
+        "r": 2,
+        "x": 3,
+        "y": 3,
+        "xWorld": 692,
+        "yWorld": 560,
+        "anchorX": 692,
+        "anchorY": 560,
+        "visualEqualsAnchor": true,
+        "texture": "furniture:ortho:counter:up-left",
+        "cells": [
+          {
+            "x": 3,
+            "y": 3
+          },
+          {
+            "x": 4,
+            "y": 3
+          }
+        ],
+        "mode": "edit"
+      },
+      {
+        "r": 3,
+        "x": 3,
+        "y": 3,
+        "xWorld": 648,
+        "yWorld": 680,
+        "anchorX": 648,
+        "anchorY": 680,
+        "visualEqualsAnchor": true,
+        "texture": "furniture:ortho:counter:up-right",
+        "cells": [
+          {
+            "x": 3,
+            "y": 3
+          },
+          {
+            "x": 3,
+            "y": 4
+          }
+        ],
+        "mode": "edit"
+      }
+    ],
+    "roundtrip": {
+      "start": {
+        "r": 0,
+        "x": 3,
+        "y": 3,
+        "xWorld": 692,
+        "yWorld": 560,
+        "anchorX": 692,
+        "anchorY": 560,
+        "visualEqualsAnchor": true,
+        "texture": "furniture:ortho:counter:down-right",
+        "cells": [
+          {
+            "x": 3,
+            "y": 3
+          },
+          {
+            "x": 4,
+            "y": 3
+          }
+        ],
+        "mode": "edit"
+      },
+      "end": {
+        "r": 0,
+        "x": 3,
+        "y": 3,
+        "xWorld": 692,
+        "yWorld": 560,
+        "anchorX": 692,
+        "anchorY": 560,
+        "visualEqualsAnchor": true,
+        "texture": "furniture:ortho:counter:down-right",
+        "cells": [
+          {
+            "x": 3,
+            "y": 3
+          },
+          {
+            "x": 4,
+            "y": 3
+          }
+        ],
+        "mode": "edit"
+      },
+      "identical": true
+    },
+    "pageErrorsOrtho": [],
+    "artDebug": {
+      "pageErrors": []
+    },
+    "isoRegression": {
+      "mode": "iso",
+      "pageErrors": []
+    }
+  }
+}

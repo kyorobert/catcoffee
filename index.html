@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hant" data-build-id="0577b">
+<html lang="zh-Hant" data-build-id="0577d">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
@@ -7,21 +7,21 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="貓咪咖啡廳">
-  <title>V0.57.7-alpha｜第一批家具旋轉與方向校正版</title>
-  <link rel="manifest" href="./manifest.webmanifest?v=0577b">
-  <link rel="icon" type="image/png" href="./icons/icon-192.png?v=0577b">
-  <link rel="apple-touch-icon" href="./icons/icon-180.png?v=0577b">
-  <link rel="stylesheet" href="./assets/css/base.css?v=0577b">
-  <link rel="stylesheet" href="./assets/css/hud.css?v=0577b">
-  <link rel="stylesheet" href="./assets/css/panels.css?v=0577b">
-  <link rel="stylesheet" href="./assets/css/mobile.css?v=0577b">
+  <title>V0.57.7-alpha｜家具旋轉體驗重構版</title>
+  <link rel="manifest" href="./manifest.webmanifest?v=0577d">
+  <link rel="icon" type="image/png" href="./icons/icon-192.png?v=0577d">
+  <link rel="apple-touch-icon" href="./icons/icon-180.png?v=0577d">
+  <link rel="stylesheet" href="./assets/css/base.css?v=0577d">
+  <link rel="stylesheet" href="./assets/css/hud.css?v=0577d">
+  <link rel="stylesheet" href="./assets/css/panels.css?v=0577d">
+  <link rel="stylesheet" href="./assets/css/mobile.css?v=0577d">
 </head>
 <body>
   <div id="gameApp">
     <header id="gameHud">
       <div class="brand">
         <span class="brand-cat" aria-hidden="true">🐾</span>
-        <div><b>貓咪咖啡廳 <small>Lv.<span id="hudLevel">1</span></small></b><em>V0.57.7-alpha｜第一批家具旋轉與方向校正版</em></div>
+        <div><b>貓咪咖啡廳 <small>Lv.<span id="hudLevel">1</span></small></b><em>V0.57.7-alpha｜家具旋轉體驗重構版</em></div>
       </div>
       <div class="hud-metrics" aria-label="店鋪狀態">
         <span><i>金幣</i><b id="hudCoins">0</b></span>
@@ -52,7 +52,7 @@
             <p data-boot-error>發生未預期的啟動錯誤。</p>
             <small data-boot-stage>發生階段：未知</small>
             <small data-boot-failures>進度 0%｜失敗素材 0</small>
-            <small data-boot-version>V0.57.7-alpha｜Build 0577b</small>
+            <small data-boot-version>V0.57.7-alpha｜Build 0577d</small>
             <details class="boot-diagnostics"><summary>檢視錯誤診斷</summary><pre data-boot-diagnostics></pre></details>
             <div class="boot-error-actions">
               <button type="button" data-boot-reload>重新載入</button>
@@ -61,24 +61,29 @@
           </div>
         </div>
         <div id="gameToast" role="status" aria-live="polite"></div>
-        <div id="selectionBar" class="selection-bar hidden">
-          <b id="selectionName">家具</b>
-          <div class="selection-actions">
-            <button id="rotateBtn">旋轉</button>
-            <button id="storeBtn">收納</button>
-            <button id="sellBtn">出售</button>
-            <button id="cancelPlacementBtn">取消</button>
-          </div>
-        </div>
       </div>
     </main>
 
-    <nav id="gameBottomBar" aria-label="主要操作">
-      <button id="openStoreBtn"><b class="nav-icon" aria-hidden="true">▦</b><span>家具商店</span></button>
-      <button id="helperBtn"><b class="nav-icon" aria-hidden="true">◇</b><span>放置輔助：關</span></button>
-      <button id="careBtn"><b class="nav-icon" aria-hidden="true">♡</b><span>照顧貓咪</span></button>
-      <button id="reportBtn"><b class="nav-icon" aria-hidden="true">▤</b><span>每日報告</span></button>
-      <button id="settingsBtn"><b class="nav-icon" aria-hidden="true">⚙</b><span>設定</span></button>
+    <nav id="gameBottomBar" aria-label="主要操作" data-mode="nav">
+      <div class="bottom-nav">
+        <button id="openStoreBtn"><b class="nav-icon" aria-hidden="true">▦</b><span>家具商店</span></button>
+        <button id="helperBtn"><b class="nav-icon" aria-hidden="true">◇</b><span>放置輔助：關</span></button>
+        <button id="careBtn"><b class="nav-icon" aria-hidden="true">♡</b><span>照顧貓咪</span></button>
+        <button id="reportBtn"><b class="nav-icon" aria-hidden="true">▤</b><span>每日報告</span></button>
+        <button id="settingsBtn"><b class="nav-icon" aria-hidden="true">⚙</b><span>設定</span></button>
+      </div>
+      <!-- ARCH-0577C: the furniture edit bar REPLACES the nav row in-place inside
+           this same bottom container. It is not a floating overlay over the Canvas,
+           so selecting furniture never covers the scene nor forces a camera reserve. -->
+      <div id="selectionBar" class="selection-bar hidden">
+        <b id="selectionName">家具</b>
+        <div class="selection-actions">
+          <button id="rotateBtn">旋轉</button>
+          <button id="storeBtn">收納</button>
+          <button id="sellBtn">出售</button>
+          <button id="cancelPlacementBtn">取消</button>
+        </div>
+      </div>
     </nav>
   </div>
 
@@ -107,7 +112,7 @@
   <section id="settingsPanel" class="panel hidden">
     <div class="panel-dialog">
       <header><h2>設定與版本資訊</h2><button type="button" data-close-panel aria-label="關閉">×</button></header>
-      <p><b>V0.57.7-alpha｜第一批家具旋轉與方向校正版</b></p>
+      <p><b>V0.57.7-alpha｜家具旋轉體驗重構版</b></p>
       <p>Phaser 3.90.0・Canvas Renderer・本地靜態資源</p>
       <p>重新載入最新版不會刪除遊戲存檔。</p>
       <p>Renderer: Canvas</p>
@@ -117,10 +122,10 @@
   <script>
     (() => {
       'use strict';
-      window.__CAT_CAFE_HTML_BUILD_ID__ = '0577b';
+      window.__CAT_CAFE_HTML_BUILD_ID__ = '0577d';
       window.__CAT_CAFE_EARLY_ERRORS__ = window.__CAT_CAFE_EARLY_ERRORS__ || [];
       window.__CAT_CAFE_ERROR_FINGERPRINTS__ = window.__CAT_CAFE_ERROR_FINGERPRINTS__ || new Set();
-      const version = 'V0.57.7-alpha｜第一批家具旋轉與方向校正版';
+      const version = 'V0.57.7-alpha｜家具旋轉體驗重構版';
       const toMessage = value => value && value.message ? value.message : String(value || '未知的載入錯誤');
       const describe = (error, context, extra = {}) => ({
         name: error && error.name ? error.name : typeof error,
@@ -150,7 +155,7 @@
         };
         setText('[data-boot-error]', diagnostic.message);
         setText('[data-boot-stage]', `發生階段：${diagnostic.context}`);
-        setText('[data-boot-version]', `${version}｜Build 0577b`);
+        setText('[data-boot-version]', `${version}｜Build 0577d`);
         setText('[data-boot-diagnostics]', JSON.stringify(diagnostic, null, 2));
       };
       const report = (error, context = 'early-boot', extra = {}) => {
@@ -188,7 +193,7 @@
       }
     })();
   </script>
-  <script src="./assets/vendor/phaser-3.90.0.min.js?v=0577b" onerror="window.__CAT_CAFE_BOOT_ERROR__?.(new Error('Phaser 引擎檔載入失敗'),'Phaser script')"></script>
-  <script type="module" src="./assets/js/main.js?v=0577b"></script>
+  <script src="./assets/vendor/phaser-3.90.0.min.js?v=0577d" onerror="window.__CAT_CAFE_BOOT_ERROR__?.(new Error('Phaser 引擎檔載入失敗'),'Phaser script')"></script>
+  <script type="module" src="./assets/js/main.js?v=0577d"></script>
 </body>
 </html>

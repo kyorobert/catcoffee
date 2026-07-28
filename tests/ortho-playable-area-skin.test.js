@@ -3,15 +3,15 @@ import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
 import {ORTHO_ROOM_ZONES,ORTHO_ENTRANCE_CELLS,ORTHO_ZONE_KEYS,zoneAt}
-  from '../assets/js/config/ortho-room-zones.js?v=0577b';
+  from '../assets/js/config/ortho-room-zones.js?v=0577d';
 import {
   DEFAULT_ORTHOGONAL_ROOM_SKIN as SKIN,
   getOrthogonalCellAppearance,
   getOrthogonalRoomSkin
-} from '../assets/js/config/ortho-room-skin.js?v=0577b';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0577b';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0577b';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0577b';
+} from '../assets/js/config/ortho-room-skin.js?v=0577d';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0577d';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0577d';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0577d';
 
 const luminance = hex =>
   0.299 * ((hex >> 16) & 255) + 0.587 * ((hex >> 8) & 255) + 0.114 * (hex & 255);

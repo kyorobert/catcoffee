@@ -1,5 +1,51 @@
 # 專案決策紀錄
 
+## DEC-029：Orthogonal 旋轉採固定編輯包絡、最小位移與家具旋轉政策
+
+- 日期：2026-07-28
+- 狀態：Accepted（**取代 DEC-028 的 corner-pivot UX；保留其單一 resolver 與 cardinal 方位契約**）
+- Task：`FIX-0577D-ROTATION-UX-ENVELOPE-AND-HANDOFF-COMPLETION`
+- 背景：0577c 已修好 Sprite／Ghost／footprint 不同源，但 corner-pivot 讓非方形家具
+  單按 Rotate 時產生明顯搬動感；同時固定對稱家具與兩軸家具被誤當四方向家具。
+- 決策：
+  - Orthogonal 旋轉維持唯一純資料 resolver，改採 edit-session 固定 envelope。
+  - 候選格以包絡中心的最小平方位移選擇；同距使用
+    `clockwise-envelope-edge-order`，不得以合法性搜尋更遠格。
+  - 集中政策為 `fixed`、`axis2`、`cardinal4`。第一批中
+    `pinkTableLong=axis2`、`roundTable/scratchPost=fixed`，其餘九件為
+    `cardinal4`。
+  - 方位仍是 `r0 South / r1 West / r2 North / r3 East`、順時針。
+  - Entity、Ghost、Preview、Placement input、commit、Occupancy、Art Debug 與
+    Browser evidence 必須消費同一 resolved candidate。
+  - 無效旋轉只顯示紅色 Ghost／footprint；正式 `x/y/r`、Occupancy、save 與
+    coins 不變，也不得自動搜尋替代格。
+  - Cancel 恢復編輯 session 的原始 `x/y/r`；legacy axis2 r2/r3 只做顯示等價，
+    不在載入時改寫存檔。
+- 不變：CameraController、ROOM_CONFIG、10×8 Grid、78 playable cells、入口
+  `(7,0)/(8,0)`、家具 PNG／ID／price／footprint、save key
+  `catCafePhaserV0540`、schema 5401、migration 5402、iso／flat。
+- 驗證：純 resolver 與狀態測試、17 種非方形 footprint、多週期零漂移、真實
+  Rotate／Cancel／Store 點擊、390／393／430 touch pointer、conflict／boundary／
+  entrance preview、iso／flat／invalid 回歸。證據見
+  `docs/evidence/v0577d/`。iPhone Safari 真機仍 pending；第二批 35 件未核准。
+
+## DEC-028：Orthogonal 90° 旋轉改為單一 resolver＋誠實 corner-pivot，退場 DEC-027 固定視覺 pivot
+
+- 日期：2026-07-28
+- 狀態：Superseded by DEC-029（歷史方案；曾取代
+  [DEC-027](#dec-027orthogonal-家具旋轉以穩定視覺-pivot-校準邏輯-footprint-不變)）
+- Task：`ARCH-0577C-ORTHOGONAL-CARDINAL-ROTATION-AND-EDIT-MODE`
+- 背景缺陷：DEC-027 的 `getFurnitureVisualPosition()` 在 ortho 以 `calibration.rotationAnchor='base-rotation'` 把 Sprite/Ghost 永遠釘在 **r0 anchor**，而 Occupancy／Placement／紅綠框用**實際 r** 的 anchor；非方形家具（2×1／1×2／3×2）因此「貼圖在 A、占格在 B」。此為需修正的核心缺陷（見 [稽核](./V0577C_CARDINAL_ROTATION_ARCHITECTURE_AUDIT.md)）。
+- 決策：
+  - 新增單一純資料 resolver `assets/js/core/orthogonal-furniture-rotation.js`／`resolveOrthogonalRotationPlacement()`，輸出 resolved x/y/r、footprint cells、logical pivot、visual world position、cardinal direction、candidate signature、safelyRepresentable。**Entity／Ghost／snapping preview／commit／Placement／Occupancy／ArtDebug／BrowserSmoke 全部共用同一結果**。
+  - ortho 旋轉為**誠實 corner-pivot**：左上角 `(x,y)` 不動、奇數旋轉交換寬高；Sprite 位置＝該實際旋轉 footprint 的 gameplay anchor（與占格同源）。**不得**再用固定 pivot 或畫面 offset 掩蓋非方形的位移。單次 90° 對非方形會移動（正確），4× 回圈精確歸位、零漂移（`r0==r2`、`r1==r3`）。
+  - **正交 cardinal 方位**：`ORTHOGONAL_CARDINAL_DIRECTION_MAP = {0:'south',1:'west',2:'north',3:'east'}`，旋向 **順時針**（`r+1`：south→west→north→east），版本內以測試鎖定、不可逆。cardinal 以集中對照表重用既有四張 authored 貼圖（south→down-right、west→down-left、north→up-left、east→up-right），**不重畫美術**。iso／flat 的 `rotationToDirection`／texture／golden／save 對應完全不動。
+  - **家具編輯模式**：`#selectionBar` 由浮在 Canvas 上改為移入 `#gameBottomBar`，以 `data-mode="edit"` **就地替換**底部主導覽列（家具商店/放置輔助/照顧貓咪/每日報告/設定），非第二層浮動列；同容器等高切換 → viewport 不縮放、相機不跳；編輯鈕維持 ≥44×44、safe-area-inset-bottom 由底列 padding 保留。取消或取消選取即還原主導覽列。
+  - **Art Debug 可讀性**：`artDebug=1` 只畫幾何（sprite bounds、footprint cells、logical pivot、visual pivot）＋單行短標籤（type#idsuffix r·方位）；完整 metadata 只在 `artDebugFocus=<id|type>` 或選取的家具顯示。唯讀、不寫存檔、不攔截指標。
+- 不變契約：家具 ID／price／footprint／entrance／10×8 Grid／78 placeable cells／`x/y/r` 語意／save key `catCafePhaserV0540`／schema 5401／migration 5402／CameraController 核心／iso・flat。**未觸發任何 §21 STOP 條款**：無 Save schema 變更、無座標搬移、無第二套 Grid/Occupancy、無美術重畫、無相機核心重構、舊存檔位置不變。
+- 驗證：`orthogonal-rotation-resolver`（cardinal 鎖定、resolver-shared、4×與40×零漂移、x/y 不因旋轉改變、1×1/2×1/1×2/2×2/3×2 誠實位移）；`orthogonal-furniture-visuals`（退場 base-rotation calibration、visual==gameplay anchor、round-trip）；`browser-smoke`（**真實點擊 `#rotateBtn`** 四次的零漂移 round-trip＋sprite 貼齊 gameplay anchor、編輯模式就地替換底列並於取消後還原、artDebug URL 無錯）。Build 機械升版 0577b→0577c（package 維持 0.57.7-alpha）、`check.js` obsolete `?v=0577b`、import 一致性 `?v=0577c`、新增 resolver 模組與測試至 required/tests/purity。iPhone Safari 真機 Gate 仍 **pending，保留給產品負責人**。
+- 證據：[稽核](./V0577C_CARDINAL_ROTATION_ARCHITECTURE_AUDIT.md)、[結果](./V0577C_CARDINAL_ROTATION_AND_EDIT_MODE_RESULT.md)、[驗收](./V0577C_CARDINAL_ROTATION_AND_EDIT_MODE_ACCEPTANCE.md)、[比較 HTML](./V0577C_CARDINAL_ROTATION_AND_EDIT_MODE_COMPARISON.html)、`docs/evidence/v0577c/`。
+
 ## DEC-027：Orthogonal 家具旋轉以穩定視覺 pivot 校準，邏輯 footprint 不變
 
 - 日期：2026-07-28

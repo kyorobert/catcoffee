@@ -1,7 +1,7 @@
-import {ToastManager} from '../systems/ToastManager.js?v=0577b';
-import {StorePanel} from './StorePanel.js?v=0577b';
-import {CarePanel} from './CarePanel.js?v=0577b';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0577b';
+import {ToastManager} from '../systems/ToastManager.js?v=0577d';
+import {StorePanel} from './StorePanel.js?v=0577d';
+import {CarePanel} from './CarePanel.js?v=0577d';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0577d';
 
 export class UiBridge {
   constructor(game, saveAdapter, furnitureConfig, {startup = null, dom} = {}) {
@@ -138,10 +138,19 @@ export class UiBridge {
   renderCatSelection(selection) { this.selectedCatId = selection?.cat?.id || null; }
 
   renderSelection(selection) {
+    // ARCH-0577C: the edit bar REPLACES the bottom nav in-place. Toggling
+    // data-mode on the shared bottom container (instead of floating a second bar
+    // over the Canvas) keeps the bar height constant, so the viewport never
+    // resizes and the camera never jumps when a furniture is selected.
+    this.dom.gameBottomBar.dataset.mode = selection ? 'edit' : 'nav';
     this.dom.selectionBar.classList.toggle('hidden', !selection);
     this.dom.selectionBar.classList.toggle('placing', Boolean(selection?.placing));
     if (!selection) return;
     this.dom.selectionName.textContent = selection.definition.name + (selection.placing ? '（放置中）' : '');
+    this.dom.rotateBtn.disabled = selection.rotationPolicy === 'fixed';
+    this.dom.rotateBtn.title = selection.rotationPolicy === 'fixed'
+      ? '此家具外觀對稱，不需要旋轉'
+      : '順時針旋轉';
     this.dom.storeBtn.disabled = selection.placing;
     this.dom.sellBtn.disabled = selection.placing;
   }

@@ -1,11 +1,22 @@
 # V0.56 產品決策交接（給產品負責人）
 
-> **最新狀態（2026-07-28，V0.57.7-alpha / Build 0577b）**：
-> `ART-0577B-FIRST-BATCH-ROTATION-AND-DIRECTION-CALIBRATION` 已完成。12 件
-> Orthogonal override 透過集中式 calibration 共用穩定旋轉 pivot；木椅補齊
-> 真正四個 3/4 方向。footprint／Occupancy／Placement／`x/y/r`／save contract
-> 不變。貓咪 × 家具僅完成比例、站位與互動節點稽核，未新增 Runtime 互動。
+> **最新狀態（2026-07-28，V0.57.7-alpha / Build 0577d）**：
+> `FIX-0577D-ROTATION-UX-ENVELOPE-AND-HANDOFF-COMPLETION` 已完成。Orthogonal
+> 家具旋轉維持單一 resolver，改採固定 edit-session envelope、最小位移及
+> `fixed/axis2/cardinal4` 政策；`r0 South / r1 West / r2 North / r3 East`
+> 順時針不變。無效旋轉只顯示紅色 Ghost／footprint，正式 `x/y/r`、Occupancy、
+> save、coins 不變，不自動搜尋替代格；Cancel 可精確回復。第一批 12 件／48 張
+> PNG 未重畫，其餘 35 件仍為 base visual；iso 預設／rollback、ortho opt-in。
 > iPhone Safari 真機仍 pending；第二批 35 件未核准、未開始。
+>
+> **歷史狀態（2026-07-28，Build 0577c）**：`ARCH-0577C` 建立單一 cardinal
+> resolver、底列就地編輯工具列與精簡 Art Debug；其 corner-pivot UX 已由
+> DEC-029／0577d 的固定包絡取代。
+>
+> **歷史狀態（2026-07-28，Build 0577b）**：
+> `ART-0577B-FIRST-BATCH-ROTATION-AND-DIRECTION-CALIBRATION` 完成 12 件
+> Orthogonal override 的初版 pivot 校準與木椅真四向；其固定 r0 pivot 手法已
+> 經 0577c 稽核並退出現行 Runtime。
 >
 > **歷史狀態（2026-07-27，V0.57.7-alpha / Build 0577a）**：
 > `ART-0577-CORE-ORTHOGONAL-FURNITURE-PASS-1` 已完成。12 件核心家具已用

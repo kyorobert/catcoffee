@@ -1,5 +1,34 @@
 # 開發日誌
 
+## 2026-07-28｜FIX-0577D-ROTATION-UX-ENVELOPE-AND-HANDOFF-COMPLETION
+
+- 版本／Build：`V0.57.7-alpha｜家具旋轉體驗重構版`／`0577d`；package 維持
+  `0.57.7-alpha`。
+- 強制交接：先以 0577b 部署基線稽核 0577c 工作樹；559 個基線檔中 49 個內容
+  不同、0 個缺失，另有 18 個新增。受保護 Grid／Camera／Save／家具 PNG 沒有
+  行為或素材變更；完整紀錄在 `V0577D_FORCED_HANDOFF_AUDIT.md`。
+- 根因：0577c corner-pivot 雖使 Sprite 與 gameplay footprint 同源，非方形家具
+  的 Rotate 仍有明顯搬動感；所有家具也缺少 fixed／axis2／cardinal4 政策。
+- 修正：唯一純 resolver 改用固定 edit-session envelope、最小位移、
+  `clockwise-envelope-edge-order`；集中 12 件第一批 policy。Preview／Ghost／
+  Entity／Placement／commit／Occupancy／Art Debug 共用同一 resolved candidate。
+- 安全：無效衝突／越界／入口旋轉只顯示紅色 preview，正式 `x/y/r`、Occupancy、
+  save、coins 不變，不自動搜尋；Cancel 恢復進入編輯時原始狀態。
+- 測試：新增 `orthogonal-rotation-state.test.js` 與
+  `rotation-ux-browser.test.js`；24 張 PNG＋`metrics.json` 位於
+  `docs/evidence/v0577d/`。`npm test`、`test:build`、`test:ortho-furniture`、
+  `test:entrance`、`test:ortho-area`、`test:ortho-rotation`、
+  `test:rotation-state`、`check:deploy`、`check:dev` 全數通過；Chrome／Edge
+  Browser Smoke 通過。第一批 48 張 PNG 與修改前備份 SHA-256 全數相同。
+- 不變：CameraController、ROOM_CONFIG、10×8／78 cells、入口 `(7,0)/(8,0)`、
+  第一批 48 張 PNG、save key `catCafePhaserV0540`、schema 5401、migration 5402、
+  iso／flat。
+- iPhone Safari 真機仍 pending；第二批 35 件未核准、未開始；未執行 Git 或部署。
+- 部署包：重建 `dist/cat_cafe_v0577d_git_deploy/` 與
+  `cat_cafe_v0577d_git_deploy.zip`；部署資料夾自身的 deploy Gate、Browser Smoke
+  與 root／iso／flat／ortho／orthogonal／demo／artDebug／invalid URL 回歸通過。
+  ZIP entry 全用 `/`，未含 node_modules／legacy／tools／dist／`.git`／其他 ZIP。
+
 ## 2026-07-28｜ART-0577B-FIRST-BATCH-ROTATION-AND-DIRECTION-CALIBRATION
 
 - 版本／Build：`V0.57.7-alpha｜第一批家具旋轉與方向校正版`／`0577b`；

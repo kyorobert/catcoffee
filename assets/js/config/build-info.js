@@ -1,7 +1,7 @@
 export const APP_VERSION =
-  'V0.57.7-alpha｜第一批家具旋轉與方向校正版';
+  'V0.57.7-alpha｜家具旋轉體驗重構版';
 
-export const BUILD_ID = '0577b';
+export const BUILD_ID = '0577d';
 
 // This key is part of the public save contract. Never change it for cache recovery.
 export const SAVE_KEY = 'catCafePhaserV0540';

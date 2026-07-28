@@ -1,9 +1,17 @@
-import {INPUT_MODE} from '../core/input-state.js?v=0577b';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0577b';
+import {INPUT_MODE} from '../core/input-state.js?v=0577d';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0577d';
 import {
   getFurnitureDisplayState,
   getFurnitureVisualPosition
-} from '../core/furniture-display-state.js?v=0577b';
+} from '../core/furniture-display-state.js?v=0577d';
+import {
+  createRotationEditSession,
+  rebaseRotationEditSession,
+  advanceRotationEditSession,
+  getOrthogonalRotationPolicy,
+  resolveOrthogonalRotationPlacement,
+  resolveNextOrthogonalRotation
+} from '../core/orthogonal-furniture-rotation.js?v=0577d';
 
 const DRAG_THRESHOLD_PX = 8;
 
@@ -24,6 +32,9 @@ export class FurnitureDragController {
     this.lastPointer = null;
     this.lastValidation = null;
     this.lastPlacementEvaluation = null;
+    this.rotationSession = null;
+    this.rotationPreview = null;
+    this.rotationPreviewGhost = null;
     this.scene.input.dragDistanceThreshold = DRAG_THRESHOLD_PX;
     this.bind();
   }
@@ -86,6 +97,7 @@ export class FurnitureDragController {
       item, original: {...item}, candidate: {...item}, entity: gameObject,
       grabOffsetWorld: {x: gameObject.x - pointerWorld.x, y: gameObject.y - pointerWorld.y}
     };
+    this.rotationSession = this.createRotationSession(this.drag.candidate);
     this.armed = null;
     this.inputMode.setMode(INPUT_MODE.FURNITURE_DRAG, {itemId, pointerId: pointer.id});
     this.cameraController.setEnabled(false);
@@ -111,13 +123,21 @@ export class FurnitureDragController {
     const available = this.findAvailablePlacement(type);
     const candidate = {id: `new-${Date.now().toString(36)}`, type, x: available.x, y: available.y, r: 0};
     this.drag = {pointerId: null, isNew: true, movingItemId: null, item: null, original: null, candidate, entity: null, grabOffsetWorld: {x: 0, y: 0}};
+    this.rotationSession = this.createRotationSession(candidate);
     this.inputMode.setMode(INPUT_MODE.FURNITURE_SELECTED, {itemId: candidate.id, isNew: true});
     this.inputMode.setMode(INPUT_MODE.FURNITURE_DRAG, {itemId: candidate.id, isNew: true});
     this.cameraController.setEnabled(false);
     this.catBehaviorController.pause('furniture-drag');
     this.createGhost(candidate, null);
     this.renderPlacementVisuals();
-    this.scene.game.events.emit('selection-changed', {item: candidate, definition: this.furniture[type], placing: true});
+    this.scene.game.events.emit('selection-changed', {
+      item: candidate,
+      definition: this.furniture[type],
+      placing: true,
+      rotationPolicy: (this.grid.projectionMode || 'iso') === 'ortho'
+        ? this.rotationSession.policy
+        : null
+    });
     return true;
   }
 
@@ -163,6 +183,16 @@ export class FurnitureDragController {
     );
     this.drag.candidate.x = snapped.x;
     this.drag.candidate.y = snapped.y;
+    if ((this.grid.projectionMode || 'iso') === 'ortho') {
+      this.rotationSession = this.rotationSession
+        ? rebaseRotationEditSession(this.rotationSession, {
+            definition: this.furniture[item.type],
+            x: snapped.x,
+            y: snapped.y,
+            rotation: item.r || 0
+          })
+        : this.createRotationSession(item);
+    }
     this.syncGhost();
     this.renderPlacementVisuals();
   }
@@ -170,12 +200,11 @@ export class FurnitureDragController {
   createGhost(item, sourceEntity) {
     this.ghost?.destroy();
     const definition = this.furniture[item.type];
+    const resolved = this.resolveCandidate(item);
     const display = getFurnitureDisplayState(
-      item.type, item.r || 0, definition, this.grid.projectionMode
+      item.type, resolved.resolvedRotation, definition, this.grid.projectionMode
     );
-    const anchor = getFurnitureVisualPosition(
-      this.grid, item.type, item.x, item.y, item.r || 0, display
-    );
+    const anchor = resolved.visualPosition;
     this.ghost = this.scene.add.image(anchor.x, anchor.y, display.texture)
       .setOrigin(sourceEntity?.originX ?? display.originX, sourceEntity?.originY ?? display.originY)
       .setAlpha(.64)
@@ -193,12 +222,11 @@ export class FurnitureDragController {
   syncGhost() {
     if (!this.drag || !this.ghost) return;
     const item = this.drag.candidate;
+    const resolved = this.resolveCandidate(item);
     const display = getFurnitureDisplayState(
-      item.type, item.r || 0, this.furniture[item.type], this.grid.projectionMode
+      item.type, resolved.resolvedRotation, this.furniture[item.type], this.grid.projectionMode
     );
-    const anchor = getFurnitureVisualPosition(
-      this.grid, item.type, item.x, item.y, item.r || 0, display
-    );
+    const anchor = resolved.visualPosition;
     if(display.texture&&this.ghost.texture.key!==display.texture)this.ghost.setTexture(display.texture);
     this.ghost.setPosition(anchor.x, anchor.y)
       .setOrigin(display.originX,display.originY)
@@ -206,14 +234,74 @@ export class FurnitureDragController {
       .setDepth(DepthSystem.for('ghost', anchor.y));
   }
 
-  validate(item = this.drag?.candidate) {
+  createRotationSession(item, original = null) {
+    const definition = this.furniture[item.type];
+    return createRotationEditSession({
+      type: item.type,
+      definition,
+      x: item.x,
+      y: item.y,
+      rotation: item.r || 0,
+      policy: getOrthogonalRotationPolicy(item.type, definition),
+      original
+    });
+  }
+
+  resolveCandidate(item = this.drag?.candidate) {
+    if (!item) return null;
+    const definition = this.furniture[item.type];
+    if ((this.grid.projectionMode || 'iso') !== 'ortho') {
+      const rotation = item.r || 0;
+      const display = getFurnitureDisplayState(
+        item.type, rotation, definition, this.grid.projectionMode
+      );
+      const visualPosition = getFurnitureVisualPosition(
+        this.grid, item.type, item.x, item.y, rotation, display
+      );
+      return {
+        resolvedX: item.x,
+        resolvedY: item.y,
+        resolvedRotation: rotation,
+        effectiveRotation: rotation,
+        rotationPolicy: null,
+        footprintCells: this.grid.getFootprintCells(
+          item.type, item.x, item.y, rotation
+        ),
+        footprintPolygon: this.grid.getFootprintPolygon(
+          item.type, item.x, item.y, rotation
+        ),
+        visualPosition,
+        movementDelta: {x: 0, y: 0},
+        envelopeContext: null,
+        signature: `${item.type}:${item.x}:${item.y}:${rotation}:legacy`,
+        validityInput: {
+          type: item.type, x: item.x, y: item.y, rotation
+        }
+      };
+    }
+    return resolveOrthogonalRotationPlacement({
+      grid: this.grid,
+      type: item.type,
+      definition,
+      x: item.x,
+      y: item.y,
+      rotation: item.r || 0,
+      policy: getOrthogonalRotationPolicy(item.type, definition)
+    });
+  }
+
+  validate(item = this.drag?.candidate, resolved = this.resolveCandidate(item)) {
     if (!item) return {valid: false, blockingReason: 'unplaceable-cell', message: '這裡不是可擺放區域', warnings: []};
+    const validity = resolved?.validityInput || {
+      type: item.type, x: item.x, y: item.y, rotation: item.r || 0
+    };
     const base = this.placement.validatePlacement({
-      type: item.type, x: item.x, y: item.y, rotation: item.r || 0,
+      ...validity,
       movingItemId: this.drag?.movingItemId || null
     });
     if (!base.valid) return base;
-    const cells = this.grid.getFootprintCells(item.type, item.x, item.y, item.r || 0);
+    const cells = resolved?.footprintCells
+      || this.grid.getFootprintCells(item.type, item.x, item.y, item.r || 0);
     if (this.furniture[item.type]?.layer !== 'floorDecoration' && this.catBehaviorController.isAnyCatInCells(cells)) {
       return {valid: false, blockingReason: 'character-occupied', message: '這裡有貓咪，請換個位置', warnings: base.warnings || []};
     }
@@ -222,7 +310,8 @@ export class FurnitureDragController {
 
   candidateSignature(item = this.drag?.candidate) {
     if (!item) return '';
-    return `${item.type}:${item.x}:${item.y}:${item.r || 0}:${this.drag?.movingItemId || ''}`;
+    const resolved = this.resolveCandidate(item);
+    return `${resolved.signature}:${this.drag?.movingItemId || ''}`;
   }
 
   // Preview and commit both consume this exact evaluation shape. Under the drag
@@ -238,12 +327,17 @@ export class FurnitureDragController {
         result: this.validate(item)
       };
     }
+    const resolved = this.resolveCandidate(item);
     return {
-      signature: this.candidateSignature(item),
-      item: {type:item.type,x:item.x,y:item.y,r:item.r || 0},
-      cells: this.grid.getFootprintCells(item.type,item.x,item.y,item.r || 0),
-      polygon: this.grid.getFootprintPolygon(item.type,item.x,item.y,item.r || 0),
-      result: this.validate(item)
+      signature: `${resolved.signature}:${this.drag?.movingItemId || ''}`,
+      item: {
+        type:item.type,x:resolved.resolvedX,y:resolved.resolvedY,
+        r:resolved.resolvedRotation
+      },
+      resolved,
+      cells: resolved.footprintCells,
+      polygon: resolved.footprintPolygon,
+      result: this.validate(item,resolved)
     };
   }
 
@@ -308,10 +402,17 @@ export class FurnitureDragController {
       } else {
         Object.assign(drag.item, drag.candidate);
         this.occupancy.addItem(drag.item);
-        drag.entity.setGridPosition(drag.item.x, drag.item.y, drag.item.r).setDragVisual('normal');
+        drag.entity.setGridPosition(
+          drag.item.x, drag.item.y, drag.item.r, evaluation.resolved
+        ).setDragVisual('normal');
       }
       layoutChanged = true;
       this.saveAdapter.save();
+      this.scene.onFurniturePlacementCommitted?.(
+        drag.isNew
+          ? this.scene.state.items[this.scene.state.items.length - 1]
+          : drag.item
+      );
       this.scene.emitState();
       return true;
     } catch (error) {
@@ -344,6 +445,7 @@ export class FurnitureDragController {
     this.drag = null;
     this.armed = null;
     this.lastPlacementEvaluation = null;
+    this.rotationSession = null;
     this.ghost?.destroy();
     this.ghost = null;
     this.scene.placementGraphics.clear();
@@ -355,10 +457,82 @@ export class FurnitureDragController {
 
   rotateCandidate() {
     if (!this.drag) return false;
-    this.drag.candidate.r = ((this.drag.candidate.r || 0) + 1) % 4;
+    const item = this.drag.candidate;
+    if ((this.grid.projectionMode || 'iso') !== 'ortho') {
+      item.r = ((item.r || 0) + 1) % 4;
+      this.syncGhost();
+      this.renderPlacementVisuals();
+      return true;
+    }
+    const definition = this.furniture[item.type];
+    const resolved = resolveNextOrthogonalRotation({
+      grid: this.grid,
+      type: item.type,
+      definition,
+      x: item.x,
+      y: item.y,
+      rotation: item.r || 0,
+      policy: this.rotationSession.policy,
+      editSession: this.rotationSession
+    });
+    if (
+      resolved.resolvedX === item.x
+      && resolved.resolvedY === item.y
+      && resolved.resolvedRotation === (item.r || 0)
+    ) return false;
+    Object.assign(item, {
+      x: resolved.resolvedX,
+      y: resolved.resolvedY,
+      r: resolved.resolvedRotation
+    });
+    this.rotationSession = advanceRotationEditSession(
+      this.rotationSession,
+      resolved
+    );
     this.syncGhost();
     this.renderPlacementVisuals();
     return true;
+  }
+
+  showRotationPreview(item, resolved, result, sourceEntity = null) {
+    this.clearRotationPreview();
+    const definition = this.furniture[item.type];
+    const display = getFurnitureDisplayState(
+      item.type, resolved.resolvedRotation, definition, this.grid.projectionMode
+    );
+    const anchor = resolved.visualPosition;
+    this.rotationPreviewGhost = this.scene.add.image(
+      anchor.x, anchor.y, display.texture
+    ).setOrigin(
+      sourceEntity?.originX ?? display.originX,
+      sourceEntity?.originY ?? display.originY
+    ).setAlpha(.64)
+      .setTint(result.valid ? 0xc9ffd1 : 0xffb3b3)
+      .setDepth(DepthSystem.for('ghost', anchor.y));
+    if (sourceEntity) {
+      this.rotationPreviewGhost.setScale(
+        sourceEntity.scaleX, sourceEntity.scaleY
+      );
+    } else if (display.scale) {
+      this.rotationPreviewGhost.setScale(display.scale);
+    }
+    this.rotationPreviewGhost.disableInteractive();
+    const color = result.valid ? 0x60be73 : 0xda5252;
+    this.scene.placementGraphics
+      .fillStyle(color, .25).fillPoints(resolved.footprintPolygon, true)
+      .lineStyle(2, color, .9)
+      .strokePoints(
+        [...resolved.footprintPolygon, resolved.footprintPolygon[0]],
+        false
+      );
+    this.rotationPreview = {item: {...item}, resolved, result};
+  }
+
+  clearRotationPreview() {
+    this.rotationPreviewGhost?.destroy();
+    this.rotationPreviewGhost = null;
+    this.rotationPreview = null;
+    if (!this.drag) this.scene.placementGraphics?.clear();
   }
 
   isDragging() { return Boolean(this.drag); }
@@ -375,8 +549,11 @@ export class FurnitureDragController {
   }
 
   getDebugSnapshot() {
-    const item = this.drag?.candidate;
-    const cells = item ? this.grid.getFootprintCells(item.type, item.x, item.y, item.r || 0) : [];
+    const item = this.drag?.candidate || this.rotationPreview?.item;
+    const resolved = this.drag
+      ? this.resolveCandidate(item)
+      : this.rotationPreview?.resolved;
+    const cells = resolved?.footprintCells || [];
     const failedCell = cells.find(cell => !this.grid.isInsideGrid(cell.x, cell.y) || !this.grid.isPlaceableCell(cell.x, cell.y) || this.occupancy.getOccupant(cell.x, cell.y));
     return {
       selectedItemId: this.scene.selectedId,
@@ -385,6 +562,9 @@ export class FurnitureDragController {
       originalGrid: this.drag?.original ? {x: this.drag.original.x, y: this.drag.original.y} : null,
       candidateGrid: item ? {x: item.x, y: item.y} : null,
       rotation: item?.r || 0,
+      rotationPolicy: resolved?.rotationPolicy || null,
+      rotationEnvelope: resolved?.envelopeContext || null,
+      movementDelta: resolved?.movementDelta || null,
       footprintCells: cells,
       pointer: this.lastPointer,
       blockingReason: this.lastValidation?.blockingReason || null,
@@ -398,6 +578,7 @@ export class FurnitureDragController {
 
   destroy() {
     this.cancel('scene-shutdown');
+    this.clearRotationPreview();
     const input = this.scene.input;
     input.off('dragstart', this.handleDragStart);
     input.off('drag', this.handleDrag);
