@@ -1,4 +1,4 @@
-import {createServer} from 'node:http';
+﻿import {createServer} from 'node:http';
 import {readFileSync,existsSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
@@ -120,7 +120,7 @@ try{
     if(!signature.every((byte,index)=>body[index]===byte))failures.push(`invalid cat PNG signature ${path}`);
     if(body.length<100)failures.push(`empty cat PNG ${path}`);
   }
-  for(const asset of ['./assets/environment/wall-window.png?v=0577e','./assets/environment/menu-board.png?v=0577e']){
+  for(const asset of ['./assets/environment/wall-window.png?v=0577k','./assets/environment/menu-board.png?v=0577k']){
     const path=new URL(asset,origin+'/').pathname;
     const response=await fetch(origin+path);
     const body=new Uint8Array(await response.arrayBuffer());
@@ -135,4 +135,4 @@ if(failures.length){
   console.error('HTTP resource failures:\n- '+failures.join('\n- '));
   process.exit(1);
 }
-console.log(`HTTP resource test passed: ${visited.size} linked resources, ${Object.keys(FURNITURE_CONFIG).length} furniture definitions, 48 orthogonal runtime PNGs, 11 cat PNG assets and 2 wall decorations.`);
+console.log(`HTTP resource test passed: ${visited.size} linked resources, ${Object.keys(FURNITURE_CONFIG).length} furniture definitions, 52 orthogonal runtime PNGs, 11 cat PNG assets and 2 wall decorations.`);

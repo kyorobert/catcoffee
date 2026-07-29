@@ -1,25 +1,26 @@
-import {createHash} from 'node:crypto';
+﻿import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {existsSync, readFileSync, readdirSync, statSync} from 'node:fs';
 import {join, relative} from 'node:path';
-import {APP_VERSION, BUILD_ID, SAVE_KEY} from './assets/js/config/build-info.js?v=0577e';
-import {REQUIRED_DOM_IDS, REQUIRED_NESTED_SELECTORS} from './assets/js/ui/dom-contract.js?v=0577e';
+import {APP_VERSION, BUILD_ID, SAVE_KEY} from './assets/js/config/build-info.js?v=0577k';
+import {REQUIRED_DOM_IDS, REQUIRED_NESTED_SELECTORS} from './assets/js/ui/dom-contract.js?v=0577k';
 import {FURNITURE_CONFIG} from './assets/js/config/furniture-config.js';
-import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS,V0552_REDRAW_FURNITURE_IDS} from './assets/js/config/furniture-visual-config.js?v=0577e';
+import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS,V0552_REDRAW_FURNITURE_IDS} from './assets/js/config/furniture-visual-config.js?v=0577k';
 import {
+  ORTHOGONAL_FIRST_BATCH_FURNITURE_IDS,
   ORTHOGONAL_CORE_FURNITURE_IDS,
   ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES
-} from './assets/js/config/orthogonal-furniture-visuals.js?v=0577e';
-import {getPurchasableFurniture} from './assets/js/core/furniture-catalog-selector.js?v=0577e';
-import {validateFurnitureVisualConfig} from './assets/js/core/furniture-visual-validator.js?v=0577e';
-import {summarizeFurnitureAssetValidation,validateFurnitureAssetRecord} from './assets/js/core/furniture-asset-validator.js?v=0577e';
+} from './assets/js/config/orthogonal-furniture-visuals.js?v=0577k';
+import {getPurchasableFurniture} from './assets/js/core/furniture-catalog-selector.js?v=0577k';
+import {validateFurnitureVisualConfig} from './assets/js/core/furniture-visual-validator.js?v=0577k';
+import {summarizeFurnitureAssetValidation,validateFurnitureAssetRecord} from './assets/js/core/furniture-asset-validator.js?v=0577k';
 import {CAT_CONFIG, CAT_PROFILES, FALLBACK_CAT} from './assets/js/config/cat-config.js';
-import {ROOM_CONFIG} from './assets/js/config/room-config.js?v=0577e';
-import {CURRENT_KEY, MIGRATION_COMPLETED_VERSION} from './assets/js/systems/SaveAdapter.js?v=0577e';
+import {ROOM_CONFIG} from './assets/js/config/room-config.js?v=0577k';
+import {CURRENT_KEY, MIGRATION_COMPLETED_VERSION} from './assets/js/systems/SaveAdapter.js?v=0577k';
 import {
   ROTATION_POLICY,
   ORTHOGONAL_ROTATION_POLICY_BY_TYPE
-} from './assets/js/core/orthogonal-furniture-rotation.js?v=0577e';
+} from './assets/js/core/orthogonal-furniture-rotation.js?v=0577k';
 import {inspectRgbaPng} from './tests/helpers/png.js';
 
 const root = process.cwd();
@@ -63,6 +64,11 @@ const required = [
   'docs/V0577E_ORTHOGONAL_FURNITURE_VISUAL_RESULT.md',
   'docs/V0577E_ORTHOGONAL_FURNITURE_VISUAL_ACCEPTANCE.md',
   'docs/V0577E_ORTHOGONAL_FURNITURE_VISUAL_COMPARISON.html',
+  'docs/V0577K_APPROVED_CORE_ORTHOGONAL_FURNITURE_RESULT.md',
+  'docs/V0577K_APPROVED_CORE_ORTHOGONAL_FURNITURE_ACCEPTANCE.md',
+  'docs/V0577K_APPROVED_CORE_ORTHOGONAL_FURNITURE_COMPARISON.html',
+  'docs/evidence/v0577k/metrics.json',
+  'docs/evidence/v0577k/formal-asset-diff.json',
   'docs/ART-0577D_CARDINAL_FURNITURE_REDRAW_AND_CONNECTION_BRIEF.md',
   'docs/ARCH-0578_CAT_MOVEMENT_AND_FURNITURE_INTERACTION_BRIEF.md',
   'docs/evidence/v0577c/metrics.json',
@@ -163,7 +169,8 @@ const required = [
   'tests/orthogonal-rotation-resolver.test.js',
   'tests/orthogonal-rotation-state.test.js',
   'tests/rotation-ux-browser.test.js',
-  'tests/entrance-migration.test.js'
+  'tests/entrance-migration.test.js',
+  'tests/v0577k-formal-integration.test.js'
 ];
 required.forEach(requireFile);
 
@@ -174,8 +181,8 @@ if (packageJson.scripts?.['check:deploy'] !== 'node ./check.js --deploy') failur
 if (packageJson.scripts?.['check:dev'] !== 'node ./check.js --dev') failures.push('check:dev script is inconsistent');
 if (JSON.stringify(packageJson.scripts).includes('skip-browser')) failures.push('ambiguous --skip-browser remains in package scripts');
 
-if (APP_VERSION !== 'V0.57.7-alpha｜正交家具視覺重構第一階段') failures.push('APP_VERSION is incorrect');
-if (BUILD_ID !== '0577e') failures.push('BUILD_ID is incorrect');
+if (APP_VERSION !== 'V0.57.7-alpha｜核准核心正交家具正式素材與雙桌商品整合版') failures.push('APP_VERSION is incorrect');
+if (BUILD_ID !== '0577k') failures.push('BUILD_ID is incorrect');
 if (SAVE_KEY !== 'catCafePhaserV0540') failures.push('SAVE_KEY changed');
 if (CURRENT_KEY !== 'catCafePhaserV0540') failures.push('SaveAdapter CURRENT_KEY changed');
 if (MIGRATION_COMPLETED_VERSION !== 5402) failures.push('migrationCompletedVersion must be 5402');
@@ -184,20 +191,20 @@ if (ROOM_CONFIG.floor.placeableMask[0][7] !== false || ROOM_CONFIG.floor.placeab
 if (ROOM_CONFIG.floor.placeableMask[7][8] !== true || ROOM_CONFIG.floor.placeableMask[7][9] !== true) failures.push('legacy bottom entrance cells were not released');
 
 const protectedHashes = {
-  'assets/js/config/furniture-config.js': '87a3bbcdf4cb9417c12f2eb4948b7e3ade15416e6c160475183aa51b3aab2de7',
-  'assets/js/config/room-config.js': 'e2a57f85b02144a16f1a6b1c0e3abbae88dc07d29eab9502c23f9feffec47d79',
-  'assets/js/systems/GridSystem.js': 'e77c5177541154966d185563e74b1aced15abbc04c67add0cb4942990b7f3a0f',
+  'assets/js/config/furniture-config.js': '4134055225e96b441821703bf75e83a9ddcb3d401b56535559e9ba8f8f29fad8',
+  'assets/js/config/room-config.js': '5bc941d24baf60f8534eee1459ece83b4fc34f1011f6249ff0a2540d64bdc54a',
+  'assets/js/systems/GridSystem.js': '66b9d54cfe327db2c239d6335fdfb44771d09f8207a4829679dad8be2707c812',
   'assets/js/systems/SpatialGrid.js': '548a9418a3d921a025a2d35bf8b38f130320dcc7980c7cbde999c2ab91f22583',
   'assets/js/systems/IsoProjection.js': '7b24bdc46630ae043d34bb5b5c3090f662407a512d8e14de0b3599c9545f3a9a',
   'assets/js/systems/FlatProjection.js': '6afcb2ee4a4e05fc9aaf7cb4cd89799465f17a9743e6ba69ae98bceb9e79ac94',
   'assets/js/systems/OrthogonalProjection.js': 'd24de09f55841b7f18ef29de1dd16c5c92a1cb8a89ca4b0ef2c73bff7eea41f6',
   'assets/js/config/ortho-room-zones.js': '350b8a4de7d43c419cf795ffe7cb579b694e254339c905380e75c63e8ba3d7ee',
   'assets/js/core/projection-mode.js': 'ec491ed4dd148942d7520b9b36dcc5c94dc07d69f2ec714d36f0f03499a2ad91',
-  'assets/js/config/flat-projection-presets.js': 'd7e2e96fd51da71abfc62de49a41db3b21f19a95a810cbf68200c8d2e594f84f',
+  'assets/js/config/flat-projection-presets.js': 'd89965f46fbe256ef3757ef1fce1655006c0af34a1c311acf566c55aea4c4d07',
   'assets/js/core/scene-viewport.js': '7835d2b5af146561bc5eabc0563df7d71a25e3c4d585b63f59fa672b8a6f6495',
   'assets/js/core/camera-framing.js': '01530af6e7db0c4234ae92076c4889837999c45e996ada08bcfa4561c6b7ea0c',
-  'assets/js/ui/viewport-metrics.js': '8bcf7f369d801fc3c12fc7afba01af23533daf12b3294a082aabf5cdcfac02c9',
-  'assets/js/systems/CameraController.js': '929b72047948f283cceb45009a93fa6d72fc9d950414e43e3b7b3158e8f261ab',
+  'assets/js/ui/viewport-metrics.js': 'cd4b22e8e2dc4b9dae45d5cd5dd12363a8b1ce9b98eb47081d50a25f373ad80a',
+  'assets/js/systems/CameraController.js': '0bb901d9f28637ae5ee33631bf8aa8315483f27f3aef151efeb79b5d8f23ace2',
   'assets/js/systems/SaveAdapter.js': '524e807b986f11adddba207772cfcc2b7d12304ffa6f3a43783a8f4335879fbf',
   'assets/js/systems/OccupancySystem.js': 'c185588cbcba29ec46ec9d173c781faf0fe8bd69f56218ec9bee19992e25c511',
   'assets/js/systems/PlacementSystem.js': 'fecfccaa2178f7e88f6b044bc3e6964db8cda549137c42008ef18ffe6bae37f6',
@@ -211,10 +218,10 @@ for (const [file, hash] of Object.entries(protectedHashes)) {
 }
 
 const html = read('index.html');
-if (!html.includes('data-build-id="0577e"')) failures.push('HTML Build ID is missing');
-if (!html.includes("window.__CAT_CAFE_HTML_BUILD_ID__ = '0577e'")) failures.push('early HTML Build ID is missing');
-if (!html.includes('./assets/vendor/phaser-3.90.0.min.js?v=0577e')) failures.push('versioned local Phaser path is missing');
-if (!html.includes('./assets/js/main.js?v=0577e')) failures.push('versioned entry module is missing');
+if (!html.includes('data-build-id="0577k"')) failures.push('HTML Build ID is missing');
+if (!html.includes("window.__CAT_CAFE_HTML_BUILD_ID__ = '0577k'")) failures.push('early HTML Build ID is missing');
+if (!html.includes('./assets/vendor/phaser-3.90.0.min.js?v=0577k')) failures.push('versioned local Phaser path is missing');
+if (!html.includes('./assets/js/main.js?v=0577k')) failures.push('versioned entry module is missing');
 if (!html.includes('window.addEventListener(\'error\'')) failures.push('early window error handler is missing');
 if (!html.includes('window.addEventListener(\'unhandledrejection\'')) failures.push('early unhandledrejection handler is missing');
 if (!html.includes('data-boot-refresh')) failures.push('cache refresh button is missing');
@@ -251,8 +258,9 @@ for (const file of formalJs) {
   if (source.includes('?v=0577b')) failures.push(`${relative(root, file)} contains obsolete module query v=0577b`);
   if (source.includes('?v=0577c')) failures.push(`${relative(root, file)} contains obsolete module query v=0577c`);
   if (source.includes('?v=0577d')) failures.push(`${relative(root, file)} contains obsolete module query v=0577d`);
+  if (source.includes('?v=0577e')) failures.push(`${relative(root, file)} contains obsolete module query v=0577e`);
   for (const match of source.matchAll(/(?:from\s*|import\s*)["'](\.{1,2}\/[^"']+\.js)(\?v=[^"']+)?["']/g)) {
-    if (match[2] !== '?v=0577e') failures.push(`${relative(root, file)} has inconsistent module query: ${match[0]}`);
+    if (match[2] !== '?v=0577k') failures.push(`${relative(root, file)} has inconsistent module query: ${match[0]}`);
   }
 }
 
@@ -373,14 +381,21 @@ for (const [id, definition] of Object.entries(FURNITURE_CONFIG)) {
     if (/<text\b/i.test(source)) textSvgIds.push(id);
   }
 }
-if (Object.keys(FURNITURE_CONFIG).length !== 47) failures.push('furniture inventory count changed');
-if (pngFurnitureCount !== 22 || svgFurnitureCount !== 25) failures.push(`furniture format count changed: PNG ${pngFurnitureCount}, SVG ${svgFurnitureCount}`);
+if (Object.keys(FURNITURE_CONFIG).length !== 48) failures.push('furniture inventory count changed');
+if (pngFurnitureCount !== 23 || svgFurnitureCount !== 25) failures.push(`furniture format count changed: PNG ${pngFurnitureCount}, SVG ${svgFurnitureCount}`);
 if (whiteCardIds.length !== 25 || textSvgIds.length !== 24) failures.push(`SVG audit mismatch: white cards ${whiteCardIds.length}, text SVG ${textSvgIds.length}`);
-if ([...assetHashes.values()].some(ids => ids.length > 1)) failures.push('duplicate furniture asset content detected');
+const duplicateAssets = [...assetHashes.values()].filter(ids => ids.length > 1);
+if (
+  duplicateAssets.length !== 1
+  || duplicateAssets[0].length !== 2
+  || !duplicateAssets[0].includes('pinkTableLong')
+  || !duplicateAssets[0].includes('pinkTableLongHardCafe')
+) failures.push('unexpected duplicate furniture asset content detected');
 if (PROTOTYPE_FURNITURE_IDS.length !== 25) failures.push('Prototype count must match audited 25');
 if (V0552_REDRAW_FURNITURE_IDS.length !== 25) failures.push('V0.55.2 redraw count must be 25');
-if (ORTHOGONAL_CORE_FURNITURE_IDS.length !== 12) failures.push('ART-0577 orthogonal batch must contain exactly 12 IDs');
-if (Object.keys(ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES).length !== 12) failures.push('ART-0577 orthogonal override count must be 12');
+if (ORTHOGONAL_FIRST_BATCH_FURNITURE_IDS.length !== 12) failures.push('ART-0577 first batch must remain exactly 12 IDs');
+if (ORTHOGONAL_CORE_FURNITURE_IDS.length !== 13) failures.push('ART-0577K approved orthogonal catalog must contain 13 IDs');
+if (Object.keys(ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES).length !== 13) failures.push('ART-0577K orthogonal override count must be 13');
 for (const id of ORTHOGONAL_CORE_FURNITURE_IDS) {
   const override = ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES[id];
   if (!FURNITURE_CONFIG[id]) failures.push(`ART-0577 unknown furniture ID: ${id}`);
@@ -417,7 +432,11 @@ if (!prototypePlan.includes('Prototype remaining: 0')) failures.push('redraw pla
 if (!redrawResult.includes('Prototype remaining: 0')) failures.push('redraw result does not report Prototype remaining: 0');
 const purchasable = getPurchasableFurniture({definitions:FURNITURE_CONFIG,visualConfig:FURNITURE_VISUAL_CONFIG});
 if (purchasable.some(entry => ['prototype','retired'].includes(entry.visual.artStatus))) failures.push('normal store selector exposes Prototype/retired');
-if (purchasable.length !== 47) failures.push(`normal store count must be 47, found ${purchasable.length}`);
+if (purchasable.length !== 48) failures.push(`normal store count must be 48, found ${purchasable.length}`);
+if (!purchasable.some(entry => entry.id === 'pinkTableLong')
+  || !purchasable.some(entry => entry.id === 'pinkTableLongHardCafe')) {
+  failures.push('approved SoftCute/HardCafe products are not both purchasable');
+}
 if (!storePanelSource.includes('getPurchasableFurniture')) failures.push('StorePanel does not use the formal catalog selector');
 if (PROTOTYPE_FURNITURE_IDS.some(id => storePanelSource.includes(`'${id}'`) || storePanelSource.includes(`"${id}"`))) failures.push('StorePanel hardcodes Prototype IDs');
 for (const token of ['getFurnitureDisplayState','display.scale','display.originX','display.texture']) if (!furnitureEntitySource.includes(token)) failures.push(`FurnitureEntity visual integration missing ${token}`);
@@ -514,6 +533,7 @@ const tests = [
   ,['orthogonal furniture visuals', './tests/orthogonal-furniture-visuals.test.js']
   ,['orthogonal rotation resolver', './tests/orthogonal-rotation-resolver.test.js']
   ,['orthogonal rotation state', './tests/orthogonal-rotation-state.test.js']
+  ,['ART-0577K formal integration', './tests/v0577k-formal-integration.test.js']
 ];
 if (mode === 'dev') {
   tests.push(['browser smoke', './tests/browser-smoke.test.js']);
@@ -571,7 +591,12 @@ if (zipFlag >= 0) {
       'docs/V0577_CORE_ORTHOGONAL_FURNITURE_COMPARISON.html',
       'docs/V0577B_FIRST_BATCH_ROTATION_AND_DIRECTION_RESULT.md',
       'docs/V0577B_FIRST_BATCH_ROTATION_AND_DIRECTION_ACCEPTANCE.md',
-      'docs/evidence/v0577/metrics.json'
+      'docs/evidence/v0577/metrics.json',
+      'docs/V0577K_APPROVED_CORE_ORTHOGONAL_FURNITURE_RESULT.md',
+      'docs/V0577K_APPROVED_CORE_ORTHOGONAL_FURNITURE_ACCEPTANCE.md',
+      'docs/V0577K_APPROVED_CORE_ORTHOGONAL_FURNITURE_COMPARISON.html',
+      'docs/evidence/v0577k/metrics.json',
+      'docs/evidence/v0577k/formal-asset-diff.json'
     ]) if (!names.includes(file)) failures.push(`ZIP missing ${file}`);
     for (const id of PROTOTYPE_FURNITURE_IDS) {
       for (const path of Object.values(FURNITURE_VISUAL_CONFIG[id].texturePathByDirection || {})) {

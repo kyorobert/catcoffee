@@ -9,4 +9,4 @@ for(const [id,definition] of Object.entries(FURNITURE_CONFIG)){
   assert.ok(Array.isArray(visual.interactionSockets),`${id}: sockets`);
   assert.equal(typeof visual.walkBlocking,'boolean',`${id}: walkBlocking`);
 }
-console.log('Furniture footprint regression passed: all 47 gameplay footprints and visual metadata agree.');
+console.log('Furniture footprint regression passed: all 48 gameplay footprints and visual metadata agree.');

@@ -40,6 +40,7 @@ const FIRST_BATCH_POLICIES = {
   dessert:'cardinal4',
   smartOrder:'cardinal4',
   pinkTableLong:'axis2',
+  pinkTableLongHardCafe:'axis2',
   roundTable:'fixed',
   chair:'cardinal4',
   creamSofa:'cardinal4',
@@ -84,6 +85,8 @@ function turn(type, start, count) {
 assert.deepEqual(turn('roundTable',{x:3,y:3,r:0},1).current,{x:3,y:3,r:0});
 const tableCycle=turn('pinkTableLong',{x:3,y:3,r:0},2);
 assert.deepEqual(tableCycle.current,{x:3,y:3,r:0});
+const hardTableCycle=turn('pinkTableLongHardCafe',{x:3,y:3,r:0},2);
+assert.deepEqual(hardTableCycle.current,{x:3,y:3,r:0});
 assert.deepEqual(tableCycle.results.map(result=>result.movementDelta),
   [{x:1,y:0},{x:-1,y:0}]);
 const chairCycle=turn('chair',{x:3,y:3,r:0},4);
@@ -157,7 +160,7 @@ for(const origin of [{x:0,y:0},{x:3,y:4},{x:8,y:6}]){
 }
 
 // Long-run no drift.
-for(const type of ['pinkTableLong','counter','chair','dessert','doubleCatTree','creamPlaidRug']){
+for(const type of ['pinkTableLong','pinkTableLongHardCafe','counter','chair','dessert','doubleCatTree','creamPlaidRug']){
   const policy=getOrthogonalRotationPolicy(type,FURNITURE_CONFIG[type]);
   const cycleSize=policy===ROTATION_POLICY.AXIS2?2:4;
   const result=turn(type,{x:3,y:3,r:0},cycleSize*25);

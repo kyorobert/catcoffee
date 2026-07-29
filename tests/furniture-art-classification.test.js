@@ -18,7 +18,7 @@ for(const [id,definition] of Object.entries(FURNITURE_CONFIG)){
     assert.equal(visual.storeVisible,true,`${id} redraw store`);
   }
 }
-assert.deepEqual({png,svg,whiteCards,textSvg},{png:22,svg:25,whiteCards:25,textSvg:24});
-assert.deepEqual(counts,{production:42,redraw:5,prototype:0,retired:0});
+assert.deepEqual({png,svg,whiteCards,textSvg},{png:23,svg:25,whiteCards:25,textSvg:24});
+assert.deepEqual(counts,{production:42,redraw:6,prototype:0,retired:0});
 assert.equal(PROTOTYPE_FURNITURE_IDS.length,25);
-console.log('Furniture classification passed: 42 production, 5 redraw, 0 prototype, 0 retired.');
+console.log('Furniture classification passed: 42 production, 6 redraw, 0 prototype, 0 retired.');

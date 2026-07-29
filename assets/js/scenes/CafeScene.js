@@ -1,39 +1,39 @@
-import {ROOM_CONFIG} from '../config/room-config.js?v=0577e';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0577e';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0577e';
-import {GridSystem} from '../systems/GridSystem.js?v=0577e';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0577e';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0577e';
-import {CameraController} from '../systems/CameraController.js?v=0577e';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0577e';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0577e';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0577e';
-import {CatEntity} from '../entities/CatEntity.js?v=0577e';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0577e';
-import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0577e';
-import {AmbientEffects} from '../entities/AmbientEffects.js?v=0577e';
-import {INPUT_MODE} from '../core/input-state.js?v=0577e';
-import {InputModeController} from '../phaser/InputModeController.js?v=0577e';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0577e';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0577e';
-import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0577e';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0577e';
-import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0577e';
-import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0577e';
-import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0577e';
-import {ORTHO_ROOM_ZONES,zoneAt} from '../config/ortho-room-zones.js?v=0577e';
+﻿import {ROOM_CONFIG} from '../config/room-config.js?v=0577k';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0577k';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0577k';
+import {GridSystem} from '../systems/GridSystem.js?v=0577k';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0577k';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0577k';
+import {CameraController} from '../systems/CameraController.js?v=0577k';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0577k';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0577k';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0577k';
+import {CatEntity} from '../entities/CatEntity.js?v=0577k';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0577k';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0577k';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0577k';
+import {INPUT_MODE} from '../core/input-state.js?v=0577k';
+import {InputModeController} from '../phaser/InputModeController.js?v=0577k';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0577k';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0577k';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0577k';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0577k';
+import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0577k';
+import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0577k';
+import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0577k';
+import {ORTHO_ROOM_ZONES,zoneAt} from '../config/ortho-room-zones.js?v=0577k';
 import {DEFAULT_ORTHOGONAL_ROOM_SKIN,getOrthogonalCellAppearance}
-  from '../config/ortho-room-skin.js?v=0577e';
-import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0577e';
-import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0577e';
-import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0577e';
+  from '../config/ortho-room-skin.js?v=0577k';
+import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0577k';
+import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0577k';
+import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0577k';
 import {
   ROTATION_POLICY,
   createRotationEditSession,
   advanceRotationEditSession,
   getOrthogonalRotationPolicy,
   resolveNextOrthogonalRotation
-} from '../core/orthogonal-furniture-rotation.js?v=0577e';
+} from '../core/orthogonal-furniture-rotation.js?v=0577k';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};

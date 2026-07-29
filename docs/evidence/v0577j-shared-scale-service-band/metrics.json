@@ -1,0 +1,353 @@
+{
+  "task": "ART-0577J-SHARED-SCALE-SERVICE-BAND-AND-SEATING-ISLAND-REFINEMENT-GATE",
+  "status": "AWAITING_PRODUCT_REVIEW",
+  "runtimeBuild": "0577e",
+  "packageVersion": "0.57.7-alpha",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "spatialReference": {
+    "tileWidth": 88,
+    "tileHeight": 120
+  },
+  "displayContract": {
+    "soft": [
+      116,
+      72
+    ],
+    "hard": [
+      54,
+      108
+    ],
+    "chair": [
+      34,
+      45
+    ],
+    "counter": [
+      118,
+      66
+    ],
+    "coffee": [
+      50,
+      62
+    ],
+    "wash": [
+      76,
+      64
+    ],
+    "dessert": [
+      64,
+      118
+    ],
+    "cat": [
+      42,
+      49
+    ],
+    "bed": [
+      66,
+      52
+    ],
+    "plant": [
+      36,
+      48
+    ],
+    "tree": [
+      58,
+      84
+    ]
+  },
+  "alphaBoundingBoxProxy": {
+    "chair": {
+      "widthPx": 31,
+      "heightPx": 45,
+      "widthToCell": 0.352,
+      "heightToCell": 0.375,
+      "heightToCat": 0.957,
+      "widthToCat": 0.738
+    },
+    "counter": {
+      "widthPx": 118,
+      "heightPx": 58,
+      "widthToCell": 1.341,
+      "heightToCell": 0.483,
+      "heightToCat": 1.234,
+      "widthToCat": 2.81
+    },
+    "coffee": {
+      "widthPx": 50,
+      "heightPx": 48,
+      "widthToCell": 0.568,
+      "heightToCell": 0.4,
+      "heightToCat": 1.021,
+      "widthToCat": 1.19
+    },
+    "wash": {
+      "widthPx": 73,
+      "heightPx": 64,
+      "widthToCell": 0.83,
+      "heightToCell": 0.533,
+      "heightToCat": 1.362,
+      "widthToCat": 1.738
+    },
+    "dessert": {
+      "widthPx": 64,
+      "heightPx": 95,
+      "widthToCell": 0.727,
+      "heightToCell": 0.792,
+      "heightToCat": 2.021,
+      "widthToCat": 1.524
+    },
+    "softTable": {
+      "widthPx": 116,
+      "heightPx": 60,
+      "widthToCell": 1.318,
+      "heightToCell": 0.5,
+      "heightToCat": 1.277,
+      "widthToCat": 2.762
+    },
+    "hardTable": {
+      "widthPx": 54,
+      "heightPx": 101,
+      "widthToCell": 0.614,
+      "heightToCell": 0.842,
+      "heightToCat": 2.149,
+      "widthToCat": 1.286
+    },
+    "cat": {
+      "widthPx": 42,
+      "heightPx": 47,
+      "widthToCell": 0.477,
+      "heightToCell": 0.392,
+      "heightToCat": 1.0,
+      "widthToCat": 1.0
+    }
+  },
+  "chairSeatProxy": {
+    "padThicknessPxAtSceneScale": 6,
+    "totalHeightPx": 45,
+    "padThicknessToHeight": 0.133,
+    "selfReview": "compact single dining chair; not bed/sofa"
+  },
+  "serviceBand": {
+    "options": {
+      "A": {
+        "counter": [
+          68,
+          365
+        ],
+        "coffee": [
+          154,
+          365
+        ],
+        "wash": [
+          213,
+          365
+        ],
+        "dessert": [
+          282,
+          365
+        ],
+        "note": "Tight continuous service run"
+      },
+      "B": {
+        "counter": [
+          60,
+          365
+        ],
+        "coffee": [
+          150,
+          365
+        ],
+        "wash": [
+          218,
+          365
+        ],
+        "dessert": [
+          298,
+          365
+        ],
+        "note": "Small operational gaps"
+      },
+      "C": {
+        "counter": [
+          64,
+          365
+        ],
+        "coffee": [
+          151,
+          365
+        ],
+        "wash": [
+          216,
+          365
+        ],
+        "dessert": [
+          294,
+          365
+        ],
+        "note": "Balanced operations proposal"
+      }
+    },
+    "sharedBottomBaselinePx": 365,
+    "heightPx": {
+      "counter": 58,
+      "coffee": 48,
+      "wash": 64,
+      "dessert": 95
+    },
+    "dessertToCounterHeight": 1.638,
+    "selectedByProduct": null
+  },
+  "seatingIslands": {
+    "chairToSoftTableGapPxProxy": 10,
+    "chairToHardTableGapPxProxy": 9,
+    "narrowestMainAislePxProxy": 38,
+    "narrowestMainAisleToCellWidth": 0.432,
+    "largeUiLikeColorBlocksRemoved": true,
+    "runtimeAutoJoinImplemented": false
+  },
+  "normalEditParity": {
+    "identicalObjectPositions": true,
+    "identicalCamera": true,
+    "onlyEditGridDiffers": true
+  },
+  "sceneBoxes": {
+    "counter": [
+      5,
+      307,
+      118,
+      58
+    ],
+    "coffee": [
+      126,
+      317,
+      50,
+      48
+    ],
+    "wash": [
+      180,
+      301,
+      73,
+      64
+    ],
+    "dessert": [
+      262,
+      270,
+      64,
+      95
+    ],
+    "soft-chair-n": [
+      86,
+      401,
+      34,
+      44
+    ],
+    "soft-chair-w": [
+      26,
+      467,
+      33,
+      45
+    ],
+    "soft-chair-e": [
+      148,
+      467,
+      33,
+      45
+    ],
+    "soft-table": [
+      45,
+      471,
+      116,
+      60
+    ],
+    "soft-chair-s": [
+      88,
+      535,
+      31,
+      45
+    ],
+    "hard-chair-n": [
+      249,
+      412,
+      34,
+      44
+    ],
+    "hard-chair-w": [
+      206,
+      513,
+      33,
+      45
+    ],
+    "hard-chair-e": [
+      294,
+      513,
+      33,
+      45
+    ],
+    "hard-table": [
+      239,
+      487,
+      54,
+      101
+    ],
+    "hard-chair-s": [
+      250,
+      605,
+      31,
+      45
+    ],
+    "cat-bed": [
+      321,
+      601,
+      66,
+      52
+    ],
+    "plant": [
+      302,
+      666,
+      35,
+      48
+    ],
+    "tree": [
+      335,
+      658,
+      50,
+      84
+    ],
+    "bean": [
+      165,
+      635,
+      42,
+      47
+    ],
+    "coal": [
+      209,
+      680,
+      42,
+      44
+    ],
+    "snow": [
+      308,
+      635,
+      42,
+      44
+    ]
+  },
+  "protectedContracts": {
+    "formalFurniturePngChanged": false,
+    "runtimeJavaScriptChanged": false,
+    "buildChanged": false,
+    "saveKeyChanged": false,
+    "schemaChanged": false,
+    "migrationChanged": false,
+    "deploymentZipBuilt": false
+  },
+  "productApprovals": [],
+  "pending": [
+    "Select service band A/B/C",
+    "Approve/reject shared-scale chair/counter/dessert concepts",
+    "Approve/reject table island spacing and rug restraint",
+    "Real iPhone Safari acceptance"
+  ]
+}

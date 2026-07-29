@@ -1,13 +1,13 @@
-import {chromium} from 'playwright-core';
+﻿import {chromium} from 'playwright-core';
 import {spawnSync} from 'node:child_process';
 import {createServer} from 'node:http';
 import {existsSync,readFileSync,statSync} from 'node:fs';
 import {extname,normalize,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0577e';
+import {FURNITURE_VISUAL_CONFIG,PROTOTYPE_FURNITURE_IDS} from '../assets/js/config/furniture-visual-config.js?v=0577k';
 import {ORTHOGONAL_FURNITURE_VISUAL_OVERRIDES}
-  from '../assets/js/config/orthogonal-furniture-visuals.js?v=0577e';
+  from '../assets/js/config/orthogonal-furniture-visuals.js?v=0577k';
 import {CAT_PROFILES,CAT_ANIMATION_LAYOUT,FALLBACK_CAT} from '../assets/js/config/cat-config.js';
 
 const root=process.cwd();
@@ -46,7 +46,7 @@ const server=createServer((request,response)=>{
     response.end(readFileSync(file,'utf8').replace('id="careBtn"','id="careBtn-missing"'));return;
   }
   if(relativePath==='index.html'&&requestUrl.searchParams.get('fixture')==='build-mismatch'){
-    response.end(readFileSync(file,'utf8').replace('data-build-id="0577e"','data-build-id="0550-old"'));return;
+    response.end(readFileSync(file,'utf8').replace('data-build-id="0577k"','data-build-id="0550-old"'));return;
   }
   response.end(readFileSync(file));
 });
@@ -150,7 +150,7 @@ try{
     });
     const problems=[];
     if(!state.phaser||!state.game)problems.push('Phaser global or game missing');
-    if(state.htmlBuildId!=='0577e'||state.jsBuildId!=='0577e')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
+    if(state.htmlBuildId!=='0577k'||state.jsBuildId!=='0577k')problems.push(`build mismatch ${state.htmlBuildId}/${state.jsBuildId}`);
     if(state.gameReady!=='1')problems.push(`gameReady is ${state.gameReady}`);
     if(loadedUrls.some(url=>/\?v=0550a(?:$|[&#])/.test(url)||url.includes('?v=0542a')))problems.push('obsolete runtime cache query loaded');
     if(state.canvasCount!==1||state.canvasWidth<=0||state.canvasHeight<=0)problems.push(`invalid canvas ${state.canvasCount} ${state.canvasWidth}x${state.canvasHeight}`);
@@ -177,7 +177,8 @@ try{
     if(scenario.name==='fresh'&&viewport.width===390){
       await page.click('#openStoreBtn');
       const storeIds=await page.locator('.store-card[data-id]').evaluateAll(cards=>cards.map(card=>card.dataset.id));
-       if(storeIds.length!==47)problems.push(`normal store contains ${storeIds.length} items instead of 47`);
+       if(storeIds.length!==48)problems.push(`normal store contains ${storeIds.length} items instead of 48`);
+       if(!storeIds.includes('pinkTableLong')||!storeIds.includes('pinkTableLongHardCafe'))problems.push('approved dual-table products are not both visible in Store');
        if(PROTOTYPE_FURNITURE_IDS.some(id=>!storeIds.includes(id)))problems.push('a V0.55.2 redraw is missing from the store');
        const redrawThumbnails=await page.locator(PROTOTYPE_FURNITURE_IDS.map(id=>`.store-card[data-id="${id}"] img`).join(',')).evaluateAll(images=>images.map(image=>({src:image.getAttribute('src'),width:image.naturalWidth,height:image.naturalHeight})));
        if(redrawThumbnails.length!==25||redrawThumbnails.some(image=>!image.src?.includes('/redrawn/')||!image.src.endsWith('.png?v=0577a')||image.width<=0||image.height<=0))problems.push(`invalid redraw store thumbnails: ${JSON.stringify(redrawThumbnails)}`);
@@ -219,6 +220,68 @@ try{
        await clickPlacementGhost();
        const replacedRedraw=await page.evaluate(()=>{const state=window.gameController.getState();return {count:state.items.filter(item=>item.type==='squareCafeTable').length,inventory:state.inventory.squareCafeTable||0,coins:state.coins}});
        if(replacedRedraw.count<1||replacedRedraw.inventory!==storedRedraw.inventory-1||replacedRedraw.coins!==storedRedraw.coins)problems.push(`redraw inventory replacement failed: ${JSON.stringify(replacedRedraw)}`);
+       await page.click('#cancelPlacementBtn');
+       const hardCafeBefore=await page.evaluate(()=>({
+         coins:window.gameController.getState().coins,
+         count:window.gameController.getState().items.filter(
+           item=>item.type==='pinkTableLongHardCafe'
+         ).length
+       }));
+       await page.click('#openStoreBtn');
+       await page.click('.store-card[data-id="pinkTableLongHardCafe"]');
+       await clickPlacementGhost();
+       await page.click('#rotateBtn');
+       await page.waitForTimeout(100);
+       const placedHardCafe=await page.evaluate(()=>{
+         const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+         const item=scene.state.items.filter(
+           candidate=>candidate.type==='pinkTableLongHardCafe'
+         ).at(-1);
+         return {
+           item,
+           texture:item?scene.entities.get(item.id)?.texture?.key:null,
+           coins:scene.state.coins,
+           saved:JSON.parse(localStorage.getItem('catCafePhaserV0540')||'null')
+             ?.items?.some(candidate=>candidate.id===item?.id)
+         };
+       });
+       if(
+         !placedHardCafe.item
+         || placedHardCafe.item.r!==1
+         || placedHardCafe.texture!=='furniture:pinkTableLongHardCafe'
+         || !placedHardCafe.saved
+         || placedHardCafe.coins
+           !==hardCafeBefore.coins-FURNITURE_CONFIG.pinkTableLongHardCafe.price
+         || hardCafeBefore.count+1
+           !==await page.evaluate(()=>window.gameController.getState().items.filter(
+             item=>item.type==='pinkTableLongHardCafe'
+           ).length)
+       ){
+         problems.push(`HardCafe purchase/place/rotate failed: ${JSON.stringify({
+           hardCafeBefore,
+           placedHardCafe
+         })}`);
+       }
+       await page.reload({waitUntil:'domcontentloaded'});
+       await page.waitForFunction(
+         ()=>document.body.dataset.gameReady==='1'
+           &&document.getElementById('bootOverlay')?.classList.contains('hidden'),
+         null,
+         {timeout:20000}
+       );
+       const reloadedHardCafe=await page.evaluate(id=>{
+         const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+         const item=scene.state.items.find(candidate=>candidate.id===id);
+         return {
+           item,
+           texture:item?scene.entities.get(id)?.texture?.key:null
+         };
+       },placedHardCafe.item?.id);
+       if(
+         !reloadedHardCafe.item
+         || reloadedHardCafe.item.r!==1
+         || reloadedHardCafe.texture!=='furniture:pinkTableLongHardCafe'
+       ) problems.push(`HardCafe reload failed: ${JSON.stringify(reloadedHardCafe)}`);
        const dragPlan=await page.evaluate(()=>{
         const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
         const canvas=document.querySelector('#phaserGame canvas');
@@ -508,13 +571,14 @@ try{
       const cats=[...scene.catEntities.values()].map(entity=>({x:entity.sprite.x,y:entity.sprite.y}));
       const targetTypes=new Set([
         'counter','coffeeMachine','oven','washStation','dessert','smartOrder',
-        'pinkTableLong','roundTable','chair','creamSofa','doubleCatTree','scratchPost'
+        'pinkTableLong','pinkTableLongHardCafe','roundTable','chair',
+        'creamSofa','doubleCatTree','scratchPost'
       ]);
       const targetEntities=[...scene.entities.values()]
         .filter(entity=>targetTypes.has(entity.item.type))
         .map(entity=>({type:entity.item.type,texture:entity.texture.key}));
       const rotationCalibration={};
-      for(const type of ['pinkTableLong','counter','chair','dessert']){
+      for(const type of ['pinkTableLong','pinkTableLongHardCafe','counter','chair','dessert']){
         let entity=[...scene.entities.values()].find(candidate=>candidate.item.type===type);
         let temporary=false;
         if(!entity){
@@ -642,12 +706,13 @@ try{
     }
     if(ortho.demo){
       for(const [type,frames] of Object.entries(state.rotationCalibration)){
-        const expectedDirections=type==='pinkTableLong'?2:4;
+        const expectedDirections=
+          type==='pinkTableLong'||type==='pinkTableLongHardCafe'?2:4;
         if(new Set(frames.map(frame=>frame.texture)).size!==expectedDirections){
           problems.push(`${type} policy texture count is wrong: ${JSON.stringify(frames)}`);
         }
       }
-      if(Object.keys(state.rotationCalibration).length!==4){
+      if(Object.keys(state.rotationCalibration).length!==5){
         problems.push(`rotation calibration fixtures missing: ${JSON.stringify(state.rotationCalibration)}`);
       }
     }
@@ -671,7 +736,7 @@ try{
     await page.goto(origin+'/?projection=ortho',{waitUntil:'domcontentloaded',timeout:20000});
     await page.waitForFunction(()=>document.body.dataset.gameReady==='1',null,{timeout:20000});
     const calibration={};
-    for(const type of ['pinkTableLong','counter','chair','dessert']){
+    for(const type of ['pinkTableLong','pinkTableLongHardCafe','counter','chair','dessert']){
       await page.evaluate(fixtureType=>{
         const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
         scene.catBehaviorController.pause('rotation-smoke');
@@ -700,7 +765,7 @@ try{
         };
       },type);
       const steps=[await read()];
-      const clickCount=type==='pinkTableLong'?2:4;
+      const clickCount=type==='pinkTableLong'||type==='pinkTableLongHardCafe'?2:4;
       for(let click=0;click<clickCount;click++){
         await page.click('#rotateBtn');
         await page.waitForTimeout(40);
@@ -716,7 +781,7 @@ try{
       if(end.r!==start.r||end.x!==start.x||end.y!==start.y||end.xWorld!==start.xWorld||end.yWorld!==start.yWorld){
         throw new Error(`${type} policy cycle drifted from the origin: ${JSON.stringify(steps)}`);
       }
-      const expectedDirections=type==='pinkTableLong'?2:4;
+      const expectedDirections=type==='pinkTableLong'||type==='pinkTableLongHardCafe'?2:4;
       if(new Set(steps.slice(0,-1).map(step=>step.texture)).size!==expectedDirections){
         throw new Error(`${type} toolbar rotate direction cycle failed: ${JSON.stringify(steps)}`);
       }
@@ -754,7 +819,8 @@ try{
       return {mode:scene.projectionMode,thumbnails};
     },[
       'counter','coffeeMachine','oven','washStation','dessert','smartOrder',
-      'pinkTableLong','roundTable','chair','creamSofa','doubleCatTree','scratchPost'
+      'pinkTableLong','pinkTableLongHardCafe','roundTable','chair',
+      'creamSofa','doubleCatTree','scratchPost'
     ]);
     if(state.mode!==projection.mode)failures.push(`mode ${state.mode} !== ${projection.mode}`);
     for(const [id,path] of Object.entries(state.thumbnails)){

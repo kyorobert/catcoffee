@@ -1,9 +1,9 @@
-import {INPUT_MODE} from '../core/input-state.js?v=0577e';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0577e';
+﻿import {INPUT_MODE} from '../core/input-state.js?v=0577k';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0577k';
 import {
   getFurnitureDisplayState,
   getFurnitureVisualPosition
-} from '../core/furniture-display-state.js?v=0577e';
+} from '../core/furniture-display-state.js?v=0577k';
 import {
   createRotationEditSession,
   rebaseRotationEditSession,
@@ -11,7 +11,7 @@ import {
   getOrthogonalRotationPolicy,
   resolveOrthogonalRotationPlacement,
   resolveNextOrthogonalRotation
-} from '../core/orthogonal-furniture-rotation.js?v=0577e';
+} from '../core/orthogonal-furniture-rotation.js?v=0577k';
 
 const DRAG_THRESHOLD_PX = 8;
 

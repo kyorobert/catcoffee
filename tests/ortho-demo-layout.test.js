@@ -1,14 +1,14 @@
-import assert from 'node:assert/strict';
+﻿import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0577e';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0577e';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0577e';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0577k';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0577k';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0577k';
 import {ORTHO_DEMO_LAYOUT, ORTHO_DEMO_ENTRANCE, buildOrthoDemoItems, isDemoLayoutRequested}
-  from '../assets/js/config/ortho-demo-layout.js?v=0577e';
+  from '../assets/js/config/ortho-demo-layout.js?v=0577k';
 import {ORTHO_ROOM_ZONES as Z, rectContainsCell, zoneCells}
-  from '../assets/js/config/ortho-room-zones.js?v=0577e';
+  from '../assets/js/config/ortho-room-zones.js?v=0577k';
 
 const {cols, rows} = ROOM_CONFIG.floor;
 
@@ -22,8 +22,7 @@ for (const [s, e] of [
 // --- fixture shape: frozen data, deterministic display-only ids, existing furniture ---
 assert.ok(Object.isFrozen(ORTHO_DEMO_LAYOUT), 'ORTHO_DEMO_LAYOUT is frozen');
 const items = buildOrthoDemoItems();
-assert.ok(items.length >= 20 && items.length <= 26, 'demo is a dense but readable cafe (ARCH-0574, ~20-26 items)');
-assert.ok(items.length > 18, 'demo is denser than V0573 (18 items)');
+assert.equal(items.length, 16, 'ART-0577K demo is a readable real-grid café, not an art contact sheet');
 assert.equal(items.length, ORTHO_DEMO_LAYOUT.length);
 const ids = new Set(items.map(i => i.id));
 assert.equal(ids.size, items.length, 'demo item ids are unique');
@@ -39,23 +38,28 @@ assert.notEqual(again[0], items[0]);
 assert.deepStrictEqual(again, items);
 
 // --- zone membership: each item's origin cell sits in its intended zone ---
-const equipment = ['coffeeMachine', 'oven', 'dessert', 'washStation', 'bookshelf'];
-const counters = ['counter', 'console'];
+const serviceBand = ['counter', 'coffeeMachine', 'washStation', 'dessert'];
 const cats = ['catBed', 'doubleCatTree', 'scratchPost', 'catTent', 'catCastle'];
 for (const it of items) {
-  if (equipment.includes(it.type)) assert.ok(rectContainsCell(Z.staffWorkZone, it.x, it.y), `${it.type} in staffWorkZone`);
-  if (counters.includes(it.type)) assert.ok(rectContainsCell(Z.serviceCounterLine, it.x, it.y), `${it.type} on serviceCounterLine`);
+  if (serviceBand.includes(it.type)) assert.ok(rectContainsCell(Z.serviceCounterLine, it.x, it.y), `${it.type} on selected option-C service line`);
   if (cats.includes(it.type)) assert.ok(rectContainsCell(Z.catZone, it.x, it.y), `${it.type} in catZone`);
   if (it.type === 'smartOrder') assert.ok(rectContainsCell(Z.customerServiceZone, it.x, it.y), 'the order kiosk faces the customer service zone');
 }
-// A CONTINUOUS service band: the counter cells and the equipment cells each cover x1-6 with no gap.
+// ART-0577K selected option C: counter -> coffee -> wash -> dessert, with the
+// four real objects covering x1-6 continuously on the shared grid line.
 const gridForBand = new GridSystem(ROOM_CONFIG, FURNITURE_CONFIG, {mode: 'ortho'});
 const cellsAt = row => new Set(items.flatMap(it => gridForBand.getFootprintCells(it.type, it.x, it.y, it.r)).filter(c => c.y === row).map(c => c.x));
-const counterXs = cellsAt(2), equipmentXs = cellsAt(0);
+const serviceXs = cellsAt(2);
+assert.deepEqual(
+  items.filter(item => serviceBand.includes(item.type)).sort((a, b) => a.x - b.x).map(item => item.type),
+  ['counter', 'coffeeMachine', 'washStation', 'dessert']
+);
 for (let x = 1; x <= 6; x++) {
-  assert.ok(equipmentXs.has(x), `continuous equipment band covers x${x} (no gap)`);
-  assert.ok(counterXs.has(x), `continuous counter bar covers x${x} (no gap)`);
+  assert.ok(serviceXs.has(x), `selected option-C service line covers x${x} (no gap)`);
 }
+assert.ok(items.some(item => item.type === 'pinkTableLong'), 'SoftCute seating island is present');
+assert.ok(items.some(item => item.type === 'pinkTableLongHardCafe'), 'HardCafe seating island is present');
+assert.ok(!items.some(item => /rug/i.test(item.type)), 'concept-only rug blocks are absent from the Runtime fixture');
 assert.ok(items.filter(i => cats.includes(i.type)).length >= 2, 'a concentrated cat cluster exists');
 // No furniture inside the main aisle spine (kept clear for circulation).
 for (const it of items) {
@@ -97,7 +101,7 @@ assert.equal(walkable(ORTHO_DEMO_ENTRANCE.x, ORTHO_DEMO_ENTRANCE.y),false,'door 
 assert.ok(walkable(Z.customerEntryStaging.x, Z.customerEntryStaging.y), 'entry staging cell is walkable');
 const reach = reachFrom(Z.customerEntryStaging.x, Z.customerEntryStaging.y);
 for (const k of ['4,3', '5,3', '7,3']) assert.ok(reach.has(k), `service frontage reachable from entry: ${k}`);
-for (const k of ['3,4', '3,5', '4,5']) assert.ok(reach.has(k), `seating approach reachable from entry: ${k}`);
+for (const k of ['3,4', '3,5', '6,5']) assert.ok(reach.has(k), `seating approach reachable from entry: ${k}`);
 for (const k of ['4,6', '5,6']) assert.ok(reach.has(k), `cat area reachable from entry: ${k}`);
 assert.ok(reach.size >= 40, 'a large connected walkable area (aisles not a one-cell maze)');
 
@@ -125,4 +129,4 @@ for (const banned of ['Phaser', 'document', 'window', 'localStorage', 'SaveAdapt
 }
 assert.ok(!/\b(manager|staff|employee|worker)\b/i.test(source), 'demo layout must not encode actor identity');
 
-console.log(`Ortho demo layout: ${items.length} valid non-overlapping items zoned by ortho-room-zones (equipment/counter/seating/cats), 2-cell main aisle clear, entry -> service/seating/cats reachable without crossing the work side, work side continuous, pure display-only fixture (never saved).`);
+console.log(`Ortho demo layout: ${items.length} valid non-overlapping items with selected option C (counter -> coffee -> wash -> dessert), SoftCute/HardCafe islands, clear 2-cell aisle, reachable cat zone and pure display-only state.`);

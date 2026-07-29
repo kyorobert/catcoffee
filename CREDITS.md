@@ -78,3 +78,13 @@
 - Runtime 路徑：
   `assets/furniture/orthogonal/{pinkTableLong,chair,counter,dessert}/*.png`。
 - 授權：隨本專案使用；未使用外部遊戲截圖、未授權商業素材或開羅遊戲官方素材。
+
+### V0577K 核准核心家具與雙桌正式整合
+
+- 範圍：`pinkTableLong`、`pinkTableLongHardCafe`、`chair`、`counter`、`dessert`
+  共 20 張正式 Orthogonal 透明 PNG。
+- 來源：ART-0577G/J 已核准的專案內 workbench 稿，以及本卡為 chair 產生的原創
+  四方向 source sheet；由 Codex 以本地裁切、透明化、最近鄰縮放與接地校準整合。
+- Runtime 路徑：`assets/furniture/orthogonal/{id}/{id}-{direction}.png`。
+- 開發來源與處理工具保留於 `tools/`，不打入 GitHub Pages 部署包。
+- 授權：隨本專案使用；未下載或使用未授權商業遊戲素材。

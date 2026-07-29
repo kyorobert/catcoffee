@@ -1,5 +1,160 @@
 # 開發日誌
 
+## 2026-07-30｜ART-0577K-APPROVED-CORE-ORTHOGONAL-FURNITURE-FORMAL-INTEGRATION
+
+- 版本／Build：`V0.57.7-alpha｜核准核心正交家具正式素材與雙桌商品整合版` /
+  `0577k`；package 維持 `0.57.7-alpha`。
+- 備份：`貓咪咖啡廳_backup_v0577e_before_0577k`，含 manifest 與原 48 張
+  Orthogonal PNG hashes；專案無 `.git`，未執行 Git 或部署操作。
+- 正式素材：改圖範圍精確為 `pinkTableLong/chair/counter/dessert` 共 16 張；
+  新增 `pinkTableLongHardCafe` 4 張，總數 52；其餘 8 個第一批 ID 未變。
+- Runtime：新增 HardCafe 獨立商品、axis2 mapping 與 13 件 ortho override catalog；
+  Store／Ghost／Entity／rotate commit 共用既有 selector。
+- Demo：選用 Option C 連續服務帶，加入 SoftCute／HardCafe 兩座桌椅島與可達貓區；
+  不含未核准地毯，不寫入 save。
+- 契約：`catCafePhaserV0540`、schema 5401、migration 5402、Grid、Camera、入口、
+  Placement、Occupancy、Pathfinding、貓咪 Runtime／素材未變。
+- 測試：Node、HTTP、Chrome／Edge Browser Smoke、rotation browser 與部署 Gate
+  全數通過；pageerror／failed request／fatal console 為 0。
+- 部署：重建 `dist/cat_cafe_v0577k_git_deploy/` 與
+  `cat_cafe_v0577k_git_deploy.zip`；另從部署資料夾實際啟動 Chrome／Edge Smoke，
+  指定 projection URL 全部通過。未上傳 GitHub Pages。
+- 證據：`docs/evidence/v0577k/`；結果、驗收與 Runtime comparison 已落檔。
+- iPhone Safari 真機仍 pending；第二批 35 件未開始；下一個 P0 建議
+  `ANIM-0578-CAT-LOCOMOTION-AND-DIRECTIONAL-STATE-AUDIT`。
+
+## 2026-07-29｜ART-0577J-SHARED-SCALE-SERVICE-BAND-AND-SEATING-ISLAND-REFINEMENT-GATE
+
+- 任務性質：概念 Gate；基線維持 `V0.57.7-alpha`／Build `0577e`／package
+  `0.57.7-alpha`，不改正式 PNG、Runtime、Build、Save 或部署。
+- 備份：`C:\Users\rober\Desktop\貓咪咖啡廳_backup_v0577j_before_shared_scale`，
+  10,260 files／727,833,857 bytes。
+- 基線九項 Gate 全通過（含 173 秒 `check:dev` Browser Smoke）後才開始圖像工作。
+- ImageGen：chair 第一稿仍像小床，已自我退回；第二稿縮成薄座墊單人餐椅。
+  counter 保留雙貓掌／開放員工面並降低櫃體；dessert 保留蛋糕、玻璃與貓咪下櫃
+  並收斂體積。來源、prompt 摘要及 chroma-key 流程落在 sources notes。
+- 單一 `DISPLAY` 契約控制所有證據；現有貓咪不個別縮放。輸出 390×844
+  normal/edit/no-character/character/zones、服務帶 A/B/C、桌椅島、ART-I 前後、
+  家具×貓咪、88×120 比例、方向 sheets 與 metrics。
+- 服務帶 A/B/C 未由 Codex 選案；本卡狀態 `AWAITING_PRODUCT_REVIEW`。
+- 新增 P0 `ANIM-0578-CAT-LOCOMOTION-AND-DIRECTIONAL-STATE-AUDIT` 稽核輸入，
+  記錄側姿、水平滑行、四足步態、方向 silhouette、起停轉向與 furniture socket
+  動作缺口；沒有修改貓咪 Runtime。
+- 保護結果：正式 Orthogonal PNG 48 張與 Runtime JS 58 個對完整備份 tree diff
+  均為 `0`；Build／Save/schema/migration 不變。九項測試與 Gate 全通過；
+  ART-0577J Comparison 在 Chrome／Edge 均 HTTP 200、15/15 圖片解碼、
+  0 pageerror／failed request。未建立 dist 或 ZIP。
+
+## 2026-07-29｜ART-0577I-SHARED-CAMERA-CAFE-COMPOSITION-GATE
+
+- 任務性質：下一輪概念 Gate，不是正式整合、Runtime 接線、Build 升版或部署卡；基線維持
+  `V0.57.7-alpha` / Build `0577e` / package `0.57.7-alpha`。
+- 依產品決策建立真正 `390×844` 的固定高角度完整咖啡廳構圖：上側 service band、SoftCute
+  與 HardCafe 兩個桌椅島、右側貓咪互動／裝飾區及中央主要通道。
+- 正常畫面改用低對比暖木材質，不顯示 gameplay grid；另以完全相同的 Camera、家具與角色
+  位置產出半透明 `88:120` 編輯格線版本，明確分離材質層與編輯資訊層。
+- 沿用現行 0577e App shell、現有貓咪、兩款桌子與 ART-0577H chair/counter/dessert 候選稿；
+  所有位置只供 screen-space composition Gate，不是 Runtime mapping。
+- 新增可重建腳本 `tools/build-v0577i-shared-camera-cafe-composition.py`、概念 sources/workbench、
+  12 張 evidence、Result、Acceptance 與 Comparison HTML。
+- 正式核准仍為空：兩款桌子只維持已核准的概念方向；chair、counter、dessert 仍待產品判斷。
+  本卡未開始第二批 35 件家具、未建立正式商品 ID／價格／尺寸，也未實作貓咪家具互動。
+- 保護邊界：正式 Orthogonal PNG 48 張與 0577e 備份 tree diff `0`；Runtime JS 58 個 tree
+  diff `0`。Build、package、module query、Save key `catCafePhaserV0540`、schema 5401、
+  migration 5402 均未變更；未建立 dist 或部署 ZIP。
+- 測試：`npm test`、`test:build`、`test:ortho-furniture`、`test:entrance`、`test:ortho-area`、
+  `test:ortho-rotation`、`test:rotation-state`、`check:deploy` 與 `check:dev` 全部通過；
+  Chrome／Edge Browser Smoke 通過；Comparison HTML 亦於兩個瀏覽器取得 HTTP 200、
+  11/11 圖片解碼成功且 0 pageerror / failed request。詳細結果記錄於
+  `ART-0577I_SHARED_CAMERA_CAFE_COMPOSITION_ACCEPTANCE.md`。
+
+## 2026-07-29｜ART-0577G-PARTIAL-APPROVAL-AND-0577H-GATE-START
+
+- 產品部分核准：`pinkTableLong_softCute_concept` 與
+  `pinkTableLong_hardCafe_concept` 的產品／視角方向獲准，兩者是不同商品且
+  不互相取代；正式尺寸、ID、價格、Runtime 與素材覆寫仍未核准。
+- 退回：`chair` 的正立面／高椅背與薄側面不符固定上方鏡頭；需以完整椅面旋轉，
+  椅背只作遠端方向 cue。
+- 僅核准產品識別：`counter` 的雙貓掌顧客面／員工收納背面；
+  `dessert` 的高型蛋糕展示、甜點陳列／貓咪下櫃。兩者四向鏡頭與側面仍退回。
+- 下一 Gate：`ART-0577H-390X844-SHARED-CAMERA-COMPOSITE-GATE`，只建立真實
+  390×844 Orthogonal 場景概念合成，不動正式 PNG、Runtime、Build、Save、ZIP
+  或其餘 35 件。
+- Gate 產物完成：以 Build 0577e 的真實 390×844 Runtime 截圖為場景殼，
+  依 `axisX={88,0}`／`axisY={0,120}` 製作兩款桌子、固定鏡頭四向椅子、
+  吧台、蛋糕櫃及現有貓咪的概念合成；新增 Result、Acceptance、Comparison
+  與 `docs/evidence/v0577h-shared-camera-composite/`。
+- 概念重作：chair 四向保留同一完整椅面、低椅背只作方向 cue；counter 保留
+  雙貓掌正面／員工收納背面並加寬端面檯面；dessert 保留高型蛋糕展示與貓咪
+  下櫃並增加四向展示深度。三者仍為 `AWAITING_PRODUCT_REVIEW`。
+- 邊界確認：正式 48 張 Orthogonal PNG、Runtime JS、Build、package、Save、
+  schema、migration 均未修改；未建立部署資料夾或 ZIP，未開始其餘 35 件家具。
+- 驗證：正式 PNG 48 張 tree diff `0`、Runtime JS 58 個 tree diff `0`；
+  `npm test`、`test:build`、`test:ortho-furniture`、`test:entrance`、
+  `test:ortho-area`、`test:ortho-rotation`、`test:rotation-state`、
+  `check:deploy`、`check:dev`（含 Browser Smoke）全部通過。
+
+## 2026-07-29｜ART-0577G-SHARED-VIEWPOINT-REWORK
+
+- 任務性質：下一輪概念 Gate／驗收稿校正；維持 `V0.57.7-alpha`／Build
+  `0577e`，不升版、不接 Runtime、不重建部署 ZIP。
+- `pinkTableLong`：保留核准的 A 視角與長軸，拆成
+  `pinkTableLong_softCute_concept` 與 `pinkTableLong_hardCafe_concept`
+  兩項不同商品方向；硬質版不取代奶油粉可愛版。
+- `chair`：恢復奶油坐墊與貓耳／貓臉椅背，四向同時保留椅面與方向 cue。
+- `counter`：以正式雙貓掌顧客面與員工開放收納為不可 generic 化的產品識別，
+  只提高檯面可見量。
+- `dessert`：退回低矮斜玻璃方向，恢復高型三層蛋糕展示櫃、甜點陳列與貓咪下櫃。
+- 證據：新增正式正面對照、雙桌產品頁、與貓咪比例、390×844 手機縮圖及
+  88×120 cell ratio 預覽，集中於
+  `docs/evidence/v0577g-shared-viewpoint-rework/`。
+- 保護邊界：正式 48 張 Orthogonal PNG、Runtime、mapping、rotation、footprint、
+  Save／schema／migration、package、module query、dist 與 ZIP 均未修改。
+- 驗證：正式 PNG SHA-256 tree diff `0`、Runtime JS tree diff `0`；
+  `npm test`、`test:build`、`test:ortho-furniture`、`check:deploy` 與
+  `check:dev`（含 Browser Smoke）通過。
+- 下一 Gate：等待產品逐項核准兩張桌、chair、counter、dessert；未核准項不得
+  進正式素材製作。
+
+## 2026-07-29｜ART-0577F-A-SHARED-VIEWPOINT-ACCEPTANCE-GATE
+
+- 產品決策：候選 A 的近俯視觀看角度、桌面占比與 2×1／1×2 長軸關係已核准；
+  原候選 PNG 不可原樣上線。
+- A 精修：建立硬質咖啡廳餐桌驗收稿，薄化桌緣、降低蓬鬆高光、略強化但保持
+  次要的桌腳；以可重建的硬質表面處理移除中央軟質漸層、加入稀疏直線漆木紋；
+  桌面像素 proxy 橫向 91.8%、縱向 92.0%。
+- 共用語言：先建立 chair／counter／dessert 概念驗收稿；分別以椅面、檯面與
+  斜玻璃展示面作主視覺，三者均維持 `UNAPPROVED_SHARED_LANGUAGE_DRAFT`。
+- 證據：新增原 A／精修比較、四件總覽、三件 cardinal sheet、貓咪比例與
+  390×844 預覽，集中於 `docs/evidence/v0577f-a-shared-viewpoint-gate/`。
+- 文件：更新原 A Gate 驗收／結果，新增共用視角 Result／Acceptance／Comparison，
+  並新增 `DEC-031`。
+- 保護邊界：Build／package／module query、正式 48 PNG、所有 Runtime 模組、
+  visual mapping、rotation resolver、Save／schema／migration 均未修改；
+  未建立部署 ZIP、未批量重畫其他家具。
+- 下一 Gate：等待產品分別核准 A 硬質精修稿與共用視角語言，之後才可建立正式
+  PNG／Runtime 整合 Task。
+
+## 2026-07-29｜ART-0577F-PINK-TABLE-VIEWPOINT-GATE
+
+- 版本／Build：維持 `V0.57.7-alpha｜正交家具視覺重構第一階段`／`0577e`，
+  package 維持 `0.57.7-alpha`；本卡不升版。
+- 任務轉向：依產品中止指示，停止 ART-0577F 正式素材產製、切圖、校準與 Runtime
+  接線；先前的正立面主導中間稿標示為 `REJECTED_FRONT_ELEVATION_DOMINANT`。
+- 視角 Gate：由零建立 A–F 六組 `pinkTableLong` 概念，每組含 2×1 橫向與
+  1×2 縱向，探索 `TOP-SURFACE-FIRST NEAR-TOP-DOWN FURNITURE`，不沿用退件稿作母稿。
+- 證據：新增總覽、實際 88×120 格比、與現有貓咪比例、杯盤可用桌面、
+  0577e 退件比較、390×844 手機畫布預覽及候選量測 JSON，集中於
+  `docs/evidence/v0577f-table-viewpoint-gate/`。
+- 文件：新增 Gate Result、Acceptance 與 Comparison HTML；Acceptance 的
+  A–F／全部退回／核准正式製作選項全部保持未勾選。
+- 保護邊界：未修改 `assets/furniture/orthogonal/`、visual mapping、rotation
+  resolver、FurnitureEntity、FurnitureDragController、Grid、Placement、Occupancy、
+  Pathfinding、Camera、Save、Room Skin、Build、module query、schema 或 migration；
+  未重畫 chair／counter／dessert，也未建立部署 ZIP。
+- 下一 Gate：等待產品明確回覆「核准候選 X，可以進入正式素材整合」；未核准前
+  不得開始正式 PNG 或 Runtime 整合。
+
 ## 2026-07-28｜ART-0577E-ORTHOGONAL-FURNITURE-VISUAL-REDESIGN-PHASE1
 
 - 版本／Build：`V0.57.7-alpha｜正交家具視覺重構第一階段`／`0577e`；

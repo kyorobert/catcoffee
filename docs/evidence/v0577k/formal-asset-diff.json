@@ -1,0 +1,285 @@
+{
+  "task": "ART-0577K-APPROVED-CORE-ORTHOGONAL-FURNITURE-FORMAL-INTEGRATION",
+  "baselineBuild": "0577e",
+  "currentBuild": "0577k",
+  "generatedAt": "2026-07-29T17:35:06.377Z",
+  "baseline": {
+    "pngCount": 48,
+    "source": "backup_v0577e_before_0577k/assets/furniture/orthogonal"
+  },
+  "current": {
+    "pngCount": 52,
+    "source": "assets/furniture/orthogonal"
+  },
+  "expectedScope": {
+    "changedExistingIds": [
+      "chair",
+      "counter",
+      "dessert",
+      "pinkTableLong"
+    ],
+    "addedIds": [
+      "pinkTableLongHardCafe"
+    ],
+    "unchangedExistingIds": 8,
+    "note": "Only four approved first-batch products changed; HardCafe is an independent new product."
+  },
+  "actual": {
+    "changedExistingIds": [
+      "chair",
+      "counter",
+      "dessert",
+      "pinkTableLong"
+    ],
+    "addedIds": [
+      "pinkTableLongHardCafe"
+    ],
+    "removedIds": [],
+    "unchangedIds": [
+      "coffeeMachine",
+      "creamSofa",
+      "doubleCatTree",
+      "oven",
+      "roundTable",
+      "scratchPost",
+      "smartOrder",
+      "washStation"
+    ],
+    "changedFiles": [
+      "chair/chair-down-left.png",
+      "chair/chair-down-right.png",
+      "chair/chair-up-left.png",
+      "chair/chair-up-right.png",
+      "counter/counter-down-left.png",
+      "counter/counter-down-right.png",
+      "counter/counter-up-left.png",
+      "counter/counter-up-right.png",
+      "dessert/dessert-down-left.png",
+      "dessert/dessert-down-right.png",
+      "dessert/dessert-up-left.png",
+      "dessert/dessert-up-right.png",
+      "pinkTableLong/pinkTableLong-down-left.png",
+      "pinkTableLong/pinkTableLong-down-right.png",
+      "pinkTableLong/pinkTableLong-up-left.png",
+      "pinkTableLong/pinkTableLong-up-right.png"
+    ],
+    "addedFiles": [
+      "pinkTableLongHardCafe/pinkTableLongHardCafe-down-left.png",
+      "pinkTableLongHardCafe/pinkTableLongHardCafe-down-right.png",
+      "pinkTableLongHardCafe/pinkTableLongHardCafe-up-left.png",
+      "pinkTableLongHardCafe/pinkTableLongHardCafe-up-right.png"
+    ],
+    "removedFiles": [],
+    "unchangedFiles": 32
+  },
+  "files": {
+    "chair/chair-down-left.png": {
+      "bytes": 8836,
+      "sha256": "f712b8a0758fd7c40bc4b80ef01eb268f68397e04c6d89c25d85046eb848933c"
+    },
+    "chair/chair-down-right.png": {
+      "bytes": 10845,
+      "sha256": "12ae5ad43a3153fef7d37cfdeff5eb3e52700b3c776c7dc4cd669b96d12f38a7"
+    },
+    "chair/chair-up-left.png": {
+      "bytes": 10523,
+      "sha256": "22b0c3862ad68a8e0734bab2f13920dab6b386844028dd521b2bc2d245bf92f6"
+    },
+    "chair/chair-up-right.png": {
+      "bytes": 9112,
+      "sha256": "327c4ffe05650074e849079f660b1d6041f536da64726b917fc7c4cf0b5a9722"
+    },
+    "coffeeMachine/coffeeMachine-down-left.png": {
+      "bytes": 19430,
+      "sha256": "11f251e9ef961851061d5add50c5128b64dfc0137cd3c8ac22b8b59ee990af85"
+    },
+    "coffeeMachine/coffeeMachine-down-right.png": {
+      "bytes": 19523,
+      "sha256": "4ee49b5a119b6cf2d02066737c1f077be33faa7ce5a8351719bcf16716f9bb0e"
+    },
+    "coffeeMachine/coffeeMachine-up-left.png": {
+      "bytes": 16950,
+      "sha256": "f576fcd6901f61f29ef2d8bc044f1a9e47ddb3fe014c6d409136779b05e15695"
+    },
+    "coffeeMachine/coffeeMachine-up-right.png": {
+      "bytes": 16668,
+      "sha256": "70499cc96659f4cdc243b7fac5a8e2c62409cba979a1dd30d90925317fbcda54"
+    },
+    "counter/counter-down-left.png": {
+      "bytes": 11256,
+      "sha256": "17daab8522a6d53a88e636fd6cb67b200dd778c1f07c1c1bceb05fee1bb30b16"
+    },
+    "counter/counter-down-right.png": {
+      "bytes": 21829,
+      "sha256": "327b35be3d4577836bd34bcae063cb19e8a288fa7196da4df0dcbbda9e324107"
+    },
+    "counter/counter-up-left.png": {
+      "bytes": 26779,
+      "sha256": "3c6564961e39eb85091ca9a2e09eb908fe4be9d2b08cfb29196d47943a709921"
+    },
+    "counter/counter-up-right.png": {
+      "bytes": 11557,
+      "sha256": "b7ee1d6c47dd926e81e01b40cd6013dd697a0a7927382e09de7dfbbe645b802f"
+    },
+    "creamSofa/creamSofa-down-left.png": {
+      "bytes": 36223,
+      "sha256": "5e300fefd45f85e01b013236470ee3099139ab08b2d56abca1b3d803e93b7caa"
+    },
+    "creamSofa/creamSofa-down-right.png": {
+      "bytes": 36602,
+      "sha256": "ad168d48c7e7fde27e461001751e011c8a672a09a411cedbf0e7515ca2876ab9"
+    },
+    "creamSofa/creamSofa-up-left.png": {
+      "bytes": 30564,
+      "sha256": "4e62ef3cb40c69f9523c5093251a213f2c1c69865f16b780d8b9990b88422768"
+    },
+    "creamSofa/creamSofa-up-right.png": {
+      "bytes": 30407,
+      "sha256": "9e8a8e91663b775686e9d158df6df7cdf6ff684a9fd0f87c1026fb1c9b114a37"
+    },
+    "dessert/dessert-down-left.png": {
+      "bytes": 17600,
+      "sha256": "04789f9b35e214f2ff2c19f1c000af743821af09f58fcd6d1dc127ae9ee09db1"
+    },
+    "dessert/dessert-down-right.png": {
+      "bytes": 31107,
+      "sha256": "a5e9ff4cdb02b76e4877f76ca4d34ce55367101c3f87986745f8d57ceb77518b"
+    },
+    "dessert/dessert-up-left.png": {
+      "bytes": 22719,
+      "sha256": "6fb91ffaaa6179fd85d18185b1f34c0e04a10d902ec847e2e9463186ce3662e9"
+    },
+    "dessert/dessert-up-right.png": {
+      "bytes": 17129,
+      "sha256": "947786d8974db607962e9a2e078a057f3745256b0f99f485791aa677c8168387"
+    },
+    "doubleCatTree/doubleCatTree-down-left.png": {
+      "bytes": 18555,
+      "sha256": "87b65f75137c2ae7396f35679a3f4d1a3ce5dd039c1a022b20c521556da58956"
+    },
+    "doubleCatTree/doubleCatTree-down-right.png": {
+      "bytes": 26375,
+      "sha256": "0afa4074cb8490f988c02506c7d3bceb93a13453e577f66b26b0defdebd987ea"
+    },
+    "doubleCatTree/doubleCatTree-up-left.png": {
+      "bytes": 18371,
+      "sha256": "b90eea42b6d705bf5df3ccf843fdde447e9ccdb359a717416db39e64e1cae512"
+    },
+    "doubleCatTree/doubleCatTree-up-right.png": {
+      "bytes": 24160,
+      "sha256": "952d905f3ebac8259892ac0557e9c78acfc561021db7f89afda2ec0f749500ea"
+    },
+    "oven/oven-down-left.png": {
+      "bytes": 17574,
+      "sha256": "72dc3449f94cafb17908dd97c854701017ed9e777ea4480cf4e6deb036d5f202"
+    },
+    "oven/oven-down-right.png": {
+      "bytes": 17464,
+      "sha256": "1c2926e8c7e65570a5baa6b09aa5397b2e2ebabbc28364069da78a54eb0942c8"
+    },
+    "oven/oven-up-left.png": {
+      "bytes": 16301,
+      "sha256": "0456d612938fc71c5f0f5f35cd4a1e6467e971979e6a6c5eff9405bada38684c"
+    },
+    "oven/oven-up-right.png": {
+      "bytes": 16100,
+      "sha256": "3cf675d8b56dfcbefb6dbebc8e613a0c150591b25e674ecf2a3d4c62dd7d324e"
+    },
+    "pinkTableLongHardCafe/pinkTableLongHardCafe-down-left.png": {
+      "bytes": 3499,
+      "sha256": "15db2dbfb438b0cd94e714f68d566afdd84352859f1b0d1336c6a8820f8437d4"
+    },
+    "pinkTableLongHardCafe/pinkTableLongHardCafe-down-right.png": {
+      "bytes": 4652,
+      "sha256": "ad40386b49ff46334140263363e944d6618f17ffef0622c5f3fed827b6a3f1c3"
+    },
+    "pinkTableLongHardCafe/pinkTableLongHardCafe-up-left.png": {
+      "bytes": 4669,
+      "sha256": "3b56b373c68551a143543537e277aa7b9157650e48bfb11bd6ca5bd8937cb846"
+    },
+    "pinkTableLongHardCafe/pinkTableLongHardCafe-up-right.png": {
+      "bytes": 3535,
+      "sha256": "f2e743cba66a32632ef32da7f55ae3819e48aba14331daacd3481ccb2f52093f"
+    },
+    "pinkTableLong/pinkTableLong-down-left.png": {
+      "bytes": 9948,
+      "sha256": "f81616d543926bd02ad445d37300b475cbdc60a0546bd996ab76cba96d52dd54"
+    },
+    "pinkTableLong/pinkTableLong-down-right.png": {
+      "bytes": 16880,
+      "sha256": "0f978e33b7b3d6f5834852d563d85ed1a34c0d59b9a75e40c49664a32ab2ef05"
+    },
+    "pinkTableLong/pinkTableLong-up-left.png": {
+      "bytes": 16886,
+      "sha256": "0b895f0e1609f72af68760c7f851484422d590ef46c49f23880bbb1318a415ba"
+    },
+    "pinkTableLong/pinkTableLong-up-right.png": {
+      "bytes": 9951,
+      "sha256": "9d1cb67f41bf966ef5e29cc0b601c20eb4b25a094de93c47d9d5dfd8d5247efb"
+    },
+    "roundTable/roundTable-down-left.png": {
+      "bytes": 14338,
+      "sha256": "1b0565fcd09b97d29207d348a2cc7b7d393013d06f8652a06856e37f23dd59e9"
+    },
+    "roundTable/roundTable-down-right.png": {
+      "bytes": 14400,
+      "sha256": "a45517557221a5ed078068245d7980ead749bba98cfbeaabc4577331dcc1a000"
+    },
+    "roundTable/roundTable-up-left.png": {
+      "bytes": 14440,
+      "sha256": "d1b2d088fa46a1cd0cecae5ce14b548397c708b0f5cc29412fa1c6aa9c918b05"
+    },
+    "roundTable/roundTable-up-right.png": {
+      "bytes": 14486,
+      "sha256": "9287b79bf5a550fc15f1143667a4382a52a11ee0c00bb50360ab068d0dfd3e4c"
+    },
+    "scratchPost/scratchPost-down-left.png": {
+      "bytes": 21450,
+      "sha256": "17b6e69075e903626a3b027540b131e04136665329ae63bda4eb28414813f838"
+    },
+    "scratchPost/scratchPost-down-right.png": {
+      "bytes": 21750,
+      "sha256": "6b7221e7ff597e3f5042f3f8629dd43e79222532383bc13987264ae7c527eddb"
+    },
+    "scratchPost/scratchPost-up-left.png": {
+      "bytes": 21324,
+      "sha256": "21b3fbb6477206abf7d4c584abf48a11a8edc2ccd9528c031837895b29d05e54"
+    },
+    "scratchPost/scratchPost-up-right.png": {
+      "bytes": 21375,
+      "sha256": "87f2b3e8161487a844d030b96777da54cc97287959de5314fc75f4b2ef966c47"
+    },
+    "smartOrder/smartOrder-down-left.png": {
+      "bytes": 22543,
+      "sha256": "ddc37361e143086ab0f2f4b4b8fdec75a163c4eeb30608626cf8f627d46c29a5"
+    },
+    "smartOrder/smartOrder-down-right.png": {
+      "bytes": 22140,
+      "sha256": "5b976dcbc5c037e811ff7985140561fb1f4196a1200e5053a6153dc2e6eca926"
+    },
+    "smartOrder/smartOrder-up-left.png": {
+      "bytes": 17807,
+      "sha256": "fab4861a418763c08e4042d9b2942e20f56f783c84845830bf5436c6ab546bc7"
+    },
+    "smartOrder/smartOrder-up-right.png": {
+      "bytes": 17787,
+      "sha256": "4e90b4201392eab14d743cf23a09e7992f364626a9c54a3b7837f80992e917bc"
+    },
+    "washStation/washStation-down-left.png": {
+      "bytes": 27878,
+      "sha256": "a4c4e09fd9a19205ef44648ed467922fe37c0a3b3ecb53be94d0495f1cf50cb5"
+    },
+    "washStation/washStation-down-right.png": {
+      "bytes": 28171,
+      "sha256": "a476dbe6e73384ddafe4d21532984ce851ef9c81562a0af02668b03c9763669a"
+    },
+    "washStation/washStation-up-left.png": {
+      "bytes": 27305,
+      "sha256": "344bad2ea157074bec7919405ac617a56dd725eab724b5f2f0c985d2c5e86d0a"
+    },
+    "washStation/washStation-up-right.png": {
+      "bytes": 27473,
+      "sha256": "86830d6a57aa74d02973e7733fbcd5931771b6a5b0ed488c6d372a994aa6082a"
+    }
+  }
+}

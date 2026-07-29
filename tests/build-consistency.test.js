@@ -1,18 +1,18 @@
-import assert from 'node:assert/strict';
+﻿import assert from 'node:assert/strict';
 import {readFileSync, readdirSync, statSync} from 'node:fs';
 import {join} from 'node:path';
-import {APP_VERSION, BUILD_ID, SAVE_KEY, BuildMismatchError, assertBuildConsistency} from '../assets/js/config/build-info.js?v=0577e';
+import {APP_VERSION, BUILD_ID, SAVE_KEY, BuildMismatchError, assertBuildConsistency} from '../assets/js/config/build-info.js?v=0577k';
 
 const html = readFileSync('index.html', 'utf8');
 const browserSmoke = readFileSync('tests/browser-smoke.test.js', 'utf8');
-assert.equal(BUILD_ID, '0577e');
+assert.equal(BUILD_ID, '0577k');
 assert.equal(SAVE_KEY, 'catCafePhaserV0540');
-assert.equal(APP_VERSION, 'V0.57.7-alpha｜正交家具視覺重構第一階段');
-assert(html.includes('data-build-id="0577e"'));
-assert(html.includes("window.__CAT_CAFE_HTML_BUILD_ID__ = '0577e'"));
-assert(html.includes('./assets/vendor/phaser-3.90.0.min.js?v=0577e'));
-assert(html.includes('./assets/js/main.js?v=0577e'));
-assert(!browserSmoke.includes("'0577c'"), 'browser smoke retains a stale Build ID');
+assert.equal(APP_VERSION, 'V0.57.7-alpha｜核准核心正交家具正式素材與雙桌商品整合版');
+assert(html.includes('data-build-id="0577k"'));
+assert(html.includes("window.__CAT_CAFE_HTML_BUILD_ID__ = '0577k'"));
+assert(html.includes('./assets/vendor/phaser-3.90.0.min.js?v=0577k'));
+assert(html.includes('./assets/js/main.js?v=0577k'));
+assert(!browserSmoke.includes("'0577e'"), 'browser smoke retains a stale Build ID');
 assert(!/https?:\/\//i.test(html), 'runtime HTML must not use a CDN');
 assert(!/file:\/\//i.test(html));
 assert(!html.includes('data-boot-clear'));
@@ -32,18 +32,19 @@ for (const file of runtimeFiles) {
   assert(!source.includes('?v=0576a'), `${file} contains obsolete module query v=0576a`);
   assert(!source.includes('?v=0576b'), `${file} contains obsolete module query v=0576b`);
   assert(!source.includes('?v=0577d'), `${file} contains obsolete module query v=0577d`);
+  assert(!source.includes('?v=0577e'), `${file} contains obsolete module query v=0577e`);
   if (file.endsWith('.js')) {
     for (const match of source.matchAll(/(?:from\s*|import\s*)["'](\.{1,2}\/[^"']+\.js)(\?v=[^"']+)?["']/g)) {
-      assert.equal(match[2], '?v=0577e', `${file} has an unversioned or inconsistent import: ${match[0]}`);
+      assert.equal(match[2], '?v=0577k', `${file} has an unversioned or inconsistent import: ${match[0]}`);
     }
   }
 }
 
-assert.equal(assertBuildConsistency('0577e'), true);
+assert.equal(assertBuildConsistency('0577k'), true);
 assert.throws(() => assertBuildConsistency('0550-old'), error => {
   assert(error instanceof BuildMismatchError);
   assert.equal(error.htmlBuildId, '0550-old');
-  assert.equal(error.jsBuildId, '0577e');
+  assert.equal(error.jsBuildId, '0577k');
   assert(error.message.includes('介面版本不一致'));
   return true;
 });

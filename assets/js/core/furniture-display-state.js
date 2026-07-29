@@ -1,12 +1,12 @@
-import {getFurnitureVisualDefinition} from '../config/furniture-visual-config.js?v=0577e';
-import {resolveFurnitureDirection,rotationToDirection} from './furniture-direction.js?v=0577e';
+﻿import {getFurnitureVisualDefinition} from '../config/furniture-visual-config.js?v=0577k';
+import {resolveFurnitureDirection,rotationToDirection} from './furniture-direction.js?v=0577k';
 import {
   resolveOrthogonalRotationPlacement,
   getOrthogonalRotationPolicy,
   effectiveRotationForPolicy,
   orthogonalRotationToCardinal,
   orthogonalRotationToTextureDirection
-} from './orthogonal-furniture-rotation.js?v=0577e';
+} from './orthogonal-furniture-rotation.js?v=0577k';
 
 // Pure display description shared by the scene entity and its drag ghost.
 // It contains only JSON-like values and never touches a texture manager or sprite.

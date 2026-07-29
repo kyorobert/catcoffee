@@ -1,5 +1,50 @@
 # V0.57.7-alpha 專案現況
 
+## Build 0577k：核准核心正交家具正式素材與雙桌商品整合
+
+- 現行版本為 `V0.57.7-alpha｜核准核心正交家具正式素材與雙桌商品整合版`，
+  Build `0577k`，package `0.57.7-alpha`。
+- `ART-0577K` 已把核准稿接入真實 Phaser Runtime：SoftCute
+  `pinkTableLong`、新獨立商品 `pinkTableLongHardCafe`、四向 `chair`、
+  `counter` 與 `dessert`。
+- 原第一批仍精確為 12 件；核准 ortho override catalog 現為 13 件。其餘 35 件
+  仍使用既有 base visual，第二批未核准、未開始。
+- 正式 Orthogonal PNG 為 52 張：基線 48 張中的 16 張改圖，加上 HardCafe 4 張；
+  其餘第一批 8 個 ID／32 張未變。
+- Demo Runtime 採 Option C：
+  `counter → coffeeMachine → washStation → dessert`，並同時呈現 SoftCute／HardCafe
+  兩座桌椅島與可達貓區；fixture 使用真實 Grid、Occupancy、Placement 與 BFS。
+- Store、Entity、Ghost、preview、rotate commit 共用既有 visual selector 與 0577d
+  rotation envelope；`fixed/axis2/cardinal4` 契約不變。
+- `iso` 仍為預設與 rollback；`ortho` 仍為 URL opt-in；`flat`／invalid fallback
+  未變。
+- Save key `catCafePhaserV0540`、schema `5401`、migration `5402`、10×8 Grid、
+  88×120 cell、78 playable cells 與入口 `(7,0)/(8,0)` 未變。
+- Chrome／Edge 自動化通過；iPhone Safari 真機 Gate 仍為 **pending**。
+- 下一個 P0 建議為 `ANIM-0578-CAT-LOCOMOTION-AND-DIRECTIONAL-STATE-AUDIT`；
+  本卡未修改貓咪 Runtime／素材，也未開始第二批家具。
+- 詳見 [結果](./V0577K_APPROVED_CORE_ORTHOGONAL_FURNITURE_RESULT.md)、
+  [驗收](./V0577K_APPROVED_CORE_ORTHOGONAL_FURNITURE_ACCEPTANCE.md) 與
+  [Runtime 比較](./V0577K_APPROVED_CORE_ORTHOGONAL_FURNITURE_COMPARISON.html)。
+
+## ART-0577J 歷史概念 Gate（已由 ART-0577K 正式整合取代）
+
+- Runtime 現況仍是 Build `0577e`；本 Gate 沒有覆寫正式家具 PNG、Runtime、
+  mapping、Build、package、Save、schema 或 migration。
+- 以現有貓咪作固定尺度基準，完成 compact chair、低重心 counter、收斂體積的
+  dessert 概念稿，並以單一顯示契約重組 coffee／wash 服務帶。
+- 提供服務帶 A（緊密）、B（小間距）、C（均衡操作提案）三案；**尚未由產品選案**。
+- SoftCute／HardCafe 桌椅島收近椅距，以杯盤與低透明小地毯取代大型 UI-like
+  色塊；沒有實作 Runtime 自動拼接或吸附。
+- 正常／edit grid 證據共用同一 `390×844` Camera、比例與位置；量測 proxy 位於
+  `docs/evidence/v0577j-shared-scale-service-band/metrics.json`。
+- 本 Gate 仍待產品核准、iPhone Safari 真機仍 pending、第二批 35 件仍未核准。
+- 貓咪 locomotion 問題已升為下一階段 P0 稽核輸入
+  `ANIM-0578-CAT-LOCOMOTION-AND-DIRECTIONAL-STATE-AUDIT`，本卡沒有修改貓咪 Runtime。
+- 詳見 [結果](./ART-0577J_SHARED_SCALE_AND_SERVICE_BAND_RESULT.md)、
+  [驗收](./ART-0577J_SHARED_SCALE_AND_SERVICE_BAND_ACCEPTANCE.md)、
+  [比較](./ART-0577J_SHARED_SCALE_AND_SERVICE_BAND_COMPARISON.html)。
+
 ## Build 0577e（ART-0577E）— 現行
 
 - **正交家具視覺規格 v1** 已落檔，固定 South/front → West/right →
@@ -100,8 +145,8 @@
 
 | 項目 | 現況 |
 |---|---|
-| 版本 | `V0.57.7-alpha｜正交家具視覺重構第一階段` |
-| Build ID | `0577e` |
+| 版本 | `V0.57.7-alpha｜核准核心正交家具正式素材與雙桌商品整合版` |
+| Build ID | `0577k` |
 | package version | `0.57.7-alpha` |
 | 引擎 | Phaser `3.90.0`，Canvas renderer |
 | 引擎來源 | `assets/vendor/phaser-3.90.0.min.js` |
@@ -171,7 +216,7 @@
 | 家具存檔相容 | 完成 | 固定 ID 與 `catCafePhaserV0540` |
 | 核心 12 件 Orthogonal 家具素材 | 完成（分階段精修） | `ART-0577` 提供 48 張；0577e 重畫 `pinkTableLong/chair/counter/dessert` 16 張，其餘 8 件沿用第一批素材 |
 | 其餘 35 件 Orthogonal 家具素材 | 未完成 | 仍沿用既有 base visual；第二批尚未核准 |
-| 貓咪顯示、動畫、漫遊與家具避障 | 完成 | 五個 cat ID；BFS、delta movement、休息狀態 |
+| 貓咪顯示、動畫、漫遊與家具避障 | 部分完成（P0 locomotion 稽核 pending） | 五個 cat ID、BFS、delta movement、休息狀態可運作；但水平滑行、側姿、四足步態、方向輪廓與起停轉向不足，見 ANIM-0578 稽核輸入 |
 | 餵食／梳毛／玩耍照顧流程 | 完成 | 純規則 core + Phaser session + DOM 演出 |
 | 正交房間空間分區（metadata） | 完成（僅空間） | `ortho-room-zones` 純資料；三層服務為空間方向，**無行為邏輯** |
 | 日別、階段、營收與報告計數 | 部分實作 | 有簡化狀態推進與報告，不代表完整經營系統 |
@@ -235,6 +280,11 @@
   interaction socket，也沒有 approach point、家具狀態占用或對應動畫；完整稽核見
   [V0577B 結果](./V0577B_FIRST_BATCH_ROTATION_AND_DIRECTION_RESULT.md)，建議另立
   `ARCH-0578-CAT-FURNITURE-INTERACTION-AUDIT`，本 Build 未實作互動。
+- **P0：貓咪 locomotion／方向狀態稽核**。目前左右側姿不足，水平移動常像正面
+  sprite 滑行；walk loop、四足腳序、方向 silhouette、起步／轉向／停止與家具
+  socket 對應姿勢均需先稽核。下一卡候選為
+  `ANIM-0578-CAT-LOCOMOTION-AND-DIRECTIONAL-STATE-AUDIT`；輸入文件見
+  [ANIM-0578 稽核](./ANIM-0578_CAT_LOCOMOTION_AND_DIRECTIONAL_STATE_AUDIT.md)。
 - 三層服務目前只有空間 metadata；工作站／可到達性／椅桌配對與收銀/製作/送餐/排隊**行為**未做（未核准，可用 `ortho-room-zones` 為未來空間依據）。
 - 玩家店長未實作；已決定未來代表玩家且可自訂，但資料與視覺規格待定。
 - 完整顧客、店員、訂單、料理、送餐、結帳、任務與故事系統未完成。

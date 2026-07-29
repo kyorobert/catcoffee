@@ -1,5 +1,25 @@
 # V0.56 產品決策交接（給產品負責人）
 
+> **最新 Gate（2026-07-30，V0.57.7-alpha / Build 0577k）**：
+> `ART-0577K` 已完成核准核心家具正式 Runtime 整合。SoftCute 保留既有
+> `pinkTableLong`，HardCafe 使用獨立 `pinkTableLongHardCafe` 商品 ID；
+> chair/counter/dessert 為正式 cardinal4 素材。Option C
+> `counter → coffeeMachine → washStation → dessert` 已接真實 Grid demo，
+> 並含雙桌島與可達貓區。原第一批 12 件不變，override catalog 為 13 件；
+> 其餘 35 件仍為 base visual、第二批未核准。Save key/schema/migration 不變。
+> Chrome／Edge 通過；iPhone Safari 真機仍 pending。下一個 P0 建議為
+> `ANIM-0578-CAT-LOCOMOTION-AND-DIRECTIONAL-STATE-AUDIT`。
+>
+> **歷史 Gate（2026-07-29，Build 0577e，已由 ART-0577K 取代）**：
+> `ART-0577J` 已完成 concept-only 的家具共同比例、服務帶連續性與桌椅島精修。
+> 現有貓咪固定作尺度基準；compact chair、較低 counter、收斂 dessert 與
+> coffee/wash 以單一顯示契約組成 A/B/C 三種服務帶。A/B/C 尚未由產品選案，
+> 正式 PNG、Runtime、Build、Save/schema/migration 均未變，也未建立 ZIP。
+> 狀態為 `AWAITING_PRODUCT_REVIEW`；iPhone Safari 真機仍 pending，第二批 35 件
+> 未核准。另將貓咪水平滑行、側姿、四足步態、起停轉向與 furniture socket 姿勢
+> 升為下一階段 P0 `ANIM-0578-CAT-LOCOMOTION-AND-DIRECTIONAL-STATE-AUDIT`，
+> 本 Gate 未實作貓咪 Runtime。
+>
 > **最新狀態（2026-07-28，V0.57.7-alpha / Build 0577e）**：
 > `ART-0577E-ORTHOGONAL-FURNITURE-VISUAL-REDESIGN-PHASE1` 已完成。
 > 0577d 的單一 resolver、固定 edit-session envelope 與

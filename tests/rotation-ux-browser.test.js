@@ -6,7 +6,7 @@ import {
 import {extname, normalize, resolve} from 'node:path';
 
 const root=process.cwd();
-const evidence=resolve(root,'docs/evidence/v0577e');
+const evidence=resolve(root,'docs/evidence/v0577k');
 mkdirSync(evidence,{recursive:true});
 const candidates=[
   'C:/Program Files/Google/Chrome/Application/chrome.exe',
@@ -40,7 +40,7 @@ const server=createServer((request,response)=>{
 await new Promise(done=>server.listen(0,'127.0.0.1',done));
 const origin=`http://127.0.0.1:${server.address().port}`;
 const metrics={
-  build:'0577e',
+  build:'0577k',
   browser:executablePath,
   cases:[],
   pointerCases:[],
@@ -248,6 +248,31 @@ try{
     });
     await screenshot(page,'table-pair-horizontal.png');
 
+    await fixture(page,{type:'pinkTableLongHardCafe',id:'hard-table'});
+    await rotationSequence(page,{
+      type:'pinkTableLongHardCafe',id:'hard-table',steps:2,
+      names:['hard-table-axis-horizontal.png','hard-table-axis-vertical.png',
+        'hard-table-axis-roundtrip.png']
+    });
+    await page.evaluate(()=>{
+      const scene=window.__CAT_CAFE_GAME__.scene.getScene('CafeScene');
+      scene.selectItem(null);
+      scene.entities.forEach(entity=>entity.destroy());
+      scene.entities.clear();
+      scene.state.items.length=0;
+      scene.occupancy.build([]);
+      const tables=[
+        {id:'soft-product',type:'pinkTableLong',x:2,y:3,r:0},
+        {id:'hard-product',type:'pinkTableLongHardCafe',x:5,y:3,r:0}
+      ];
+      for(const item of tables){
+        scene.state.items.push(item);
+        scene.occupancy.addItem(item);
+        scene.addFurnitureEntity(item).sync();
+      }
+    });
+    await screenshot(page,'dual-table-products.png');
+
     await fixture(page,{type:'chair',id:'chair'});
     await rotationSequence(page,{
       type:'chair',id:'chair',steps:4,
@@ -421,6 +446,24 @@ try{
     if(mode!==projection.mode)throw new Error(`${projection.query} => ${mode}`);
     await screenshot(page,projection.name);
     metrics.projections.push({query:projection.query,mode});
+    await context.close();
+  }
+
+  for(const viewport of [
+    {width:393,height:852,name:'orthogonal-demo-layout-393.png'},
+    {width:430,height:932,name:'orthogonal-demo-layout-430.png'},
+    {width:1366,height:768,name:'orthogonal-demo-layout-desktop.png'}
+  ]){
+    const {context,page}=await boot(
+      {width:viewport.width,height:viewport.height},
+      '?projection=ortho&demoLayout=1'
+    );
+    await screenshot(page,viewport.name);
+    metrics.projections.push({
+      query:'?projection=ortho&demoLayout=1',
+      mode:'ortho',
+      viewport:`${viewport.width}x${viewport.height}`
+    });
     await context.close();
   }
 }finally{

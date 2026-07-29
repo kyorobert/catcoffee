@@ -52,6 +52,19 @@ export const FURNITURE_CONFIG={
     "layer": "floorObject",
     "rotation": "quarter"
   },
+  "pinkTableLongHardCafe": {
+    "name": "硬質粉咖啡桌",
+    "cat": "座位",
+    "price": 980,
+    "size": 108,
+    "foot": [
+      2,
+      1
+    ],
+    "texture": "./assets/furniture/pinkTableLong.png",
+    "layer": "floorObject",
+    "rotation": "quarter"
+  },
   "chair": {
     "name": "木椅",
     "cat": "座位",

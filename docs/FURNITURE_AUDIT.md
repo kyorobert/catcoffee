@@ -1,5 +1,11 @@
 # 家具與環境素材稽核
 
+> ART-0577K current addendum：正式 catalog 現為 48 件。原 47 件
+> ID／價格／footprint／存檔契約不變；新增獨立商品
+> `pinkTableLongHardCafe`（2×1、980），orthogonal 使用四張正式 PNG，
+> iso／flat 明確沿用 `pinkTableLong.png` 作安全 base fallback。下方
+> V0.55.1 統計保留為歷史基線。
+
 > V0.55.2 runtime 更新：下方 25 筆 SVG／prototype 欄位保留為 V0.55.1 基線稽核。正式執行已全部改讀 `assets/furniture/redrawn/{id}/{id}-{direction}.png`；目前 runtime 為 42 production、5 redraw、0 prototype。舊 SVG 不再由 BootScene 或 StorePanel 載入。
 
 版本：V0.55.1-alpha。掃描來源為 `FURNITURE_CONFIG` 與 `assets/furniture/`。
@@ -24,6 +30,7 @@
 | pinkTable | 粉紅圓桌 | 座位 | PNG | `assets/furniture/pinkTable.png` | 1×1 | 92 | .78 / .5,1 | production | 是 | 單一方向 | 保留，補四方向 |
 | woodTable | 長方木桌 | 座位 | PNG | `assets/furniture/woodTable.png` | 2×1 | 105 | .82 / .5,1 | production | 是 | 操作方向圖不足 | 補真正四方向 |
 | pinkTableLong | 奶油粉餐桌 | 座位 | PNG | `assets/furniture/pinkTableLong.png` | 2×1 | 108 | .84 / .5,1 | production | 是 | 操作方向圖不足 | 補真正四方向 |
+| pinkTableLongHardCafe | 硬質粉咖啡桌 | 座位 | PNG | `assets/furniture/pinkTableLong.png`（iso／flat fallback） | 2×1 | 108 | .84 / .5,1 | redraw | 是 | Orthogonal 正式、base fallback 共用 | 後續另卡補 iso／flat 專用 base |
 | chair | 木椅 | 座位 | PNG | `assets/furniture/chair.png` | 1×1 | 58 | 1.12 / .5,1 | production | 是 | 單一方向 | 補真正四方向 |
 | cushionChair | 軟墊椅 | 座位 | PNG | `assets/furniture/cushionChair.png` | 1×1 | 60 | 1.20 / .5,1 | production | 是 | 單一方向 | 補真正四方向 |
 | redChair | 紅色小椅 | 座位 | PNG | `assets/furniture/redChair.png` | 1×1 | 58 | 1.32 / .5,1 | production | 是 | 單一方向、小型 | 補真正四方向 |

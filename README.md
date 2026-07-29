@@ -1,7 +1,42 @@
 # 貓咪咖啡廳 V0.57.7-alpha
 
 版本：`V0.57.7-alpha｜正交家具視覺重構第一階段`  
-Build ID：`0577e`
+Build ID：`0577k`
+
+## Build 0577k：核准核心正交家具與雙桌商品正式整合
+
+`ART-0577K` 已把產品核准稿接入真實 Phaser Runtime：
+
+- `pinkTableLong` 保留為 SoftCute axis2 商品。
+- 新增獨立 Store／save ID `pinkTableLongHardCafe`，同價、同 footprint，不取代舊桌。
+- `chair`、`counter`、`dessert` 使用正式 cardinal4 透明 PNG。
+- Option C 服務帶為
+  `counter → coffeeMachine → washStation → dessert`，並有兩款桌島與貓區。
+- Orthogonal 正式 PNG 由 48 增至 52；原第一批 12 件不變，override catalog 為
+  13 件；其餘 35 件仍使用 base visual，第二批未核准。
+- `/` 與 `?projection=iso` 仍為預設／rollback；ortho 仍由 URL opt-in。
+- Save key `catCafePhaserV0540`、schema 5401、migration 5402 未變。
+- Chrome／Edge Smoke 通過；iPhone Safari 真機仍 **pending**。
+
+驗收文件：
+[結果](./docs/V0577K_APPROVED_CORE_ORTHOGONAL_FURNITURE_RESULT.md)、
+[驗收](./docs/V0577K_APPROVED_CORE_ORTHOGONAL_FURNITURE_ACCEPTANCE.md)、
+[Runtime 比較](./docs/V0577K_APPROVED_CORE_ORTHOGONAL_FURNITURE_COMPARISON.html)。
+
+## ART-0577J 歷史概念 Gate（已由 0577k 正式整合取代）
+
+目前最新產品驗收稿為 `ART-0577J`，狀態
+`AWAITING_PRODUCT_REVIEW`。它以現有貓咪為固定尺度基準，縮小 chair／counter／
+dessert 的共同比例，提供服務帶 A/B/C、兩座桌椅島與相同 Camera 的 390×844
+正常／編輯證據。這些檔案只位於 `tools/` 與 `docs/evidence/`，不會被正式遊戲載入。
+
+- [ART-0577J 結果](./docs/ART-0577J_SHARED_SCALE_AND_SERVICE_BAND_RESULT.md)
+- [ART-0577J 驗收](./docs/ART-0577J_SHARED_SCALE_AND_SERVICE_BAND_ACCEPTANCE.md)
+- [ART-0577J 比較](./docs/ART-0577J_SHARED_SCALE_AND_SERVICE_BAND_COMPARISON.html)
+- [P0 貓咪 locomotion 稽核輸入](./docs/ANIM-0578_CAT_LOCOMOTION_AND_DIRECTIONAL_STATE_AUDIT.md)
+
+本 Gate 不代表 A/B/C 已選案，也不核准正式 PNG、Runtime、Build 或第二批家具。
+iPhone Safari 真機仍 pending。
 
 ## Build 0577e：正交家具視覺重構第一階段
 

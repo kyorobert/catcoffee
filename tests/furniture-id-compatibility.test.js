@@ -1,10 +1,18 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {readFileSync} from 'node:fs';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
 
-const source=readFileSync(new URL('../assets/js/config/furniture-config.js',import.meta.url));
-assert.equal(createHash('sha256').update(source).digest('hex'),'87a3bbcdf4cb9417c12f2eb4948b7e3ade15416e6c160475183aa51b3aab2de7');
-assert.equal(Object.keys(FURNITURE_CONFIG).length,47);
-assert.equal(new Set(Object.keys(FURNITURE_CONFIG)).size,47);
-console.log('Furniture ID/value compatibility passed: V0.55.1 config byte hash unchanged.');
+const originalCatalog=Object.fromEntries(
+  Object.entries(FURNITURE_CONFIG)
+    .filter(([id])=>id!=='pinkTableLongHardCafe')
+);
+assert.equal(
+  createHash('sha256').update(JSON.stringify(originalCatalog)).digest('hex'),
+  '190698e6a42f1f294133a977b80eb9fde22b18c595ddb8579f4021eaf63f6810',
+  'the original 47 ID/value contracts changed'
+);
+assert.equal(Object.keys(originalCatalog).length,47);
+assert.equal(Object.keys(FURNITURE_CONFIG).length,48);
+assert.equal(new Set(Object.keys(FURNITURE_CONFIG)).size,48);
+assert.ok(FURNITURE_CONFIG.pinkTableLongHardCafe,'approved independent product missing');
+console.log('Furniture ID/value compatibility passed: original 47 semantic contracts unchanged, one approved HardCafe product added.');

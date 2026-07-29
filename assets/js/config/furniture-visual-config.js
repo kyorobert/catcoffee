@@ -1,6 +1,6 @@
-import {FURNITURE_CONFIG} from './furniture-config.js?v=0577e';
+﻿import {FURNITURE_CONFIG} from './furniture-config.js?v=0577k';
 import {getOrthogonalFurnitureVisualOverride}
-  from './orthogonal-furniture-visuals.js?v=0577e';
+  from './orthogonal-furniture-visuals.js?v=0577k';
 
 // Visual-only metadata. Prices, unlocks, footprints and save data remain owned by
 // furniture-config.js and SaveAdapter; this module never mutates those sources.
@@ -57,7 +57,12 @@ export const V0552_REDRAW_BATCHES = Object.freeze({
 });
 
 const prototypeIds = new Set(PROTOTYPE_FURNITURE_IDS);
-const redrawIds = new Set(['sofa', 'kitchen', 'console', 'catBed']);
+const redrawIds = new Set([
+  'sofa', 'kitchen', 'console', 'catBed',
+  // ART-0577K: HardCafe has an approved formal orthogonal visual.  Iso/flat
+  // deliberately reuse the SoftCute base PNG until a separate base-art card.
+  'pinkTableLongHardCafe'
+]);
 const v0552RedrawIds = new Set(V0552_REDRAW_FURNITURE_IDS);
 const needsFinalPolishIds = new Set(['childrenPlayArea']);
 const mirrorAllowedIds = new Set([
@@ -69,6 +74,7 @@ const mirrorAllowedIds = new Set([
 // previous target width, while making the display multiplier explicit per asset.
 const visualScaleById = Object.freeze({
   roundTable:.78,pinkTable:.78,woodTable:.82,pinkTableLong:.84,
+  pinkTableLongHardCafe:.84,
   chair:1.12,cushionChair:1.2,redChair:1.32,sofa:.86,
   counter:1.08,dessert:.97,kitchen:1.27,console:1.53,
   bookshelf:.73,tallCabinet:1.1,glassCabinet:1.17,plant:1.1,
@@ -84,6 +90,7 @@ const visualScaleById = Object.freeze({
 
 const heightById = Object.freeze({
   roundTable:'medium',pinkTable:'medium',woodTable:'medium',pinkTableLong:'medium',
+  pinkTableLongHardCafe:'medium',
   chair:'medium',cushionChair:'medium',redChair:'medium',sofa:'medium',
   counter:'medium',dessert:'tall',kitchen:'medium',console:'low',bookshelf:'tall',
   tallCabinet:'tall',glassCabinet:'tall',plant:'tall',vasePlant:'medium',
@@ -99,6 +106,7 @@ const heightById = Object.freeze({
 
 const stationById = Object.freeze({
   roundTable:'table',pinkTable:'table',woodTable:'table',pinkTableLong:'table',
+  pinkTableLongHardCafe:'table',
   squareCafeTable:'table',chair:'seat',cushionChair:'seat',redChair:'seat',
   windowHighChair:'seat',wallBench:'seat',catEarChair:'seat',sofa:'seat',
   creamSofa:'seat',pawSofa:'seat',counter:'counter',dessert:'display',
@@ -152,7 +160,9 @@ function redrawReasonFor(id, status) {
     sofa:'現有圖像更接近床鋪，與「雙人沙發」概念不符。',
     kitchen:'2×1 footprint 的視覺寬度與工作面不足，需補正式方向與工作區。',
     console:'2×1 footprint 但主體接近 1×1，比例與占地不一致。',
-    catBed:'現有圖像偏人用床，需重畫成符合貓咪比例的低矮睡墊。'
+    catBed:'現有圖像偏人用床，需重畫成符合貓咪比例的低矮睡墊。',
+    pinkTableLongHardCafe:
+      'Orthogonal 已有 ART-0577K 正式素材；iso／flat 暫用奶油粉餐桌 base visual 作安全 fallback。'
   })[id] || '';
 }
 

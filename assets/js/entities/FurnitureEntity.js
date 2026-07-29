@@ -1,11 +1,11 @@
-import {DepthSystem} from '../systems/DepthSystem.js?v=0577e';
+﻿import {DepthSystem} from '../systems/DepthSystem.js?v=0577k';
 import {
   getFurnitureDisplayState,
   getFurnitureVisualPosition
-} from '../core/furniture-display-state.js?v=0577e';
+} from '../core/furniture-display-state.js?v=0577k';
 import {
   resolveOrthogonalRotationPlacement
-} from '../core/orthogonal-furniture-rotation.js?v=0577e';
+} from '../core/orthogonal-furniture-rotation.js?v=0577k';
 
 export class FurnitureEntity extends Phaser.GameObjects.Image{
   constructor(scene,item,definition,grid){

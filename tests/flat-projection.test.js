@@ -1,14 +1,14 @@
-import assert from 'node:assert/strict';
+﻿import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0577e';
-import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0577e';
-import {FlatProjection, FLAT_PROJECTION_PARAMS} from '../assets/js/systems/FlatProjection.js?v=0577e';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0577e';
-import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0577e';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0577e';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0577e';
+import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0577k';
+import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0577k';
+import {FlatProjection, FLAT_PROJECTION_PARAMS} from '../assets/js/systems/FlatProjection.js?v=0577k';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0577k';
+import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0577k';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0577k';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0577k';
 
 const approx = (a, b, eps = 1e-9) => Math.abs(a - b) <= eps;
 const spatial = new SpatialGrid(ROOM_CONFIG, FURNITURE_CONFIG);
@@ -120,7 +120,7 @@ for (const [x, y] of [[0, 0], [9, 7], [8, 7], [5, 4], [10, 0]]) {
   assert.equal(gFlat.isInsideGrid(x, y), gIso.isInsideGrid(x, y), `isInsideGrid iso==flat (${x},${y})`);
   assert.equal(gFlat.isPlaceableCell(x, y), gIso.isPlaceableCell(x, y), `isPlaceableCell iso==flat (${x},${y})`);
 }
-// All 47 furniture project to finite world coords in flat mode (no NaN/crash on load).
+// All 48 furniture project to finite world coords in flat mode (no NaN/crash on load).
 for (const type of Object.keys(FURNITURE_CONFIG)) {
   for (let r = 0; r < 4; r++) {
     const anchor = gFlat.getAnchor(type, 4, 3, r);

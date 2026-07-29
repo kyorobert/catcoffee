@@ -1,17 +1,17 @@
-import assert from 'node:assert/strict';
+﻿import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROOM_CONFIG} from '../assets/js/config/room-config.js';
 import {FURNITURE_CONFIG} from '../assets/js/config/furniture-config.js';
-// Import via the same `?v=0577e` specifier the runtime uses so `instanceof` resolves
+// Import via the same `?v=0577k` specifier the runtime uses so `instanceof` resolves
 // against the same module instance GridSystem composes internally.
-import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0577e';
-import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0577e';
+import {SpatialGrid} from '../assets/js/systems/SpatialGrid.js?v=0577k';
+import {IsoProjection} from '../assets/js/systems/IsoProjection.js?v=0577k';
 import {OrthogonalProjection, ORTHOGONAL_PROJECTION_PARAMS}
-  from '../assets/js/systems/OrthogonalProjection.js?v=0577e';
-import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0577e';
-import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0577e';
-import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0577e';
-import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0577e';
+  from '../assets/js/systems/OrthogonalProjection.js?v=0577k';
+import {GridSystem} from '../assets/js/systems/GridSystem.js?v=0577k';
+import {PROJECTION_MODE} from '../assets/js/core/projection-mode.js?v=0577k';
+import {OccupancySystem} from '../assets/js/systems/OccupancySystem.js?v=0577k';
+import {PlacementSystem} from '../assets/js/systems/PlacementSystem.js?v=0577k';
 
 const approx = (a, b, eps = 1e-9) => Math.abs(a - b) <= eps;
 const {cols, rows} = ROOM_CONFIG.floor;
@@ -105,7 +105,7 @@ assert.deepStrictEqual(ortho.getAnchor('woodTable', 2, 4, 0), {x: 604, y: 680}, 
     {x: (poly[2].x + poly[3].x) / 2, y: (poly[2].y + poly[3].y) / 2}, 'anchor is bottom-edge midpoint');
 }
 assert.deepStrictEqual(ortho.getAnchor('rugPink', 6, 5, 0), ortho.getCellCenter(6.5, 5.5), 'floorDecoration centre anchor');
-// all 47 furniture project to finite anchors/polygons in every rotation (no NaN on load)
+// all 48 furniture project to finite anchors/polygons in every rotation (no NaN on load)
 for (const type of Object.keys(FURNITURE_CONFIG)) for (let r = 0; r < 4; r++) {
   const a = ortho.getAnchor(type, 4, 3, r);
   assert.ok(Number.isFinite(a.x) && Number.isFinite(a.y), `anchor finite (${type} r${r})`);

@@ -1,5 +1,46 @@
 # 專案決策紀錄
 
+## DEC-032：核准家具以雙桌獨立商品與 Option C 服務帶正式整合
+
+- 狀態：Accepted（2026-07-30）
+- Task：`ART-0577K-APPROVED-CORE-ORTHOGONAL-FURNITURE-FORMAL-INTEGRATION`
+- Runtime：`V0.57.7-alpha` / Build `0577k`
+- `pinkTableLong`（SoftCute）保留既有商品契約；`pinkTableLongHardCafe` 是新的獨立
+  商品 ID，使用相同價格、`[2,1]` footprint 與 axis2 policy，但不取代舊桌、不做
+  migration、不自動加入既有玩家 inventory。
+- `chair`、`counter`、`dessert` 維持 cardinal4；正式 ortho texture 只影響視覺，
+  Entity、Ghost、preview 與 commit 共用既有 selector。
+- Demo 正式選用 Option C：
+  `counter → coffeeMachine → washStation → dessert`。這是 display-only 的真實
+  Grid fixture，必須通過 Occupancy、Placement 與 BFS，不寫入正式存檔。
+- 原第一批 12 件仍是受保護範圍；正式 override catalog 因 HardCafe 增為 13 件。
+  其餘 35 件仍使用 base visual，第二批未核准。
+- `iso` 仍是預設與 rollback，`ortho` 仍 opt-in；Save key、schema、migration、
+  Grid、Camera、入口與貓咪 Runtime 均不變。
+- Chrome／Edge 自動化通過不等於 iPhone Safari 真機通過；真機 Gate 保持 pending。
+
+## DEC-031：候選 A 近俯視長桌語言核准，正式整合前先過共用視角 Gate
+
+- 日期：2026-07-29
+- 狀態：Accepted
+- Task：`ART-0577F-PINK-TABLE-VIEWPOINT-GATE`
+- 決策：
+  - 核准候選 A 的觀看角度、桌面占比與 2×1／1×2 長軸關係。
+  - 核准不代表候選稿可原樣上線；正式 `pinkTableLong` 必須改為硬質咖啡廳餐桌、
+    薄桌緣、桌腳次要，桌面辨識占比不得低於 90%。
+  - 禁止厚前板、粗橫梁、大面積正立面，禁止以 Runtime offset 或 rotation
+    邏輯補救視角問題。
+  - 正式整合前先以 chair／counter／dessert 驗收稿確認共用
+    top-surface-first near-top-down 視角；三件家具概念稿不等於正式素材核准。
+  - 未通過共用視角 Gate 前，不覆寫正式 PNG、不接 visual mapping、不升 Build、
+    不批量重畫其餘家具。
+- 不變：Build `0577e`、家具 ID／footprint／`x/y/r`、rotation policy、Camera、
+  Grid、Placement、Occupancy、Pathfinding、save key `catCafePhaserV0540`、
+  schema 5401、migration 5402、iso 預設與 flat／invalid fallback。
+- 證據：[結果](./ART-0577F_A_SHARED_VIEWPOINT_RESULT.md)、
+  [驗收](./ART-0577F_A_SHARED_VIEWPOINT_ACCEPTANCE.md)、
+  [比較](./ART-0577F_A_SHARED_VIEWPOINT_COMPARISON.html)。
+
 ## DEC-030：Orthogonal 家具視覺採 cardinal v1 規格，第一階段重畫四件核心家具
 
 - 日期：2026-07-28

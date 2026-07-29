@@ -36,6 +36,7 @@
     ,"test:ortho-rotation": "node ./tests/orthogonal-rotation-resolver.test.js"
     ,"test:rotation-state": "node ./tests/orthogonal-rotation-state.test.js"
     ,"test:rotation-browser": "node ./tests/rotation-ux-browser.test.js"
+    ,"test:formal-furniture": "node ./tests/v0577k-formal-integration.test.js"
   },
   "dependencies": {
     "phaser": "3.90.0"

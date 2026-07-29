@@ -3,9 +3,9 @@
 // override footprints, prices, placement rules, sockets, layers, save fields,
 // occupancy, inventory or migration data.
 
-export const ORTHOGONAL_FURNITURE_ASSET_VERSION = '0577e';
+export const ORTHOGONAL_FURNITURE_ASSET_VERSION = '0577k';
 
-export const ORTHOGONAL_CORE_FURNITURE_IDS = Object.freeze([
+export const ORTHOGONAL_FIRST_BATCH_FURNITURE_IDS = Object.freeze([
   'counter',
   'coffeeMachine',
   'oven',
@@ -18,6 +18,13 @@ export const ORTHOGONAL_CORE_FURNITURE_IDS = Object.freeze([
   'creamSofa',
   'doubleCatTree',
   'scratchPost'
+]);
+
+// ART-0577K adds one independently purchasable approved product without
+// reclassifying or mutating the original twelve-item first batch.
+export const ORTHOGONAL_CORE_FURNITURE_IDS = Object.freeze([
+  ...ORTHOGONAL_FIRST_BATCH_FURNITURE_IDS,
+  'pinkTableLongHardCafe'
 ]);
 
 export const ORTHOGONAL_FURNITURE_DIRECTIONS = Object.freeze([
@@ -60,9 +67,9 @@ function createOverride(id) {
     sourceFormat: 'png',
     notes: [
       'ART-0577 projection-specific orthogonal PNG override.',
-      'ART-0577E redraws pinkTableLong, chair, counter and dessert to the',
-      'cardinal visual specification; gameplay metadata remains in the base',
-      'furniture definition.'
+      'ART-0577K integrates the approved SoftCute table, independent HardCafe',
+      'table, chair, counter and dessert formal art. Gameplay metadata remains',
+      'owned by the base furniture definition.'
     ].join(' ')
   });
 }

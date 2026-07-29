@@ -15,7 +15,7 @@ const report=validateFurnitureVisualConfig({
   }
 });
 
-assert.equal(Object.keys(FURNITURE_CONFIG).length,47);
+assert.equal(Object.keys(FURNITURE_CONFIG).length,48);
 assert.deepEqual(Object.keys(FURNITURE_VISUAL_CONFIG),Object.keys(FURNITURE_CONFIG));
 assert.equal(report.valid,true,report.errors.join('\n'));
 for(const [id,definition] of Object.entries(FURNITURE_CONFIG)){
