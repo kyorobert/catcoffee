@@ -3,7 +3,7 @@
 // override footprints, prices, placement rules, sockets, layers, save fields,
 // occupancy, inventory or migration data.
 
-export const ORTHOGONAL_FURNITURE_ASSET_VERSION = '0577k';
+export const ORTHOGONAL_FURNITURE_ASSET_VERSION = '0577n';
 
 export const ORTHOGONAL_FIRST_BATCH_FURNITURE_IDS = Object.freeze([
   'counter',
@@ -52,6 +52,9 @@ function createOverride(id) {
     projection: 'ortho',
     visualScale: 1,
     anchor: Object.freeze({x: 0.5, y: 1}),
+    // ARCH-0577L1 reserves a centralized visual-placement contract without
+    // changing any approved 0577k PNG. Null means exact native display parity.
+    visualPlacement: null,
     // V0577C: the fixed base-rotation pivot from V0577B is retired. The single
     // orthogonal-furniture-rotation resolver now anchors the sprite on the same
     // actual-rotation footprint the Occupancy/Placement box uses, so a

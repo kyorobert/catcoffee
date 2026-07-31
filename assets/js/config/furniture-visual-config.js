@@ -1,6 +1,6 @@
-﻿import {FURNITURE_CONFIG} from './furniture-config.js?v=0577k';
+import {FURNITURE_CONFIG} from './furniture-config.js?v=0577n';
 import {getOrthogonalFurnitureVisualOverride}
-  from './orthogonal-furniture-visuals.js?v=0577k';
+  from './orthogonal-furniture-visuals.js?v=0577n';
 
 // Visual-only metadata. Prices, unlocks, footprints and save data remain owned by
 // furniture-config.js and SaveAdapter; this module never mutates those sources.
@@ -189,6 +189,9 @@ function createVisualDefinition(id, definition) {
     storeVisible: artStatus === FURNITURE_ART_STATUS.PRODUCTION || artStatus === FURNITURE_ART_STATUS.REDRAW,
     visualScale: visualScaleById[id],
     anchor:Object.freeze({x:.5,y:layer === 'floorDecoration' ? .5 : 1}),
+    // Optional ARCH-0577L1 display-only contract. Null preserves the exact
+    // native rendering path until separately authored metadata is approved.
+    visualPlacement:null,
     textureByDirection:Object.freeze(textureByDirection),
     texturePathByDirection:texturePathByDirection ? Object.freeze(texturePathByDirection) : null,
     fallbackTexture:hasDirectionalRedraw ? textureByDirection['down-right'] : textureKey,
@@ -230,6 +233,7 @@ export function getFurnitureVisualDefinition(id, projectionMode = 'iso') {
     projection: override.projection,
     visualScale: override.visualScale,
     anchor: override.anchor,
+    visualPlacement: override.visualPlacement||null,
     calibration: override.calibration,
     textureByDirection: override.textureByDirection,
     texturePathByDirection: override.texturePathByDirection,

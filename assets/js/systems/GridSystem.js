@@ -1,9 +1,9 @@
-﻿import {SpatialGrid} from './SpatialGrid.js?v=0577k';
-import {IsoProjection} from './IsoProjection.js?v=0577k';
-import {FlatProjection} from './FlatProjection.js?v=0577k';
-import {OrthogonalProjection} from './OrthogonalProjection.js?v=0577k';
-import {PROJECTION_MODE} from '../core/projection-mode.js?v=0577k';
-import {getFlatPreset} from '../config/flat-projection-presets.js?v=0577k';
+import {SpatialGrid} from './SpatialGrid.js?v=0577n';
+import {IsoProjection} from './IsoProjection.js?v=0577n';
+import {FlatProjection} from './FlatProjection.js?v=0577n';
+import {OrthogonalProjection} from './OrthogonalProjection.js?v=0577n';
+import {PROJECTION_MODE} from '../core/projection-mode.js?v=0577n';
+import {getFlatPreset} from '../config/flat-projection-presets.js?v=0577n';
 
 // GridSystem is a compatibility Facade. It composes the projection-independent
 // SpatialGrid with the active SceneProjection and keeps the full public API

@@ -1,5 +1,5 @@
-﻿import {FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0577k';
-import {resolveOrthogonalRotationPlacement} from '../core/orthogonal-furniture-rotation.js?v=0577k';
+import {FURNITURE_VISUAL_CONFIG} from '../config/furniture-visual-config.js?v=0577n';
+import {resolveOrthogonalRotationPlacement} from '../core/orthogonal-furniture-rotation.js?v=0577n';
 
 // ARCH-0577C: read-only overlay. It never writes save state and never intercepts
 // pointer input. In artDebug=1 mode it draws geometry (sprite bounds, footprint
@@ -124,6 +124,33 @@ export class ArtDebugRenderer{
         label.setColor('#ffe8bd').setBackgroundColor('#3b291f9c').setText(`${data.type}#${shortId} r${placement.resolvedRotation}·${placement.cardinalDirection||data.direction}`);
       }
       label.setPosition(bounds.x,bounds.y-3);
+      // ARCH-0577M1: composition overlay. Read-only. Draws the native->composed
+      // pull line, target and pull metrics; a red warning marks a capped pull that
+      // needs ART-0577M2 asset reauthoring. It never moves the entity or changes any
+      // resolver result — the sprite is already at its composed position.
+      const comp=entity.composition;
+      if(comp&&comp.isConnected){
+        const composed={x:entity.x,y:entity.y};
+        const native={x:entity.x-(comp.visualOffsetX||0),y:entity.y-(comp.visualOffsetY||0)};
+        const warn=Boolean(comp.requiresAssetReauthoring);
+        const color=warn?0xff5a5a:0x51d88a;
+        this.graphics.lineStyle(2,color,.95).strokeCircle(native.x,native.y,3);
+        this.graphics.lineBetween(native.x,native.y,composed.x,composed.y);
+        this.graphics.fillStyle(color,1).fillCircle(composed.x,composed.y,3);
+        if(!this.compLabels)this.compLabels=new Map();
+        let compLabel=this.compLabels.get(instanceId);
+        if(!compLabel){compLabel=this.scene.add.text(0,0,'',{fontFamily:'monospace',fontSize:'8px',color:'#eafff2',backgroundColor:'#123726e6',padding:{x:3,y:2}}).setDepth(200002);this.compLabels.set(instanceId,compLabel);}
+        const lines=[
+          `comp ${comp.connectionSide}->${comp.targetItemId}`,
+          `pull req:${comp.requestedPull} app:${comp.appliedPull}/${comp.maxAllowedPull} gap:${comp.finalVisualGap}`,
+          `depthBias:${comp.depthBias} sig:${String(comp.signature).slice(0,20)}`,
+          `excessive:${comp.isExcessivePull} reauthor:${comp.requiresAssetReauthoring}`
+        ];
+        if(warn)lines.push('ASSET REAUTHOR REQUIRED (ART-0577M2)');
+        compLabel.setColor(warn?'#ffd0d0':'#eafff2').setBackgroundColor(warn?'#5a1414ee':'#123726e6').setText(lines).setPosition(composed.x+6,composed.y+6);
+      }else if(this.compLabels?.has(instanceId)){
+        this.compLabels.get(instanceId).setText('');
+      }
     }
     if(rotationCandidate?.resolved&&!rotationCandidate.committed){
       const resolved=rotationCandidate.resolved;
@@ -136,10 +163,13 @@ export class ArtDebugRenderer{
       );
     }
     for(const [id,label] of this.labels)if(!liveIds.has(id)){label.destroy();this.labels.delete(id)}
+    if(this.compLabels)for(const [id,label] of this.compLabels)if(!liveIds.has(id)){label.destroy();this.compLabels.delete(id)}
   }
   destroy(){
     this.graphics?.destroy();
     this.labels.forEach(label=>label.destroy());
     this.labels.clear();
+    this.compLabels?.forEach(label=>label.destroy());
+    this.compLabels?.clear();
   }
 }

@@ -1,6 +1,6 @@
-﻿import {INPUT_MODE} from '../core/input-state.js?v=0577k';
-import {computeSafeViewport} from '../core/scene-viewport.js?v=0577k';
-import {computeInitialFraming, clampCenterToContent} from '../core/camera-framing.js?v=0577k';
+import {INPUT_MODE} from '../core/input-state.js?v=0577n';
+import {computeSafeViewport} from '../core/scene-viewport.js?v=0577n';
+import {computeInitialFraming, clampCenterToContent} from '../core/camera-framing.js?v=0577n';
 
 export class CameraController {
   constructor(scene, roomConfig, {inputMode = null, isFurnitureDragging = () => false, onPinchStart = null, framing = null} = {}) {

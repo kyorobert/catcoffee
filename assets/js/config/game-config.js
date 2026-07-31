@@ -1,5 +1,5 @@
-﻿import {BootScene} from '../scenes/BootScene.js?v=0577k';
-import {CafeScene} from '../scenes/CafeScene.js?v=0577k';
+import {BootScene} from '../scenes/BootScene.js?v=0577n';
+import {CafeScene} from '../scenes/CafeScene.js?v=0577n';
 
 export function createGameConfig({preBoot,postBoot}={}){
   return {

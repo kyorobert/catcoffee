@@ -1,7 +1,7 @@
-﻿import {
+import {
   ORTHO_ENTRANCE_CELLS,
   buildOrthogonalPlaceableMask
-} from './ortho-room-zones.js?v=0577k';
+} from './ortho-room-zones.js?v=0577n';
 
 const COLS=10;
 const ROWS=8;

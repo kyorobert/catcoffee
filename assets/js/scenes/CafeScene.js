@@ -1,39 +1,41 @@
-﻿import {ROOM_CONFIG} from '../config/room-config.js?v=0577k';
-import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0577k';
-import {CAT_PROFILES} from '../config/cat-config.js?v=0577k';
-import {GridSystem} from '../systems/GridSystem.js?v=0577k';
-import {OccupancySystem} from '../systems/OccupancySystem.js?v=0577k';
-import {PlacementSystem} from '../systems/PlacementSystem.js?v=0577k';
-import {CameraController} from '../systems/CameraController.js?v=0577k';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0577k';
-import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0577k';
-import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0577k';
-import {CatEntity} from '../entities/CatEntity.js?v=0577k';
-import {CustomerEntity} from '../entities/CustomerEntity.js?v=0577k';
-import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0577k';
-import {AmbientEffects} from '../entities/AmbientEffects.js?v=0577k';
-import {INPUT_MODE} from '../core/input-state.js?v=0577k';
-import {InputModeController} from '../phaser/InputModeController.js?v=0577k';
-import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0577k';
-import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0577k';
-import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0577k';
-import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0577k';
-import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0577k';
-import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0577k';
-import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0577k';
-import {ORTHO_ROOM_ZONES,zoneAt} from '../config/ortho-room-zones.js?v=0577k';
+import {ROOM_CONFIG} from '../config/room-config.js?v=0577n';
+import {FURNITURE_CONFIG} from '../config/furniture-config.js?v=0577n';
+import {CAT_PROFILES} from '../config/cat-config.js?v=0577n';
+import {GridSystem} from '../systems/GridSystem.js?v=0577n';
+import {OccupancySystem} from '../systems/OccupancySystem.js?v=0577n';
+import {PlacementSystem} from '../systems/PlacementSystem.js?v=0577n';
+import {CameraController} from '../systems/CameraController.js?v=0577n';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0577n';
+import {validateStoreLayoutBeforeOpen} from '../systems/StoreLayoutValidator.js?v=0577n';
+import {FurnitureEntity} from '../entities/FurnitureEntity.js?v=0577n';
+import {CatEntity} from '../entities/CatEntity.js?v=0577n';
+import {CustomerEntity} from '../entities/CustomerEntity.js?v=0577n';
+import {WallDecorationEntity} from '../entities/WallDecorationEntity.js?v=0577n';
+import {AmbientEffects} from '../entities/AmbientEffects.js?v=0577n';
+import {INPUT_MODE} from '../core/input-state.js?v=0577n';
+import {InputModeController} from '../phaser/InputModeController.js?v=0577n';
+import {FurnitureDragController} from '../phaser/FurnitureDragController.js?v=0577n';
+import {CatBehaviorController} from '../phaser/CatBehaviorController.js?v=0577n';
+import {CareInteractionController} from '../phaser/CareInteractionController.js?v=0577n';
+import {InteractionDebugView} from '../phaser/InteractionDebugView.js?v=0577n';
+import {ArtDebugRenderer} from '../phaser/ArtDebugRenderer.js?v=0577n';
+import {projectionModeFromSearch,PROJECTION_MODE} from '../core/projection-mode.js?v=0577n';
+import {flatPresetFromSearch} from '../config/flat-projection-presets.js?v=0577n';
+import {ORTHO_ROOM_ZONES,zoneAt} from '../config/ortho-room-zones.js?v=0577n';
 import {DEFAULT_ORTHOGONAL_ROOM_SKIN,getOrthogonalCellAppearance}
-  from '../config/ortho-room-skin.js?v=0577k';
-import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0577k';
-import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0577k';
-import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0577k';
+  from '../config/ortho-room-skin.js?v=0577n';
+import {buildOrthoDemoItems,isDemoLayoutRequested} from '../config/ortho-demo-layout.js?v=0577n';
+import {ViewportMetrics} from '../ui/viewport-metrics.js?v=0577n';
+import {ORTHO_FRAMING} from '../core/camera-framing.js?v=0577n';
 import {
   ROTATION_POLICY,
   createRotationEditSession,
   advanceRotationEditSession,
   getOrthogonalRotationPolicy,
-  resolveNextOrthogonalRotation
-} from '../core/orthogonal-furniture-rotation.js?v=0577k';
+  resolveNextOrthogonalRotation,
+  orthogonalRotationToCardinal
+} from '../core/orthogonal-furniture-rotation.js?v=0577n';
+import {resolvePlacedComposition} from '../core/furniture-composition-state.js?v=0577n';
 
 const PHASES=['prep','morning','afternoon','evening','closed'];
 const PHASE_LABELS={prep:'準備中',morning:'上午營業',afternoon:'午後營業',evening:'晚間營業',closed:'已打烊'};
@@ -420,6 +422,7 @@ export class CafeScene extends Phaser.Scene{
     this.entities.forEach(entity=>entity.destroy());
     this.entities.clear();
     this.getLayoutItems().forEach(item=>this.addFurnitureEntity(item,{interactive:!this.demoLayoutActive}));
+    this.recomposeFurniture();
   }
   addFurnitureEntity(item,{interactive=true}={}){
     const definition=FURNITURE_CONFIG[item.type];
@@ -431,6 +434,34 @@ export class CafeScene extends Phaser.Scene{
     else{entity.disableInteractive();this.input.setDraggable(entity,false);}
     this.entities.set(item.id,entity);
     return entity;
+  }
+  // ARCH-0577M1: recompute VISUAL-ONLY furniture composition after a layout
+  // mutation (load, place, move, rotate, store, sell). It never runs per frame and
+  // never touches x/y/r, footprint, Occupancy or Save. iso/flat get no composition.
+  recomposeFurniture(){
+    const ortho=(this.grid.projectionMode||'iso')==='ortho';
+    if(!ortho){
+      this.entities.forEach(entity=>{if(entity.composition)entity.setComposition(null);});
+      return;
+    }
+    // Build snapshots for every placed furniture through the SHARED builder, then
+    // resolve all movers in one batch. Ghost/Preview use the same builder + resolver.
+    const items=[];
+    for(const [id,entity] of this.entities){
+      items.push({
+        id,type:entity.item.type,x:entity.item.x,y:entity.item.y,rotation:entity.item.r||0,
+        cardinalDirection:entity.resolvedPlacement?.cardinalDirection||orthogonalRotationToCardinal(entity.item.r||0),
+        textureDirection:entity.direction
+      });
+    }
+    const results=resolvePlacedComposition(this.grid,items);
+    const composedNow=new Set();
+    for(const [id,result] of results){
+      if(result.isConnected){this.entities.get(id)?.setComposition(result);composedNow.add(id);}
+    }
+    for(const [id,entity] of this.entities){
+      if(entity.composition&&!composedNow.has(id))entity.setComposition(null);
+    }
   }
   createCats(){
     const duty=new Set(this.state.dutyCats||[]);
@@ -636,6 +667,7 @@ export class CafeScene extends Phaser.Scene{
     this.furnitureDragController?.clearRotationPreview();
     this.saveAdapter.save();
     this.catBehaviorController?.onFurnitureLayoutChanged();
+    this.recomposeFurniture();
     this.game.events.emit('selection-changed',{
       item,definition,placing:false,rotationPolicy:session.policy
     });
@@ -653,7 +685,7 @@ export class CafeScene extends Phaser.Scene{
     this.entities.get(item.id)?.destroy();this.entities.delete(item.id);
     this.rotationEditSession=null;this.lastRotationCandidate=null;
     this.furnitureDragController?.clearRotationPreview();
-    this.selectedId=null;this.inputMode?.releaseToStable();this.saveAdapter.save();this.emitState();
+    this.selectedId=null;this.inputMode?.releaseToStable();this.saveAdapter.save();this.recomposeFurniture();this.emitState();
     this.game.events.emit('selection-changed',null);
   }
   sellSelection(){
@@ -669,7 +701,7 @@ export class CafeScene extends Phaser.Scene{
     this.entities.get(item.id)?.destroy();this.entities.delete(item.id);
     this.rotationEditSession=null;this.lastRotationCandidate=null;
     this.furnitureDragController?.clearRotationPreview();
-    this.selectedId=null;this.inputMode?.releaseToStable();this.saveAdapter.save();this.emitState();
+    this.selectedId=null;this.inputMode?.releaseToStable();this.saveAdapter.save();this.recomposeFurniture();this.emitState();
     this.game.events.emit('selection-changed',null);
   }
   togglePlacementHelper(){

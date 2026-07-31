@@ -1,19 +1,22 @@
-﻿import {DepthSystem} from '../systems/DepthSystem.js?v=0577k';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0577n';
 import {
   getFurnitureDisplayState,
-  getFurnitureVisualPosition
-} from '../core/furniture-display-state.js?v=0577k';
+  getFurnitureVisualPlacementState
+} from '../core/furniture-display-state.js?v=0577n';
 import {
   resolveOrthogonalRotationPlacement
-} from '../core/orthogonal-furniture-rotation.js?v=0577k';
+} from '../core/orthogonal-furniture-rotation.js?v=0577n';
 
 export class FurnitureEntity extends Phaser.GameObjects.Image{
   constructor(scene,item,definition,grid){
     const display=getFurnitureDisplayState(item.type,item.r||0,definition,grid.projectionMode);
-    const anchor=getFurnitureVisualPosition(
-      grid,item.type,item.x,item.y,item.r||0,display
-    );
-    super(scene,anchor.x,anchor.y,display.texture);
+    const frame=scene.textures.getFrame(display.texture);
+    const placement=getFurnitureVisualPlacementState({
+      grid,type:item.type,x:item.x,y:item.y,rotation:item.r||0,
+      definition,display,textureFrame:frame,composition:null
+    });
+    super(scene,placement.worldX,placement.worldY,display.texture);
+    this.composition=null;
     this.item=item;
     this.definition=definition;
     this.grid=grid;
@@ -22,14 +25,12 @@ export class FurnitureEntity extends Phaser.GameObjects.Image{
     this.direction=display.direction;
     this.missingDirection=Boolean(display.missingDirection);
     this.setName(`furniture:${item.id}`);
-    this.setOrigin(display.originX,display.originY);
-    if(display.scale)this.setScale(display.scale);
-    else{
-      const targetWidth=Math.max(44,Math.min(180,definition.size||96));
-      if(this.width)this.setScale(targetWidth/this.width);
-    }
+    this.setOrigin(placement.originX,placement.originY);
+    this.setScale(placement.scaleX,placement.scaleY);
     this.setFlipX(display.flipX);
-    this.setDepth(DepthSystem.for(definition.layer||'floorObject',anchor.y));
+    this.setDepth(DepthSystem.for(definition.layer||'floorObject',placement.worldY));
+    this.visualPlacement=placement;
+    this.baseDepth=this.depth;
     scene.add.existing(this);
     const minimumWorldHit=40/Math.max(.35,grid.room.camera.baseMinZoom);
     const hitWidth=Math.max(this.width,minimumWorldHit/Math.max(.01,Math.abs(this.scaleX)));
@@ -54,17 +55,31 @@ export class FurnitureEntity extends Phaser.GameObjects.Image{
           policy:display.rotationPolicy
         })
         :null);
-    const anchor=resolved?.visualPosition||getFurnitureVisualPosition(
-      this.grid,this.item.type,this.item.x,this.item.y,rotation,display
-    );
-    this.setPosition(anchor.x,anchor.y);
     if(display.texture&&this.texture.key!==display.texture)this.setTexture(display.texture);
-    this.setOrigin(display.originX,display.originY).setFlipX(display.flipX);
+    const placement=getFurnitureVisualPlacementState({
+      grid:this.grid,type:this.item.type,x:this.item.x,y:this.item.y,rotation,
+      definition:this.definition,display,
+      textureFrame:this.scene.textures.getFrame(display.texture),
+      resolvedPlacement:resolved,
+      composition:this.composition
+    });
+    this.setPosition(placement.worldX,placement.worldY)
+      .setOrigin(placement.originX,placement.originY)
+      .setScale(placement.scaleX,placement.scaleY)
+      .setFlipX(display.flipX);
     this.direction=display.direction;
     this.missingDirection=Boolean(display.missingDirection);
     this.resolvedPlacement=resolved;
-    this.setDepth(DepthSystem.for(this.definition.layer||'floorObject',anchor.y));
+    this.visualPlacement=placement;
+    // Base depth follows ground Y; composition depth bias (seat behind/in front of
+    // its table) is added only while connected, and cleared when composition clears.
+    this.baseDepth=DepthSystem.for(this.definition.layer||'floorObject',placement.worldY);
+    this.setDepth(this.baseDepth+(placement.compositionDepthBias||0));
   }
+  // ARCH-0577M1: composition is a VISUAL-ONLY result from the pure resolver. It is
+  // assigned by the scene's layout-mutation recompute, never per frame, and never
+  // touches item.x/y/r, footprint, occupancy or save.
+  setComposition(composition){this.composition=composition||null;this.sync(this.resolvedPlacement);return this;}
   setGridPosition(x,y,rotation=this.item.r||0,resolvedCandidate=null){
     this.item.x=x;this.item.y=y;this.item.r=rotation;
     this.sync(resolvedCandidate);return this;
@@ -81,6 +96,7 @@ export class FurnitureEntity extends Phaser.GameObjects.Image{
       texture:this.texture.key,sizeFallback:this.usesSizeFallback,
       missingDirection:this.missingDirection,visual:this.visual
       ,resolvedPlacement:this.resolvedPlacement||null
+      ,visualPlacement:this.visualPlacement||null
     };
   }
   destroy(fromScene){this.scene?.input?.setDraggable(this,false);super.destroy(fromScene)}

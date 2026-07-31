@@ -1,9 +1,10 @@
-﻿import {INPUT_MODE} from '../core/input-state.js?v=0577k';
-import {DepthSystem} from '../systems/DepthSystem.js?v=0577k';
+import {INPUT_MODE} from '../core/input-state.js?v=0577n';
+import {DepthSystem} from '../systems/DepthSystem.js?v=0577n';
 import {
   getFurnitureDisplayState,
-  getFurnitureVisualPosition
-} from '../core/furniture-display-state.js?v=0577k';
+  getFurnitureVisualPosition,
+  getFurnitureVisualPlacementState
+} from '../core/furniture-display-state.js?v=0577n';
 import {
   createRotationEditSession,
   rebaseRotationEditSession,
@@ -11,7 +12,8 @@ import {
   getOrthogonalRotationPolicy,
   resolveOrthogonalRotationPlacement,
   resolveNextOrthogonalRotation
-} from '../core/orthogonal-furniture-rotation.js?v=0577k';
+} from '../core/orthogonal-furniture-rotation.js?v=0577n';
+import {resolveCandidateComposition} from '../core/furniture-composition-state.js?v=0577n';
 
 const DRAG_THRESHOLD_PX = 8;
 
@@ -174,9 +176,19 @@ export class FurnitureDragController {
     const display = getFurnitureDisplayState(
       item.type, item.r || 0, this.furniture[item.type], this.grid.projectionMode
     );
-    const referenceAnchor = getFurnitureVisualPosition(
-      this.grid, item.type, 0, 0, item.r || 0, display
+    const referenceResolved=(this.grid.projectionMode||'iso')==='ortho'
+      ?resolveOrthogonalRotationPlacement({
+        grid:this.grid,type:item.type,definition:this.furniture[item.type],
+        x:0,y:0,rotation:item.r||0,policy:display.rotationPolicy
+      })
+      :null;
+    const referencePlacement=this.resolveVisualPlacementState(
+      {...item,x:0,y:0},referenceResolved,display
     );
+    const referenceAnchor={
+      x:referencePlacement.worldX,
+      y:referencePlacement.worldY
+    };
     const snapped = this.grid.snapWorldToGrid(
       desiredAnchor.x - (referenceAnchor.x - referenceCenter.x),
       desiredAnchor.y - (referenceAnchor.y - referenceCenter.y)
@@ -197,6 +209,45 @@ export class FurnitureDragController {
     this.renderPlacementVisuals();
   }
 
+  // ARCH-0577M1 §5: the ghost / rotation preview resolve their composition from the
+  // SAME shared builder + resolver the placed entity uses, excluding the dragged
+  // item's own current footprint from the neighbour set. A candidate that leaves an
+  // adjacent socket immediately loses its composition; one that enters shows the
+  // committed position before commit. Never touches state / occupancy / save.
+  candidateComposition(item,resolved=null){
+    if((this.grid.projectionMode||'iso')!=='ortho')return null;
+    return resolveCandidateComposition({
+      grid:this.grid,
+      candidate:{
+        id:item.id||'__drag_candidate__',
+        type:item.type,
+        x:resolved?.resolvedX??item.x,
+        y:resolved?.resolvedY??item.y,
+        rotation:resolved?.resolvedRotation??item.r??0,
+        cardinalDirection:resolved?.cardinalDirection,
+        textureDirection:resolved?.textureDirection
+      },
+      stationaryItems:this.scene.state?.items||[]
+    });
+  }
+  resolveVisualPlacementState(item,resolved=null,display=null,composition=null){
+    const definition=this.furniture[item.type];
+    const resolvedDisplay=display||getFurnitureDisplayState(
+      item.type,resolved?.resolvedRotation??item.r??0,
+      definition,this.grid.projectionMode
+    );
+    const textureFrame=this.scene.textures?.getFrame?.(resolvedDisplay.texture)
+      ||{width:0,height:0};
+    return getFurnitureVisualPlacementState({
+      grid:this.grid,type:item.type,x:item.x,y:item.y,
+      rotation:resolved?.resolvedRotation??item.r??0,
+      definition,display:resolvedDisplay,
+      textureFrame,
+      resolvedPlacement:resolved,
+      composition:composition&&composition.isConnected?composition:null
+    });
+  }
+
   createGhost(item, sourceEntity) {
     this.ghost?.destroy();
     const definition = this.furniture[item.type];
@@ -204,18 +255,15 @@ export class FurnitureDragController {
     const display = getFurnitureDisplayState(
       item.type, resolved.resolvedRotation, definition, this.grid.projectionMode
     );
-    const anchor = resolved.visualPosition;
-    this.ghost = this.scene.add.image(anchor.x, anchor.y, display.texture)
-      .setOrigin(sourceEntity?.originX ?? display.originX, sourceEntity?.originY ?? display.originY)
+    const composition=this.candidateComposition(item,resolved);
+    const placement=this.resolveVisualPlacementState(item,resolved,display,composition);
+    this.ghost = this.scene.add.image(placement.worldX, placement.worldY, display.texture)
+      .setOrigin(placement.originX,placement.originY)
+      .setScale(placement.scaleX,placement.scaleY)
       .setAlpha(.64)
-      .setDepth(DepthSystem.for('ghost', anchor.y));
-    if (sourceEntity) this.ghost.setScale(sourceEntity.scaleX, sourceEntity.scaleY);
-    else if(display.scale)this.ghost.setScale(display.scale);
-    else {
-      const targetWidth = Math.max(44, Math.min(180, definition.size || 96));
-      if (this.ghost.width) this.ghost.setScale(targetWidth / this.ghost.width);
-    }
+      .setDepth(DepthSystem.for('ghost', placement.worldY)+(placement.compositionDepthBias||0));
     this.ghost.disableInteractive();
+    this.ghostComposition=composition||null;
     this.syncGhost();
   }
 
@@ -226,12 +274,15 @@ export class FurnitureDragController {
     const display = getFurnitureDisplayState(
       item.type, resolved.resolvedRotation, this.furniture[item.type], this.grid.projectionMode
     );
-    const anchor = resolved.visualPosition;
     if(display.texture&&this.ghost.texture.key!==display.texture)this.ghost.setTexture(display.texture);
-    this.ghost.setPosition(anchor.x, anchor.y)
-      .setOrigin(display.originX,display.originY)
+    const composition=this.candidateComposition(item,resolved);
+    this.ghostComposition=composition||null;
+    const placement=this.resolveVisualPlacementState(item,resolved,display,composition);
+    this.ghost.setPosition(placement.worldX,placement.worldY)
+      .setOrigin(placement.originX,placement.originY)
+      .setScale(placement.scaleX,placement.scaleY)
       .setFlipX(display.flipX)
-      .setDepth(DepthSystem.for('ghost', anchor.y));
+      .setDepth(DepthSystem.for('ghost',placement.worldY)+(placement.compositionDepthBias||0));
   }
 
   createRotationSession(item, original = null) {
@@ -449,7 +500,12 @@ export class FurnitureDragController {
     this.ghost?.destroy();
     this.ghost = null;
     this.scene.placementGraphics.clear();
-    if (layoutChanged) this.catBehaviorController.onFurnitureLayoutChanged();
+    if (layoutChanged) {
+      this.catBehaviorController.onFurnitureLayoutChanged();
+      // ARCH-0577M1: recompute visual composition once, after a committed layout
+      // mutation (new placement or move). Never per frame; never changes x/y/r.
+      this.scene.recomposeFurniture?.();
+    }
     this.catBehaviorController.resume('furniture-drag');
     this.cameraController.setEnabled(true);
     this.inputMode.releaseToStable();
@@ -500,22 +556,19 @@ export class FurnitureDragController {
     const display = getFurnitureDisplayState(
       item.type, resolved.resolvedRotation, definition, this.grid.projectionMode
     );
-    const anchor = resolved.visualPosition;
+    // Composition is only meaningful for a valid target; an invalid preview shows
+    // the raw rotated position so the player sees why it is blocked.
+    const composition=result.valid?this.candidateComposition(item,resolved):null;
+    const placement=this.resolveVisualPlacementState(item,resolved,display,composition);
     this.rotationPreviewGhost = this.scene.add.image(
-      anchor.x, anchor.y, display.texture
+      placement.worldX,placement.worldY,display.texture
     ).setOrigin(
-      sourceEntity?.originX ?? display.originX,
-      sourceEntity?.originY ?? display.originY
+      placement.originX,placement.originY
+    ).setScale(
+      placement.scaleX,placement.scaleY
     ).setAlpha(.64)
       .setTint(result.valid ? 0xc9ffd1 : 0xffb3b3)
-      .setDepth(DepthSystem.for('ghost', anchor.y));
-    if (sourceEntity) {
-      this.rotationPreviewGhost.setScale(
-        sourceEntity.scaleX, sourceEntity.scaleY
-      );
-    } else if (display.scale) {
-      this.rotationPreviewGhost.setScale(display.scale);
-    }
+      .setDepth(DepthSystem.for('ghost',placement.worldY)+(placement.compositionDepthBias||0));
     this.rotationPreviewGhost.disableInteractive();
     const color = result.valid ? 0x60be73 : 0xda5252;
     this.scene.placementGraphics

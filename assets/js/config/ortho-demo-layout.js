@@ -1,4 +1,4 @@
-﻿// Pure-data DEMO composition for ART-0577K. It illustrates the approved
+// Pure-data DEMO composition for ART-0577K. It illustrates the approved
 // service-band option C, two independent table products and a compact cat
 // zone using the real Grid/Occupancy/Placement/BFS path. It is NEVER written
 // to the save, never spends coins and never touches inventory.
@@ -12,7 +12,7 @@
 // entry -> order -> seating clear. The prototype entry cell is ortho-room-zones'
 // customerEntryPoint; this is a Demo/prototype visual + route only and does NOT change the
 // logical save entrance.
-import {ORTHO_ROOM_ZONES} from './ortho-room-zones.js?v=0577k';
+import {ORTHO_ROOM_ZONES} from './ortho-room-zones.js?v=0577n';
 
 export const ORTHO_DEMO_ENTRANCE = Object.freeze({...ORTHO_ROOM_ZONES.customerEntryPoint});
 

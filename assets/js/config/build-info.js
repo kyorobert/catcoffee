@@ -1,7 +1,7 @@
 export const APP_VERSION =
-  'V0.57.7-alpha｜核准核心正交家具正式素材與雙桌商品整合版';
+  'V0.57.7-alpha｜直向長桌正式素材整合版';
 
-export const BUILD_ID = '0577k';
+export const BUILD_ID = '0577n';
 
 // This key is part of the public save contract. Never change it for cache recovery.
 export const SAVE_KEY = 'catCafePhaserV0540';
